@@ -9,7 +9,7 @@ import { AuthProvider } from "@/context/auth-context"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata = {
-  title: "Auto Sherreti - Luxury Car Dealership",
+  title: "Nitron - Luxury Car Dealership",
   description: "The premier destination for luxury and exotic cars",
     generator: 'v0.dev'
 }

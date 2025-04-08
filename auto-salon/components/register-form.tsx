@@ -91,9 +91,10 @@ export default function RegisterForm() {
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="firstName">First Name</Label>
+          <Label htmlFor="firstName">Name</Label>
           <Input
             id="firstName"
+            placeholder="Name"
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
@@ -118,7 +119,7 @@ export default function RegisterForm() {
         <Input
           id="password"
           type="password"
-          placeholder="••••••••"
+          placeholder="********"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
@@ -130,7 +131,7 @@ export default function RegisterForm() {
         <Input
           id="confirmPassword"
           type="password"
-          placeholder="••••••••"
+          placeholder="********"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           required
