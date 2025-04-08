@@ -1,9 +1,7 @@
 "use client"
 
 import Link from "next/link"
-
 import type React from "react"
-
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/context/auth-context"
@@ -13,10 +11,10 @@ import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
+import axios from "axios"
 
 export default function RegisterForm() {
-  const [firstName, setFirstName] = useState("")
-  const [lastName, setLastName] = useState("")
+  const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
@@ -25,7 +23,7 @@ export default function RegisterForm() {
   const [error, setError] = useState("")
 
   const router = useRouter()
-  const { login } = useAuth()
+  const { login, user } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -44,17 +42,39 @@ export default function RegisterForm() {
     setLoading(true)
 
     try {
-      // In a real app, this would call an API endpoint
-      // For demo purposes, we'll simulate a successful registration after a delay
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      const url = "https://localhost:7234/api/Account/register"
+      const data = {
+        name: name,
+        email: email,
+        password: password,
+        confirmPassword: confirmPassword
+      }
 
-      // Call the login function from auth context to log the user in after registration
-      login({ email })
+      const headers = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${user?.token || ""}`, // Use token from context or localStorage if available
+      }
 
-      // Redirect to home page
+      const response = await axios.post(url, data, { headers }) // Pass headers along with data
+
+      // Retrieve token from the response
+      const token = response.data.token
+
+      // Save user data with token in auth-context and localStorage
+      login({
+        email,
+        name,
+        token
+      })
+
+      // Redirect to the homepage
       router.push("/")
-    } catch (err) {
-      setError("Registration failed. Please try again.")
+    } catch (err: any) {
+      if (err.response && err.response.data && err.response.data.message) {
+        setError(err.response.data.message)
+      } else {
+        setError("Registration failed. Please try again.")
+      }
     } finally {
       setLoading(false)
     }
@@ -72,12 +92,12 @@ export default function RegisterForm() {
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="firstName">First Name</Label>
-          <Input id="firstName" value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="lastName">Last Name</Label>
-          <Input id="lastName" value={lastName} onChange={(e) => setLastName(e.target.value)} required />
+          <Input
+            id="firstName"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
         </div>
       </div>
 
@@ -142,4 +162,3 @@ export default function RegisterForm() {
     </form>
   )
 }
-

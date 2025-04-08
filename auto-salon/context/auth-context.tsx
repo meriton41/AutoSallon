@@ -1,12 +1,12 @@
 "use client"
 
 import type React from "react"
-
 import { createContext, useContext, useState, useEffect } from "react"
 
 type User = {
   email: string
   name?: string
+  token?: string
 }
 
 type AuthContextType = {
@@ -18,6 +18,12 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
+const isTokenExpired = (token: string): boolean => {
+  const decoded = JSON.parse(atob(token.split('.')[1])) // Decode JWT payload
+  const currentTime = Math.floor(Date.now() / 1000) // Current time in seconds
+  return decoded.exp < currentTime
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -26,7 +32,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Check if user is stored in localStorage
     const storedUser = localStorage.getItem("user")
     if (storedUser) {
-      setUser(JSON.parse(storedUser))
+      const userData = JSON.parse(storedUser)
+      if (userData.token && !isTokenExpired(userData.token)) {
+        setUser(userData)
+      } else {
+        localStorage.removeItem("user") // Remove expired user data
+      }
     }
     setIsLoading(false)
   }, [])
@@ -51,4 +62,3 @@ export function useAuth() {
   }
   return context
 }
-
