@@ -1,59 +1,64 @@
-"use client";
+"use client"
 
-import Link from "next/link";
-import type React from "react";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/context/auth-context";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
-import axios from "axios";
+import Link from "next/link"
+import type React from "react"
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { useAuth } from "@/context/auth-context"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { AlertCircle } from "lucide-react"
+import axios from "axios"
 
 export default function RegisterForm() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [agreeTerms, setAgreeTerms] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [name, setName] = useState("")
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [agreeTerms, setAgreeTerms] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
 
-  const router = useRouter();
-  const { login, user } = useAuth();
+  const router = useRouter()
+  const { login, user } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
+    e.preventDefault()
+    setError("")
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
-      return;
+      setError("Passwords do not match")
+      return
     }
 
     if (!agreeTerms) {
-      setError("You must agree to the terms and conditions");
-      return;
+      setError("You must agree to the terms and conditions")
+      return
     }
 
-    setLoading(true);
+    setLoading(true)
 
     try {
-      const url = "https://localhost:7234/api/Account/register";
+      const url = "https://localhost:7234/api/Account/register"
       const data = {
         name: name,
         email: email,
         password: password,
-        confirmPassword: confirmPassword,
-      };
+        confirmPassword: confirmPassword
+      }
 
       const headers = {
         "Content-Type": "application/json",
         Authorization: `Bearer ${user?.token || ""}`, // Use token from context or localStorage if available
-      };
+      }
+
+      const response = await axios.post(url, data, { headers }) // Pass headers along with data
+
+      // Retrieve token from the response
+      const token = response.data.token
 
       // Save user data with token in auth-context and localStorage
       login({
@@ -66,14 +71,14 @@ export default function RegisterForm() {
       router.push("/verify-email/notice")
     } catch (err: any) {
       if (err.response && err.response.data && err.response.data.message) {
-        setError(err.response.data.message);
+        setError(err.response.data.message)
       } else {
-        setError("Registration failed. Please try again.");
+        setError("Registration failed. Please try again.")
       }
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -156,5 +161,5 @@ export default function RegisterForm() {
         {loading ? "Creating account..." : "Register"}
       </Button>
     </form>
-  );
+  )
 }
