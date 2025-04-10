@@ -34,7 +34,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Company Info */}
           <div>
-            <h3 className="text-xl font-bold mb-4">SHERRETI</h3>
+            <h3 className="text-xl font-bold mb-4">Nitron</h3>
             <address className="not-italic">
               <p>Magj. Prishtine-Ferizaj,</p>
               <p>Çagllavicë 10010</p>
@@ -48,12 +48,12 @@ export default function Footer() {
             <ul className="space-y-2">
               <li>
                 <Link href="#" className="hover:underline">
-                  Sherreti Group
+                Nitron Group
                 </Link>
               </li>
               <li>
                 <Link href="#" className="hover:underline">
-                  Sherreti Rent
+                Nitron Rent
                 </Link>
               </li>
               <li>

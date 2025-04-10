@@ -22,7 +22,7 @@ export default function VehiclePage({ params }: VehiclePageProps) {
       description:
         "The Rolls-Royce Cullinan is a full-sized luxury sport utility vehicle produced by Rolls-Royce Motor Cars. The Cullinan is the first SUV to be launched by the Rolls-Royce marque, and is also the brand's first all-wheel drive vehicle.",
       images: [
-        "/images/cars/rolls-royce-cullinan.jpg",
+        "/images/cars/rolls royce cullinan.webp",
         "/images/cars/rolls-royce-cullinan-interior.jpg",
         "/images/cars/rolls-royce-cullinan-rear.jpg",
       ],

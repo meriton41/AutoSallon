@@ -7,52 +7,41 @@ import { ArrowRight } from "lucide-react"
 
 export default function Home() {
   return (
-    <div className="flex flex-col">
-      {/* Hero Section */}
-      <section className="hero-section h-[80vh] relative">
-        <Image src="/images/hero-lamborghini.jpg" alt="Luxury Lamborghini" fill className="object-cover" priority />
-        <div className="hero-content container mx-auto px-4 h-full flex flex-col justify-center items-start">
-          <div className="max-w-2xl space-y-6">
-            <h1 className="text-4xl md:text-6xl font-bold text-white">Auto Sherreti</h1>
-            <p className="text-xl md:text-2xl text-white">The leader in luxury vehicles since 1995</p>
-            <p className="text-white text-lg">Explore our range of vehicles from economy to exclusive luxury class.</p>
-            <Button asChild size="lg" className="mt-8">
-              <Link href="/vehicles">
-                View Our Vehicles <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* Brand Slider */}
-      <section className="py-12 bg-black">
-        <div className="container mx-auto px-4">
-          <BrandSlider />
-        </div>
-      </section>
-
-      {/* Featured Cars */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold mb-8">Featured Vehicles</h2>
-          <FeaturedCars />
-          <div className="flex justify-center mt-12">
-            <Button asChild variant="outline" size="lg">
-              <Link href="/vehicles">View All Vehicles</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
+<div className="flex flex-col">
+  {/* Hero Section */}
+  <section className="hero-section h-[80vh] relative">
+    <Image src="/images/fotop.jpg" alt="Luxury Lamborghini" fill className="object-cover opacity-70" priority />
+    <div className="hero-content container mx-auto px-4 h-full flex flex-col justify-center items-start relative z-10">
+      <div className="max-w-2xl space-y-6">
+        <h1 className="text-6xl md:text-9xl font-bold text-white drop-shadow-lg">
+        Nitron
+        </h1>
+        <p className="text-3xl md:text-4xl text-white font-medium drop-shadow-md">
+          The leader in luxury vehicles since 1995
+        </p>
+        <p className="text-white text-xl font-light drop-shadow-sm">
+          Explore our range of vehicles from economy to exclusive luxury class.
+        </p>
+        <Button asChild size="lg" className="mt-8">
+          <Link href="/vehicles">
+            <span className="inline-flex items-center space-x-2  font-semibold">
+              <span>View Our Vehicles</span>
+              <ArrowRight className="h-4 w-4" />
+            </span>
+          </Link>
+        </Button>
+      </div>
+    </div>
+  </section>
 
       {/* About Section */}
       <section className="py-16 bg-secondary/10">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-3xl font-bold mb-6">About Auto Sherreti</h2>
+              <h2 className="text-3xl font-bold mb-6">About  Nitron</h2>
               <p className="mb-4">
-                With pleasure we present Auto Sherreti, the leader in the region with experience in the market of
+                With pleasure we present  Nitron, the leader in the region with experience in the market of
                 vehicles since 1995.
               </p>
               <p className="mb-6">Browse our wide range of vehicles from economy to exclusive luxury class.</p>
@@ -61,7 +50,7 @@ export default function Home() {
               </Button>
             </div>
             <div className="relative h-[400px] rounded-lg overflow-hidden">
-              <Image src="/images/showroom.jpg" alt="Auto Sherreti Showroom" fill className="object-cover" />
+              <Image src="/images/cars/urus.jpg" alt=" Nitron Showroom" fill className="object-cover" />
             </div>
           </div>
         </div>

@@ -24,7 +24,7 @@ export default function Header() {
       <div className="container flex h-16 items-center justify-between px-4">
         <div className="flex items-center">
           <Link href="/" className="mr-6 flex items-center space-x-2">
-            <span className="text-xl font-bold tracking-wider">SHERRETI</span>
+            <span className="text-xl font-bold tracking-wider">Nitron</span>
           </Link>
 
           <nav className="hidden md:flex gap-6">

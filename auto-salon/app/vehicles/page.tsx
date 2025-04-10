@@ -3,7 +3,7 @@ import VehicleList from "@/components/vehicle-list"
 import VehicleFilters from "@/components/vehicle-filters"
 
 export const metadata: Metadata = {
-  title: "Vehicles | Auto Sherreti",
+  title: "Vehicles |  RideZone",
   description: "Browse our collection of luxury vehicles",
 }
 
