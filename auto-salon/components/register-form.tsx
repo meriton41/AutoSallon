@@ -66,9 +66,9 @@ export default function RegisterForm() {
         name,
         token
       })
-
+   
       // Redirect to the homepage
-      router.push("/")
+      router.push("/verify-email/notice")
     } catch (err: any) {
       if (err.response && err.response.data && err.response.data.message) {
         setError(err.response.data.message)
