@@ -36,61 +36,88 @@ public class AccountRepository : IUserAccount
 
     public async Task<GeneralResponse> CreateAccount(UserDTO userDTO)
     {
-        if (userDTO is null)
-            return new GeneralResponse(false, "Model is empty");
-
-        var existingUser = await userManager.FindByEmailAsync(userDTO.Email);
-        if (existingUser != null)
-            return new GeneralResponse(false, "User already registered");
-
-        // Generate and assign email confirmation token
-        var token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
-        var encodedToken = WebUtility.UrlEncode(token);
-
-        Console.WriteLine("🔐 Raw token stored in DB: " + token);
-        Console.WriteLine("📧 Encoded token sent in email: " + encodedToken);
-
-        var newUser = new ApplicationUser
+        try
         {
-            Name = userDTO.Name,
-            Email = userDTO.Email,
-            UserName = userDTO.Email,
-            IsEmailConfirmed = false,
-            EmailConfirmationToken = token // Assign BEFORE CreateAsync
-        };
+            Console.WriteLine("📝 Starting account creation for: " + userDTO.Email);
 
-        var createUserResult = await userManager.CreateAsync(newUser, userDTO.Password);
-        if (!createUserResult.Succeeded)
-        {
-            var errors = string.Join(", ", createUserResult.Errors.Select(e => e.Description));
-            return new GeneralResponse(false, $"Error occurred during user creation: {errors}");
-        }
-
-        // Send the verification email with encoded token
-        await emailService.SendVerificationEmailAsync(newUser.Email, encodedToken);
-
-        // Assign role
-        var isFirstUser = (await userManager.Users.CountAsync()) == 1;
-        var roleName = isFirstUser ? "Admin" : "User";
-
-        if (!await roleManager.RoleExistsAsync(roleName))
-        {
-            var roleResult = await roleManager.CreateAsync(new IdentityRole(roleName));
-            if (!roleResult.Succeeded)
+            if (userDTO is null)
             {
-                var errors = string.Join(", ", roleResult.Errors.Select(e => e.Description));
-                return new GeneralResponse(false, $"Error creating role: {errors}");
+                Console.WriteLine("❌ Account creation failed: UserDTO is null");
+                return new GeneralResponse(false, "Model is empty");
             }
-        }
 
-        var addToRoleResult = await userManager.AddToRoleAsync(newUser, roleName);
-        if (!addToRoleResult.Succeeded)
+            var existingUser = await userManager.FindByEmailAsync(userDTO.Email);
+            if (existingUser != null)
+            {
+                Console.WriteLine("❌ Account creation failed: User already exists - " + userDTO.Email);
+                return new GeneralResponse(false, "User already registered");
+            }
+
+            // Generate and assign email confirmation token
+            var token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+            var encodedToken = WebUtility.UrlEncode(token);
+
+            Console.WriteLine("🔐 Raw token stored in DB: " + token);
+            Console.WriteLine("📧 Encoded token sent in email: " + encodedToken);
+            Console.WriteLine("🔍 Decoded token (should match raw): " + WebUtility.UrlDecode(encodedToken));
+
+            var newUser = new ApplicationUser
+            {
+                Name = userDTO.Name,
+                Email = userDTO.Email,
+                UserName = userDTO.Email,
+                IsEmailConfirmed = false,
+                EmailConfirmationToken = token,
+                EmailConfirmationTokenCreatedAt = DateTime.UtcNow
+            };
+
+            Console.WriteLine("👤 Creating user in database...");
+            var createUserResult = await userManager.CreateAsync(newUser, userDTO.Password);
+
+            if (!createUserResult.Succeeded)
+            {
+                var errors = string.Join(", ", createUserResult.Errors.Select(e => e.Description));
+                Console.WriteLine($"❌ User creation failed: {errors}");
+                return new GeneralResponse(false, $"Error occurred during user creation: {errors}");
+            }
+
+            Console.WriteLine("✅ User created successfully, sending verification email...");
+            await emailService.SendVerificationEmailAsync(newUser.Email, encodedToken);
+
+            // Assign role
+            var isFirstUser = (await userManager.Users.CountAsync()) == 1;
+            var roleName = isFirstUser ? "Admin" : "User";
+
+            if (!await roleManager.RoleExistsAsync(roleName))
+            {
+                Console.WriteLine("👥 Creating role: " + roleName);
+                var roleResult = await roleManager.CreateAsync(new IdentityRole(roleName));
+                if (!roleResult.Succeeded)
+                {
+                    var errors = string.Join(", ", roleResult.Errors.Select(e => e.Description));
+                    Console.WriteLine($"❌ Role creation failed: {errors}");
+                    return new GeneralResponse(false, $"Error creating role: {errors}");
+                }
+            }
+
+            Console.WriteLine("👥 Adding user to role: " + roleName);
+            var addToRoleResult = await userManager.AddToRoleAsync(newUser, roleName);
+            if (!addToRoleResult.Succeeded)
+            {
+                var errors = string.Join(", ", addToRoleResult.Errors.Select(e => e.Description));
+                Console.WriteLine($"❌ Role assignment failed: {errors}");
+                return new GeneralResponse(false, $"Error adding user to role: {errors}");
+            }
+
+            Console.WriteLine("✅ Account creation completed successfully for: " + userDTO.Email);
+            return new GeneralResponse(true, "Account Created. Please verify your email.");
+        }
+        catch (Exception ex)
         {
-            var errors = string.Join(", ", addToRoleResult.Errors.Select(e => e.Description));
-            return new GeneralResponse(false, $"Error adding user to role: {errors}");
+            Console.WriteLine($"❌ Account creation error: {ex.Message}");
+            Console.WriteLine($"Stack trace: {ex.StackTrace}");
+            return new GeneralResponse(false, $"An error occurred during account creation: {ex.Message}");
         }
-
-        return new GeneralResponse(true, "Account Created. Please verify your email.");
     }
 
     public async Task<LoginResponse> LoginAccount(LoginDTO loginDTO)

@@ -8,5 +8,6 @@ namespace AutoSallonSolution.Data
         public bool IsEmailConfirmed { get; set; } = false;
 
         public string? EmailConfirmationToken { get; set; }
+        public DateTime? EmailConfirmationTokenCreatedAt { get; set; }
     }
 }
