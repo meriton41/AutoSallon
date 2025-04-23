@@ -42,9 +42,9 @@ namespace AutoSallonSolution.Services
     <style>
         body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }}
         .header {{ text-align: center; margin-bottom: 20px; }}
-        .logo {{ max-width: 300px; }}
+        .logo {{ max-width: 400px; }}
         .button {{ 
-            background-color: #007bff; 
+            background-color: black ; 
             color: white; 
             padding: 12px 24px; 
             text-decoration: none; 
