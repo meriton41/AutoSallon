@@ -1,9 +1,7 @@
 "use client"
 
 import Link from "next/link"
-
 import type React from "react"
-
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/context/auth-context"
@@ -30,17 +28,31 @@ export default function LoginForm() {
     setLoading(true)
 
     try {
-      // In a real app, this would call an API endpoint
-      // For demo purposes, we'll simulate a successful login after a delay
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      const response = await fetch("/api/account/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+        credentials: "include", // to receive HttpOnly refresh token cookie
+      })
 
-      // Call the login function from auth context
-      login({ email })
+      if (!response.ok) {
+        setError("Invalid email or password. Please try again.")
+        setLoading(false)
+        return
+      }
 
-      // Redirect to home page
-      router.push("/")
+      const data = await response.json()
+
+      if (data.token) {
+        login({ email, token: data.token })
+        router.push("/")
+      } else {
+        setError("Login failed. No token received.")
+      }
     } catch (err) {
-      setError("Invalid email or password. Please try again.")
+      setError("An error occurred during login. Please try again.")
     } finally {
       setLoading(false)
     }
@@ -97,4 +109,3 @@ export default function LoginForm() {
     </form>
   )
 }
-
