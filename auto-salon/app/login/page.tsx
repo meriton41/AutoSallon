@@ -1,11 +1,11 @@
-import type { Metadata } from "next"
-import Link from "next/link"
-import LoginForm from "@/components/login-form"
+import type { Metadata } from "next";
+import Link from "next/link";
+import LoginForm from "../../components/login-form";
 
 export const metadata: Metadata = {
   title: "Login | Auto Sherreti",
   description: "Login to your Auto Sherreti account",
-}
+};
 
 export default function LoginPage() {
   return (
@@ -30,6 +30,5 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
-

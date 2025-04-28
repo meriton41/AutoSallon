@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using SharedClassLibrary.Contracts;
 using SharedClassLibrary.DTOs;
+using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
@@ -14,6 +15,7 @@ using System.Threading.Tasks;
 using static SharedClassLibrary.DTOs.ServiceResponses;
 using AutoSallonSolution.Services;
 using System.Net;
+using AutoSallonSolution;  // Added to import RefreshToken class
 
 public class AccountRepository : IUserAccount
 {
@@ -21,17 +23,20 @@ public class AccountRepository : IUserAccount
     private readonly RoleManager<IdentityRole> roleManager;
     private readonly IConfiguration config;
     private readonly EmailService emailService;
+    private readonly ApplicationDbContext _context;
 
     public AccountRepository(
         UserManager<ApplicationUser> userManager,
         RoleManager<IdentityRole> roleManager,
         IConfiguration config,
-        EmailService emailService)
+        EmailService emailService,
+        ApplicationDbContext context)
     {
         this.userManager = userManager;
         this.roleManager = roleManager;
         this.config = config;
         this.emailService = emailService;
+        this._context = context;
     }
 
     public async Task<GeneralResponse> CreateAccount(UserDTO userDTO)
@@ -146,6 +151,12 @@ public class AccountRepository : IUserAccount
         var userSession = new UserSession(getUser.Id, getUser.UserName, getUser.Email, getUserRole.First());
         string token = GenerateToken(userSession);
 
+        // Generate refresh token
+        var refreshToken = GenerateRefreshToken();
+
+        // Store refresh token in DB
+        await StoreRefreshToken(getUser.Id, refreshToken);
+
         return new LoginResponse(true, token, "Login completed");
     }
 
@@ -169,48 +180,36 @@ public class AccountRepository : IUserAccount
         return userDetails;
     }
 
-    public async Task<GeneralResponse> UpdateUser(string userId, UserDetailsDTO userDetailsDTO)
+    public async Task<GeneralResponse> UpdateUser(string id, UserDetailsDTO userDetailsDTO)
     {
-        if (userDetailsDTO == null)
-            return new GeneralResponse(false, "Model is empty");
-
-        var user = await userManager.FindByIdAsync(userId);
-        if (user == null)
-            return new GeneralResponse(false, "User not found");
-
-        user.Name = userDetailsDTO.Name;
-        user.Email = userDetailsDTO.Email;
-        user.UserName = userDetailsDTO.Email;
-
-        var updateUserResult = await userManager.UpdateAsync(user);
-        if (!updateUserResult.Succeeded)
+        try
         {
-            var errors = string.Join(", ", updateUserResult.Errors.Select(e => e.Description));
-            return new GeneralResponse(false, $"Error updating user: {errors}");
-        }
-
-        if (!string.IsNullOrEmpty(userDetailsDTO.Role))
-        {
-            var currentRoles = await userManager.GetRolesAsync(user);
-            var removeFromRolesResult = await userManager.RemoveFromRolesAsync(user, currentRoles);
-            if (!removeFromRolesResult.Succeeded)
+            var user = await userManager.FindByIdAsync(id);
+            if (user == null)
             {
-                var errors = string.Join(", ", removeFromRolesResult.Errors.Select(e => e.Description));
-                return new GeneralResponse(false, $"Error removing user from roles: {errors}");
+                return new GeneralResponse(false, "User not found");
             }
 
-            var addToRoleResult = await userManager.AddToRoleAsync(user, userDetailsDTO.Role);
-            if (!addToRoleResult.Succeeded)
-            {
-                var errors = string.Join(", ", addToRoleResult.Errors.Select(e => e.Description));
-                return new GeneralResponse(false, $"Error adding user to role: {errors}");
-            }
-        }
+            user.Name = userDetailsDTO.Name;
+            user.Email = userDetailsDTO.Email;
+            user.UserName = userDetailsDTO.Email;
 
-        return new GeneralResponse(true, "User updated successfully");
+            var updateResult = await userManager.UpdateAsync(user);
+            if (!updateResult.Succeeded)
+            {
+                var errors = string.Join(", ", updateResult.Errors.Select(e => e.Description));
+                return new GeneralResponse(false, $"Failed to update user: {errors}");
+            }
+
+            return new GeneralResponse(true, "User updated successfully");
+        }
+        catch (Exception ex)
+        {
+            return new GeneralResponse(false, $"An error occurred while updating user: {ex.Message}");
+        }
     }
 
-    private string GenerateToken(UserSession user)
+    public string GenerateToken(UserSession user)
     {
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Key"]!));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
@@ -229,5 +228,59 @@ public class AccountRepository : IUserAccount
             signingCredentials: credentials
         );
         return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    private RefreshToken GenerateRefreshToken()
+    {
+        return new RefreshToken
+        {
+            Token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64)),
+            Expired = DateTime.Now.AddDays(7),
+            Created = DateTime.Now
+        };
+    }
+
+    public async Task StoreRefreshToken(string userId, SharedClassLibrary.DTOs.RefreshToken refreshToken)
+    {
+        var user = await userManager.FindByIdAsync(userId);
+        if (user == null) return;
+
+        // Check if a refresh token already exists for the user
+        var existingToken = await _context.RefreshTokens.FirstOrDefaultAsync(rt => rt.UserId == userId);
+        if (existingToken != null)
+        {
+            // Update existing token
+            existingToken.Token = refreshToken.Token;
+            existingToken.Expired = refreshToken.Expired;
+            existingToken.Created = refreshToken.Created;
+            _context.RefreshTokens.Update(existingToken);
+        }
+        else
+        {
+            // Add new refresh token
+            var newRefreshToken = new SharedClassLibrary.DTOs.RefreshToken
+            {
+                Token = refreshToken.Token,
+                Expired = refreshToken.Expired,
+                Created = refreshToken.Created,
+                UserId = userId
+            };
+            _context.RefreshTokens.Add(newRefreshToken);
+        }
+
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task<RefreshToken?> GetRefreshToken(string token)
+    {
+        return await _context.RefreshTokens.FirstOrDefaultAsync(rt => rt.Token == token);
+    }
+
+    public async Task<bool> ValidateRefreshToken(string token, string userId)
+    {
+        var refreshToken = await GetRefreshToken(token);
+        if (refreshToken == null || refreshToken.UserId != userId || refreshToken.Expired < DateTime.Now)
+            return false;
+        return true;
     }
 }
