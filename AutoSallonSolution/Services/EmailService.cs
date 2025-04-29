@@ -70,7 +70,7 @@ namespace AutoSallonSolution.Services
                         </head>
                         <body>
                             <div class='header'>
-                                <img src='cid:logoImage' alt='AutoSallon' class='logo'>
+                                <img src='https://i.pinimg.com/736x/79/d8/62/79d8626b8e0849552c2c0917b624de30.jpg' alt='AutoSallon' class='logo'>
                             </div>
 
                             <h2>Verify Your Email</h2>
@@ -104,13 +104,14 @@ namespace AutoSallonSolution.Services
                 // Adjust the image path to the actual location of your logo image file
                 string imagePath = "wwwroot/images/logo.jpg";
 
-                LinkedResource logoImage = new LinkedResource(imagePath, MediaTypeNames.Image.Jpeg)
-                {
-                    ContentId = "logoImage",
-                    TransferEncoding = System.Net.Mime.TransferEncoding.Base64
-                };
+                // Remove LinkedResource since image is loaded from URL
+                // LinkedResource logoImage = new LinkedResource(imagePath, MediaTypeNames.Image.Jpeg)
+                // {
+                //     ContentId = "logoImage",
+                //     TransferEncoding = System.Net.Mime.TransferEncoding.Base64
+                // };
 
-                htmlView.LinkedResources.Add(logoImage);
+                // htmlView.LinkedResources.Add(logoImage);
 
                 message.AlternateViews.Add(htmlView);
 
