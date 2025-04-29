@@ -1,3 +1,4 @@
+
 using AutoSallonSolution;
 using AutoSallonSolution.Data;
 using AutoSallonSolution.Services;
@@ -87,6 +88,9 @@ var app = builder.Build();
 
 // Middleware
 app.UseCors("AllowReactApp");
+
+// Add static files middleware to serve wwwroot
+app.UseStaticFiles();
 
 if (app.Environment.IsDevelopment())
 {
