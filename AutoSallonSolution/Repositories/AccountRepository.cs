@@ -40,7 +40,7 @@ public class AccountRepository : IUserAccount
         this._context = context;
     }
 
-    public async Task<GeneralResponse> CreateAccount(UserDTO userDTO)
+    public async Task<ServiceResponses.RegisterResponse> CreateAccount(UserDTO userDTO)
     {
         try
         {
@@ -49,14 +49,14 @@ public class AccountRepository : IUserAccount
             if (userDTO is null)
             {
                 Console.WriteLine("❌ Account creation failed: UserDTO is null");
-                return new GeneralResponse(false, "Model is empty");
+                return new ServiceResponses.RegisterResponse(false, "Model is empty", null);
             }
 
             var existingUser = await userManager.FindByEmailAsync(userDTO.Email);
             if (existingUser != null)
             {
                 Console.WriteLine("❌ Account creation failed: User already exists - " + userDTO.Email);
-                return new GeneralResponse(false, "User already registered");
+                return new ServiceResponses.RegisterResponse(false, "User already registered", null);
             }
 
             // Generate and assign email confirmation token
@@ -69,7 +69,7 @@ public class AccountRepository : IUserAccount
 
             var newUser = new ApplicationUser
             {
-                Name = userDTO.Name,
+                Name = userDTO.UserName,
                 Email = userDTO.Email,
                 UserName = userDTO.Email,
                 IsEmailConfirmed = false,
@@ -84,7 +84,7 @@ public class AccountRepository : IUserAccount
             {
                 var errors = string.Join(", ", createUserResult.Errors.Select(e => e.Description));
                 Console.WriteLine($"❌ User creation failed: {errors}");
-                return new GeneralResponse(false, $"Error occurred during user creation: {errors}");
+                return new ServiceResponses.RegisterResponse(false, $"Error occurred during user creation: {errors}", null);
             }
 
             Console.WriteLine("✅ User created successfully, sending verification email...");
@@ -102,7 +102,7 @@ public class AccountRepository : IUserAccount
                 {
                     var errors = string.Join(", ", roleResult.Errors.Select(e => e.Description));
                     Console.WriteLine($"❌ Role creation failed: {errors}");
-                    return new GeneralResponse(false, $"Error creating role: {errors}");
+                    return new ServiceResponses.RegisterResponse(false, $"Error creating role: {errors}", null);
                 }
             }
 
@@ -112,17 +112,17 @@ public class AccountRepository : IUserAccount
             {
                 var errors = string.Join(", ", addToRoleResult.Errors.Select(e => e.Description));
                 Console.WriteLine($"❌ Role assignment failed: {errors}");
-                return new GeneralResponse(false, $"Error adding user to role: {errors}");
+                return new ServiceResponses.RegisterResponse(false, $"Error adding user to role: {errors}", null);
             }
 
             Console.WriteLine("✅ Account creation completed successfully for: " + userDTO.Email);
-            return new GeneralResponse(true, "Account Created. Please verify your email.");
+            return new ServiceResponses.RegisterResponse(true, "Account Created. Please verify your email.", newUser);
         }
         catch (Exception ex)
         {
             Console.WriteLine($"❌ Account creation error: {ex.Message}");
             Console.WriteLine($"Stack trace: {ex.StackTrace}");
-            return new GeneralResponse(false, $"An error occurred during account creation: {ex.Message}");
+            return new ServiceResponses.RegisterResponse(false, $"An error occurred during account creation: {ex.Message}", null);
         }
     }
 
@@ -172,7 +172,7 @@ public class AccountRepository : IUserAccount
             userDetails.Add(new UserDetailsDTO
             {
                 Id = user.Id,
-                Name = user.Name ?? string.Empty,
+                UserName = user.UserName ?? string.Empty,
                 Email = user.Email ?? string.Empty,
                 Role = roles.FirstOrDefault() ?? string.Empty
             });
@@ -191,9 +191,9 @@ public class AccountRepository : IUserAccount
                 return new GeneralResponse(false, "User not found");
             }
 
-            user.Name = userDetailsDTO.Name;
+            // user.Name = userDetailsDTO.Name; // Removed because UserDetailsDTO does not have Name anymore
             user.Email = userDetailsDTO.Email;
-            user.UserName = userDetailsDTO.Email;
+            user.UserName = userDetailsDTO.UserName;
 
             var updateResult = await userManager.UpdateAsync(user);
             if (!updateResult.Succeeded)
@@ -217,7 +217,7 @@ public class AccountRepository : IUserAccount
         var userClaims = new[]
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id),
-            new Claim(ClaimTypes.Name, user.Name),
+            new Claim(ClaimTypes.Name, user.UserName),
             new Claim(ClaimTypes.Email, user.Email),
             new Claim(ClaimTypes.Role, user.Role)
         };
@@ -225,7 +225,7 @@ public class AccountRepository : IUserAccount
             issuer: config["Jwt:Issuer"],
             audience: config["Jwt:Audience"],
             claims: userClaims,
-            expires: DateTime.Now.AddDays(1),
+            expires: DateTime.Now.AddMinutes(10),
             signingCredentials: credentials
         );
         return new JwtSecurityTokenHandler().WriteToken(token);

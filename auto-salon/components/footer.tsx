@@ -1,97 +1,99 @@
 import Link from "next/link"
-import { Facebook, Instagram, TiktokIcon } from "@/components/social-icons"
+import { Facebook, Instagram, Twitter } from "lucide-react"
 
 export default function Footer() {
   return (
     <footer className="bg-black text-white">
-      {/* Social Media Section */}
-      <div className="grid grid-cols-1 md:grid-cols-3 border-b border-gray-800">
-        <Link
-          href="https://facebook.com"
-          className="flex flex-col items-center justify-center py-12 px-4 bg-[#1877F2] hover:opacity-90 transition-opacity"
-        >
-          <Facebook className="h-12 w-12 mb-4" />
-          <p className="text-lg">Like us on Facebook</p>
-        </Link>
-        <Link
-          href="https://instagram.com"
-          className="flex flex-col items-center justify-center py-12 px-4 bg-white text-black hover:opacity-90 transition-opacity"
-        >
-          <Instagram className="h-12 w-12 mb-4" />
-          <p className="text-lg">Follow us on Instagram</p>
-        </Link>
-        <Link
-          href="https://tiktok.com"
-          className="flex flex-col items-center justify-center py-12 px-4 bg-black hover:bg-gray-900 transition-colors"
-        >
-          <TiktokIcon className="h-12 w-12 mb-4" />
-          <p className="text-lg">Follow us on TikTok</p>
-        </Link>
-      </div>
-
-      {/* Footer Content */}
       <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
           <div>
             <h3 className="text-xl font-bold mb-4">Nitron</h3>
-            <address className="not-italic">
-              <p>Magj. Prishtine-Ferizaj,</p>
-              <p>Çagllavicë 10010</p>
-              <p>Kosovë</p>
-            </address>
+            <p className="text-gray-400 mb-4">
+              Kosovo's premier automotive destination, providing quality vehicles and exceptional service.
+            </p>
+            <div className="flex space-x-4">
+              <a href="#" className="text-gray-400 hover:text-white">
+                <Facebook className="h-6 w-6" />
+              </a>
+              <a href="#" className="text-gray-400 hover:text-white">
+                <Instagram className="h-6 w-6" />
+              </a>
+              <a href="#" className="text-gray-400 hover:text-white">
+                <Twitter className="h-6 w-6" />
+              </a>
+            </div>
           </div>
 
-          {/* Links */}
+          {/* Quick Links */}
           <div>
-            <h3 className="text-xl font-bold mb-4">Links</h3>
+            <h3 className="text-xl font-bold mb-4">Quick Links</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="#" className="hover:underline">
-                Nitron Group
+                <Link href="/" className="text-gray-400 hover:text-white">
+                  Home
                 </Link>
               </li>
               <li>
-                <Link href="#" className="hover:underline">
-                Nitron Rent
-                </Link>
-              </li>
-              <li>
-                <Link href="/vehicles" className="hover:underline">
+                <Link href="/vehicles" className="text-gray-400 hover:text-white">
                   Vehicles
                 </Link>
               </li>
+              <li>
+                <Link href="/about" className="text-gray-400 hover:text-white">
+                  About Us
+                </Link>
+              </li>
+              <li>
+                <Link href="/contact" className="text-gray-400 hover:text-white">
+                  Contact
+                </Link>
+              </li>
             </ul>
           </div>
 
-          {/* Social */}
+          {/* Services */}
           <div>
-            <h3 className="text-xl font-bold mb-4">Follow Us</h3>
+            <h3 className="text-xl font-bold mb-4">Our Services</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="https://facebook.com" className="flex items-center hover:underline">
-                  <Facebook className="h-5 w-5 mr-2" />
-                  Facebook
+                <Link href="#" className="text-gray-400 hover:text-white">
+                  Vehicle Sales
                 </Link>
               </li>
               <li>
-                <Link href="https://instagram.com" className="flex items-center hover:underline">
-                  <Instagram className="h-5 w-5 mr-2" />
-                  Instagram
+                <Link href="#" className="text-gray-400 hover:text-white">
+                  Vehicle Service
                 </Link>
               </li>
               <li>
-                <Link href="https://tiktok.com" className="flex items-center hover:underline">
-                  <TiktokIcon className="h-5 w-5 mr-2" />
-                  TikTok
+                <Link href="#" className="text-gray-400 hover:text-white">
+                  Parts & Accessories
+                </Link>
+              </li>
+              <li>
+                <Link href="#" className="text-gray-400 hover:text-white">
+                  Financing Options
                 </Link>
               </li>
             </ul>
+          </div>
+
+          {/* Contact Info */}
+          <div>
+            <h3 className="text-xl font-bold mb-4">Contact Info</h3>
+            <address className="not-italic text-gray-400">
+              <p className="mb-2">Magj. Prishtine-Ferizaj,</p>
+              <p className="mb-2">Çagllavicë 10010</p>
+              <p className="mb-2">Kosovë</p>
+              <p className="mb-2">Phone: +383 44 123 456</p>
+              <p className="mb-2">Email: info@nitron.com</p>
+            </address>
           </div>
         </div>
 
-        <div className="border-t border-gray-800 mt-12 pt-8 text-sm text-gray-400">
-          <p>© 2009-{new Date().getFullYear()} - All rights reserved | by Kosowwwa LLC</p>
+        <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
+          <p>&copy; {new Date().getFullYear()} Nitron. All rights reserved.</p>
         </div>
       </div>
     </footer>

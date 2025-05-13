@@ -1,11 +1,13 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 type User = {
   email: string;
   name?: string;
   token?: string;
+  role?: string;
 };
 
 type AuthContextType = {
@@ -24,9 +26,29 @@ const isTokenExpired = (token: string): boolean => {
   return decoded.exp < currentTime;
 };
 
+// Helper to parse JWT and extract claims
+const parseJwt = (token: string) => {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map(function (c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        })
+        .join('')
+    );
+    return JSON.parse(jsonPayload);
+  } catch (e) {
+    return null;
+  }
+};
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -69,9 +91,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const data = await response.json();
     if (data.token) {
-      const loggedInUser: User = { email, token: data.token };
+      // Decode the JWT token to get the role
+      const decoded = parseJwt(data.token);
+      const role =
+        decoded?.['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] ||
+        decoded?.role ||
+        null;
+      // If role is array, pick first or handle as needed
+      const userRole = Array.isArray(role) ? role[0] : role;
+      const loggedInUser: User = { 
+        email, 
+        token: data.token,
+        role: userRole
+      };
       setUser(loggedInUser);
       localStorage.setItem("user", JSON.stringify(loggedInUser));
+      if (typeof window !== "undefined") {
+        router.push("/");
+      }
     } else {
       throw new Error("No token in response");
     }

@@ -6,7 +6,7 @@ namespace SharedClassLibrary.DTOs
     {
         public string? Id { get; set; }
         [Required]
-        public string Name { get; set; } = string.Empty;
+        public string UserName { get; set; } = string.Empty;
         [Required]
         [EmailAddress]
         [DataType(DataType.EmailAddress)]

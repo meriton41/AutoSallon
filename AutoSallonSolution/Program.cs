@@ -1,4 +1,4 @@
-
+// Program.cs
 using AutoSallonSolution;
 using AutoSallonSolution.Data;
 using AutoSallonSolution.Services;
@@ -8,8 +8,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using SharedClassLibrary.Contracts;
+using SharedClassLibrary.DTOs;
 using Swashbuckle.AspNetCore.Filters;
+using System;
 using System.Text;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,8 +43,10 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
+// Authorization
 builder.Services.AddAuthorization();
 
+// Authentication with JWT
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -63,7 +68,8 @@ builder.Services.AddAuthentication(options =>
         ValidateLifetime = true,
         ValidIssuer = builder.Configuration["Jwt:Issuer"],
         ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)),
+        RoleClaimType = ClaimTypes.Role
     };
 });
 
@@ -81,15 +87,13 @@ builder.Services.AddCors(options =>
 
 // Register Repositories & Services
 builder.Services.AddScoped<IUserAccount, AccountRepository>();
-builder.Services.AddScoped<EmailService>(); // Moved before `Build()`
+builder.Services.AddScoped<EmailService>();
 
 // Build App
 var app = builder.Build();
 
 // Middleware
 app.UseCors("AllowReactApp");
-
-// Add static files middleware to serve wwwroot
 app.UseStaticFiles();
 
 if (app.Environment.IsDevelopment())
@@ -99,10 +103,11 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
+
+// DEBUG: Print the JWT key at startup to verify correct config
+Console.WriteLine("[DEBUG] JWT Key at runtime: " + builder.Configuration["Jwt:Key"]);
 
 app.Run();
