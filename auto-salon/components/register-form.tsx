@@ -44,7 +44,7 @@ export default function RegisterForm() {
     try {
       const url = "https://localhost:7234/api/Account/register";
       const data = {
-        name: name,
+        userName: name,
         email: email,
         password: password,
         confirmPassword: confirmPassword,

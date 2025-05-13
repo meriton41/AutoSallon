@@ -225,7 +225,7 @@ public class AccountRepository : IUserAccount
             issuer: config["Jwt:Issuer"],
             audience: config["Jwt:Audience"],
             claims: userClaims,
-            expires: DateTime.Now.AddMinutes(10),
+            expires: DateTime.Now.AddDays(1),
             signingCredentials: credentials
         );
         return new JwtSecurityTokenHandler().WriteToken(token);
