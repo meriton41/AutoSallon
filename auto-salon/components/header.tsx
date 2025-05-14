@@ -4,9 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/context/auth-context"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Menu, X, User } from "lucide-react"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Menu, X, User, Heart } from "lucide-react"
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false)
@@ -20,135 +18,123 @@ export default function Header() {
   ]
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-black/95 backdrop-blur supports-[backdrop-filter]:bg-black/60">
-      <div className="container flex h-16 items-center justify-between">
-        <div className="flex items-center">
-          <Link href="/" className="mr-6 flex items-center space-x-2">
-            <span className="text-xl font-bold tracking-wider">Nitron</span>
-          </Link>
-
-          <nav className="hidden md:flex gap-6">
+    <header className="sticky top-0 z-50 w-full border-b bg-white/90 dark:bg-black/90 backdrop-blur shadow-sm">
+      <div className="container mx-auto flex h-16 items-center justify-between px-4">
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-2 font-bold text-2xl tracking-tight text-primary">
+          Nitron
+        </Link>
+        {/* Desktop Nav */}
+        <nav className="hidden md:flex gap-6 items-center">
+          {navLinks.map((link) => (
+            <Link
+              key={link.name}
+              href={link.href}
+              className="text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary transition-colors"
+            >
+              {link.name}
+            </Link>
+          ))}
+          {user && user.role === "Admin" && (
+            <Link href="/dashboard">
+              <Button variant="ghost" className="font-semibold">Dashboard</Button>
+            </Link>
+          )}
+          {user && (
+            <Link href="/favorites" className="relative">
+              <Button variant="ghost" size="icon" className="hover:bg-primary/10">
+                <Heart className="h-5 w-5" />
+              </Button>
+            </Link>
+          )}
+          {user ? (
+            <div className="flex items-center gap-2">
+              <Link href="/profile">
+                <Button variant="outline" size="sm" className="flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  Profile
+                </Button>
+              </Link>
+              <Button variant="destructive" size="sm" onClick={logout}>
+                Logout
+              </Button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Link href="/login">
+                <Button variant="outline" size="sm">Login</Button>
+              </Link>
+              <Link href="/register">
+                <Button size="sm">Register</Button>
+              </Link>
+            </div>
+          )}
+        </nav>
+        {/* Mobile Nav */}
+        <div className="md:hidden flex items-center">
+          <Button variant="ghost" size="icon" onClick={() => setIsOpen(!isOpen)}>
+            {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            <span className="sr-only">Toggle menu</span>
+          </Button>
+        </div>
+        {/* Mobile Drawer */}
+        {isOpen && (
+          <div className="fixed inset-0 z-50 bg-black/60" onClick={() => setIsOpen(false)} />
+        )}
+        <div
+          className={`fixed top-0 right-0 z-50 h-full w-64 bg-white dark:bg-black shadow-lg transform transition-transform duration-200 md:hidden ${isOpen ? "translate-x-0" : "translate-x-full"}`}
+        >
+          <div className="flex items-center justify-between p-4 border-b">
+            <span className="font-bold text-xl">Nitron</span>
+            <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
+              <X className="h-5 w-5" />
+            </Button>
+          </div>
+          <nav className="flex flex-col gap-2 p-4">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
                 href={link.href}
-                className="text-sm font-medium transition-colors hover:text-primary"
+                className="text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary transition-colors py-2"
+                onClick={() => setIsOpen(false)}
               >
                 {link.name}
               </Link>
             ))}
-          </nav>
-        </div>
-
-        <div className="flex items-center gap-4">
-          {user ? (
-            <>
-              {user.role === "Admin" && (
-                <Link href="/dashboard" className="hidden md:block">
-                  <Button variant="ghost">Dashboard</Button>
-                </Link>
-              )}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="rounded-full">
-                    <User className="h-5 w-5" />
-                    <span className="sr-only">User menu</span>
+            {user && user.role === "Admin" && (
+              <Link href="/dashboard" onClick={() => setIsOpen(false)}>
+                <Button variant="ghost" className="w-full font-semibold mt-2">Dashboard</Button>
+              </Link>
+            )}
+            {user && (
+              <Link href="/favorites" className="relative" onClick={() => setIsOpen(false)}>
+                <Button variant="ghost" size="icon" className="hover:bg-primary/10 w-full justify-start">
+                  <Heart className="h-5 w-5 mr-2" /> Favorites
+                </Button>
+              </Link>
+            )}
+            {user ? (
+              <>
+                <Link href="/profile" onClick={() => setIsOpen(false)}>
+                  <Button variant="outline" size="sm" className="w-full flex items-center gap-2 mt-2">
+                    <User className="h-4 w-4" /> Profile
                   </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem>
-                    <Link href="/profile" className="w-full">
-                      Profile
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Link href="/favorites" className="w-full">
-                      Favorites
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={logout}>Logout</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </>
-          ) : (
-            <div className="hidden md:flex gap-4">
-              <Button asChild variant="ghost">
-                <Link href="/login">Login</Link>
-              </Button>
-              <Button asChild>
-                <Link href="/register">Register</Link>
-              </Button>
-            </div>
-          )}
-
-          <Sheet open={isOpen} onOpenChange={setIsOpen}>
-            <SheetTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon">
-                {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-                <span className="sr-only">Toggle menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right">
-              <nav className="flex flex-col gap-4 mt-8">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.name}
-                    href={link.href}
-                    className="text-lg font-medium transition-colors hover:text-primary"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    {link.name}
-                  </Link>
-                ))}
-                {user ? (
-                  <>
-                    {user.role === "Admin" && (
-                      <Link
-                        href="/dashboard"
-                        className="text-lg font-medium transition-colors hover:text-primary"
-                        onClick={() => setIsOpen(false)}
-                      >
-                        Dashboard
-                      </Link>
-                    )}
-                    <Link
-                      href="/profile"
-                      className="text-lg font-medium transition-colors hover:text-primary"
-                      onClick={() => setIsOpen(false)}
-                    >
-                      Profile
-                    </Link>
-                    <button
-                      onClick={() => {
-                        logout()
-                        setIsOpen(false)
-                      }}
-                      className="text-lg font-medium transition-colors hover:text-primary text-left"
-                    >
-                      Logout
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <Link
-                      href="/login"
-                      className="text-lg font-medium transition-colors hover:text-primary"
-                      onClick={() => setIsOpen(false)}
-                    >
-                      Login
-                    </Link>
-                    <Link
-                      href="/register"
-                      className="text-lg font-medium transition-colors hover:text-primary"
-                      onClick={() => setIsOpen(false)}
-                    >
-                      Register
-                    </Link>
-                  </>
-                )}
-              </nav>
-            </SheetContent>
-          </Sheet>
+                </Link>
+                <Button variant="destructive" size="sm" className="w-full mt-2" onClick={() => { logout(); setIsOpen(false); }}>
+                  Logout
+                </Button>
+              </>
+            ) : (
+              <>
+                <Link href="/login" onClick={() => setIsOpen(false)}>
+                  <Button variant="outline" size="sm" className="w-full mt-2">Login</Button>
+                </Link>
+                <Link href="/register" onClick={() => setIsOpen(false)}>
+                  <Button size="sm" className="w-full mt-2">Register</Button>
+                </Link>
+              </>
+            )}
+          </nav>
         </div>
       </div>
     </header>

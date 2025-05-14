@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Users, Car, ShoppingCart, Settings } from "lucide-react";
+import Link from "next/link";
 
 interface DashboardStats {
   totalUsers: number;
@@ -106,18 +107,18 @@ export default function DashboardPage() {
         <Card className="p-6">
           <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
           <div className="space-y-4">
-            <button className="w-full flex items-center space-x-2 p-3 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+            <Link href="/dashboard/users" className="w-full flex items-center space-x-2 p-3 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
               <Users className="w-5 h-5 text-gray-600" />
               <span>Manage Users</span>
-            </button>
-            <button className="w-full flex items-center space-x-2 p-3 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+            </Link>
+            <Link href="/dashboard/vehicles" className="w-full flex items-center space-x-2 p-3 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
               <Car className="w-5 h-5 text-gray-600" />
-              <span>Add New Vehicle</span>
-            </button>
-            <button className="w-full flex items-center space-x-2 p-3 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+              <span>Manage Vehicles</span>
+            </Link>
+            <Link href="/dashboard/settings" className="w-full flex items-center space-x-2 p-3 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
               <Settings className="w-5 h-5 text-gray-600" />
               <span>System Settings</span>
-            </button>
+            </Link>
           </div>
         </Card>
       </div>

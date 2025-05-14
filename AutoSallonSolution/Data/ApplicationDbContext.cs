@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using SharedClassLibrary.DTOs;
+using SharedClassLibrary.Models;
 
 namespace AutoSallonSolution.Data
 {
@@ -13,6 +14,27 @@ namespace AutoSallonSolution.Data
         {
         }
 
+        public DbSet<ApplicationUser> Users { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
+        public DbSet<FavoriteVehicle> FavoriteVehicles { get; set; }
+        public DbSet<Vehicle> Vehicles { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+
+            // Configure FavoriteVehicle relationships
+            builder.Entity<FavoriteVehicle>()
+                .HasOne<ApplicationUser>()
+                .WithMany()
+                .HasForeignKey(f => f.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<FavoriteVehicle>()
+                .HasOne<Vehicle>()
+                .WithMany()
+                .HasForeignKey(f => f.VehicleId)
+                .OnDelete(DeleteBehavior.Cascade);
+        }
     }
 }

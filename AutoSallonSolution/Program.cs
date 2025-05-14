@@ -43,9 +43,6 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-// Authorization
-builder.Services.AddAuthorization();
-
 // Authentication with JWT
 builder.Services.AddAuthentication(options =>
 {
@@ -73,29 +70,28 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-// CORS
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowReactApp", corsBuilder =>
-    {
-        corsBuilder.WithOrigins("http://localhost:3000")
-                   .AllowAnyHeader()
-                   .AllowAnyMethod()
-                   .AllowCredentials();
-    });
-});
-
 // Register Repositories & Services
 builder.Services.AddScoped<IUserAccount, AccountRepository>();
 builder.Services.AddScoped<EmailService>();
 
+// Add CORS policy
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp",
+        builder =>
+        {
+            builder
+                .WithOrigins("http://localhost:3000")
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials();
+        });
+});
+
 // Build App
 var app = builder.Build();
 
-// Middleware
-app.UseCors("AllowReactApp");
-app.UseStaticFiles();
-
+// Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -103,8 +99,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("AllowReactApp");
 app.UseAuthentication();
-app.UseAuthorization();
+// app.UseAuthorization();
 app.MapControllers();
 
 // DEBUG: Print the JWT key at startup to verify correct config

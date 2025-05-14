@@ -7,6 +7,10 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useSearchParams } from "next/navigation"
+import { Heart } from "lucide-react"
+import { useAuth } from "@/context/auth-context"
+import axios from "axios"
+import { Button } from "@/components/ui/button"
 
 type Vehicle = {
   id: number
@@ -25,109 +29,59 @@ type Vehicle = {
 export default function VehicleList() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([])
   const [loading, setLoading] = useState(true)
+  const [favorites, setFavorites] = useState<number[]>([])
   const searchParams = useSearchParams()
   const brandFilter = searchParams.get("brand")
+  const { user } = useAuth()
 
   useEffect(() => {
-    // Simulate API call with a timeout
-    const fetchVehicles = () => {
+    const fetchVehicles = async () => {
       setLoading(true)
+      try {
+        // Fetch vehicles
+        const response = await axios.get("https://localhost:7234/api/Vehicles")
+        setVehicles(response.data)
 
-      // This would be replaced with a real API call
-      setTimeout(() => {
-        const allVehicles = [
-          {
-            id: 1,
-            title: "Rolls Royce Cullinan II",
-            image: "/images/cars/rolls-royce-cullinan.jpg",
-            year: 2025,
-            mileage: "0 km",
-            brand: "rolls-royce",
-            brandLogo: "/images/brands/rolls-royce.png",
-            isNew: true,
-            engine: "6.7",
-            fuel: "Petrol",
-            power: "571 PS",
-          },
-          {
-            id: 2,
-            title: "Ferrari Purosangue",
-            image: "/images/cars/ferrari-purosangue.jpg",
-            year: 2024,
-            mileage: "1000 km",
-            brand: "ferrari",
-            brandLogo: "/images/brands/ferrari.png",
-            isNew: false,
-            engine: "6.5",
-            fuel: "Petrol",
-            power: "725 PS",
-          },
-          {
-            id: 3,
-            title: "Mercedes-Benz SL 63 AMG",
-            image: "/images/cars/mercedes-sl.jpg",
-            year: 2023,
-            mileage: "2500 km",
-            brand: "mercedes",
-            brandLogo: "/images/brands/mercedes.png",
-            isNew: false,
-            engine: "4.0",
-            fuel: "Petrol",
-            power: "585 PS",
-          },
-          {
-            id: 4,
-            title: "Lamborghini Urus",
-            image: "/images/cars/lamborghini-urus.jpg",
-            year: 2023,
-            mileage: "3500 km",
-            brand: "lamborghini",
-            brandLogo: "/images/brands/lamborghini.png",
-            isNew: false,
-            engine: "4.0",
-            fuel: "Petrol",
-            power: "650 PS",
-          },
-          {
-            id: 5,
-            title: "Porsche 911 GT3",
-            image: "/images/cars/porsche-911.jpg",
-            year: 2024,
-            mileage: "500 km",
-            brand: "porsche",
-            brandLogo: "/images/brands/porsche.png",
-            isNew: true,
-            engine: "4.0",
-            fuel: "Petrol",
-            power: "510 PS",
-          },
-          {
-            id: 6,
-            title: "Bentley Continental GT",
-            image: "/images/cars/bentley-continental.jpg",
-            year: 2024,
-            mileage: "100 km",
-            brand: "bentley",
-            brandLogo: "/images/brands/bentley.png",
-            isNew: true,
-            engine: "6.0",
-            fuel: "Petrol",
-            power: "659 PS",
-          },
-        ]
+        // Fetch user's favorites if logged in
+        const headers = user?.token
+          ? { Authorization: `Bearer ${user.token}` }
+          : {};
 
-        // Filter by brand if a brand filter is applied
-        const filteredVehicles = brandFilter
-          ? allVehicles.filter((vehicle) => vehicle.brand === brandFilter)
-          : allVehicles
-
-        setVehicles(filteredVehicles)
+        const favoritesResponse = await axios.get("https://localhost:7234/api/FavoriteVehicles", {
+          headers,
+        })
+        setFavorites(favoritesResponse.data.map((f: any) => f.vehicleId))
+      } catch (error) {
+        console.error("Error fetching data:", error)
+      } finally {
         setLoading(false)
-      }, 1000)
+      }
     }
 
     fetchVehicles()
-  }, [brandFilter])
+  }, [brandFilter, user?.token])
+
+  const toggleFavorite = async (vehicleId: number) => {
+    if (!user?.token || !user?.userId) {
+      // Redirect to login or show login prompt
+      return;
+    }
+
+    const headers = { Authorization: `Bearer ${user.token}` };
+    const userId = user.userId;
+
+    try {
+      if (favorites.includes(vehicleId)) {
+        await axios.delete(`https://localhost:7234/api/FavoriteVehicles/${vehicleId}?userId=${userId}`, { headers });
+        setFavorites(favorites.filter(id => id !== vehicleId));
+      } else {
+        await axios.post(`https://localhost:7234/api/FavoriteVehicles/${vehicleId}?userId=${userId}`, {}, { headers });
+        setFavorites([...favorites, vehicleId]);
+      }
+    } catch (error) {
+      console.error("Error toggling favorite:", error);
+    }
+  };
 
   if (loading) {
     return (
@@ -171,6 +125,21 @@ export default function VehicleList() {
                 className="object-cover transition-transform duration-300"
               />
               {vehicle.isNew && <Badge className="absolute top-2 left-2 z-10">New</Badge>}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-2 right-2 z-10 bg-white/80 hover:bg-white"
+                onClick={(e) => {
+                  e.preventDefault()
+                  toggleFavorite(vehicle.id)
+                }}
+              >
+                <Heart
+                  className={`h-5 w-5 ${
+                    favorites.includes(vehicle.id) ? "text-red-500 fill-red-500" : "text-gray-500"
+                  }`}
+                />
+              </Button>
             </div>
             <CardContent className="p-4">
               <div className="flex items-center mb-2">

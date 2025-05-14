@@ -3,8 +3,8 @@ import Link from "next/link";
 import LoginForm from "../../components/login-form";
 
 export const metadata: Metadata = {
-  title: "Login | Auto Sherreti",
-  description: "Login to your Auto Sherreti account",
+  title: "Login | Nitron",
+  description: "Login to your Nitron account",
 };
 
 export default function LoginPage() {

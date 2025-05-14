@@ -3,8 +3,8 @@ import Link from "next/link"
 import RegisterForm from "@/components/register-form"
 
 export const metadata: Metadata = {
-  title: "Register | Auto Sherreti",
-  description: "Create a new account at Auto Sherreti",
+  title: "Register | Nitron",
+  description: "Create a new account at Nitron",
 }
 
 export default function RegisterPage() {
@@ -14,7 +14,7 @@ export default function RegisterPage() {
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold">Create an Account</h1>
           <p className="text-muted-foreground mt-2">
-            Join Auto Sherreti to save your favorite vehicles and get personalized recommendations.
+            Join Nitron to save your favorite vehicles and get personalized recommendations.
           </p>
         </div>
 

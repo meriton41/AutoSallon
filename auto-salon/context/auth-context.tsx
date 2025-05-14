@@ -8,6 +8,7 @@ type User = {
   name?: string;
   token?: string;
   role?: string;
+  userId?: string;
 };
 
 type AuthContextType = {
@@ -91,18 +92,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const data = await response.json();
     if (data.token) {
-      // Decode the JWT token to get the role
+      // Decode the JWT token to get the role and userId
       const decoded = parseJwt(data.token);
       const role =
         decoded?.['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] ||
         decoded?.role ||
         null;
-      // If role is array, pick first or handle as needed
+      const userId =
+        decoded?.['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'] ||
+        decoded?.sub ||
+        null;
       const userRole = Array.isArray(role) ? role[0] : role;
       const loggedInUser: User = { 
         email, 
         token: data.token,
-        role: userRole
+        role: userRole,
+        userId
       };
       setUser(loggedInUser);
       localStorage.setItem("user", JSON.stringify(loggedInUser));

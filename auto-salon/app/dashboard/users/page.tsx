@@ -1,16 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useAuth } from "@/context/auth-context";
+import axios from "axios";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Pencil, Trash2, Shield, User } from "lucide-react";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -18,124 +19,217 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useRouter } from "next/navigation";
 
-type User = {
+interface User {
   id: string;
-  name: string;
+  username: string;
   email: string;
   role: string;
-};
+  createdAt: string;
+}
 
-export default function UsersPage() {
+export default function DashboardUsers() {
   const [users, setUsers] = useState<User[]>([]);
-  const [roles, setRoles] = useState<string[]>([]);
-  const { user } = useAuth();
-  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [form, setForm] = useState({
+    username: "",
+    email: "",
+    role: "User",
+  });
 
   useEffect(() => {
-    if (!user || user.role !== "Admin") {
-      router.push("/");
-      return;
-    }
-
+    const fetchUsers = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get("https://localhost:7234/api/Account/users");
+        setUsers(response.data);
+      } catch (err) {
+        setError("Failed to fetch users");
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchUsers();
-    fetchRoles();
-  }, [user, router]);
+  }, []);
 
-  const fetchUsers = async () => {
+  const handleEdit = (user: User) => {
+    setEditingUser(user);
+    setForm({
+      username: user.username,
+      email: user.email,
+      role: user.role,
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleUpdate = async () => {
+    if (!editingUser) return;
+    setError(null);
     try {
-      const response = await fetch("https://localhost:7234/api/account/users", {
-        headers: {
-          Authorization: `Bearer ${user?.token}`,
-        },
+      // Update user role
+      await axios.post(`https://localhost:7234/api/Account/users/${editingUser.id}/role`, form.role);
+      
+      // Update other user details if needed
+      await axios.put(`https://localhost:7234/api/Account/users/${editingUser.id}`, {
+        username: form.username,
+        email: form.email
       });
-      if (response.ok) {
-        const data = await response.json();
-        setUsers(data);
-      }
-    } catch (error) {
-      console.error("Error fetching users:", error);
+
+      setIsEditModalOpen(false);
+      setEditingUser(null);
+      // Refresh list
+      const response = await axios.get("https://localhost:7234/api/Account/users");
+      setUsers(response.data);
+    } catch (err) {
+      setError("Failed to update user");
     }
   };
 
-  const fetchRoles = async () => {
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this user?")) return;
     try {
-      const response = await fetch("https://localhost:7234/api/account/roles", {
-        headers: {
-          Authorization: `Bearer ${user?.token}`,
-        },
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setRoles(data);
-      }
-    } catch (error) {
-      console.error("Error fetching roles:", error);
-    }
-  };
-
-  const updateUserRole = async (userId: string, newRole: string) => {
-    try {
-      const response = await fetch(
-        `https://localhost:7234/api/account/users/${userId}/role`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${user?.token}`,
-          },
-          body: JSON.stringify(newRole),
-        }
-      );
-
-      if (response.ok) {
-        fetchUsers(); // Refresh the users list
-      }
-    } catch (error) {
-      console.error("Error updating user role:", error);
+      await axios.delete(`https://localhost:7234/api/Users/${id}`);
+      // Refresh list
+      const response = await axios.get("https://localhost:7234/api/Users");
+      setUsers(response.data);
+    } catch (err) {
+      setError("Failed to delete user");
     }
   };
 
   return (
-    <div className="container mx-auto py-10">
-      <h1 className="text-3xl font-bold mb-6">User Management</h1>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Role</TableHead>
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          User Management
+        </h1>
+
+        {error && (
+          <div className="text-red-500 mb-4 p-4 bg-red-50 border border-red-200 rounded-lg dark:bg-red-900/50 dark:border-red-800">
+            {error}
+          </div>
+        )}
+
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          </div>
+        ) : (
+          <div className="overflow-x-auto rounded-lg shadow">
+            <table className="min-w-full bg-white dark:bg-gray-800">
+              <thead>
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
           {users.map((user) => (
-            <TableRow key={user.id}>
-              <TableCell>{user.name}</TableCell>
-              <TableCell>{user.email}</TableCell>
-              <TableCell>{user.role}</TableCell>
-              <TableCell>
+                  <tr key={user.id} className="border-b dark:border-gray-700">
+                    <td className="px-6 py-4 whitespace-nowrap text-gray-800 dark:text-white">{user.username}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-gray-600 dark:text-gray-300">{user.email}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${user.role === "Admin" ? "bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300" : "bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300"}`}>{user.role}</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-gray-600 dark:text-gray-300">{new Date(user.createdAt).toLocaleDateString()}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex gap-2">
+                        <Button
+                          variant="secondary"
+                          size="icon"
+                          onClick={() => handleEdit(user)}
+                          className="bg-black/90 hover:bg-black text-white"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="icon"
+                          onClick={() => handleDelete(user.id)}
+                          className="bg-black/90 hover:bg-black text-white"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+          <DialogContent className="bg-white dark:bg-gray-800">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                Edit User
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Username
+                </label>
+                <input
+                  value={form.username}
+                  disabled
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white cursor-not-allowed"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Role
+                </label>
                 <Select
-                  defaultValue={user.role}
-                  onValueChange={(value) => updateUserRole(user.id, value)}
+                  value={form.role}
+                  onValueChange={(value) => setForm({ ...form, role: value })}
                 >
-                  <SelectTrigger className="w-[180px]">
+                  <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select role" />
                   </SelectTrigger>
                   <SelectContent>
-                    {roles.map((role) => (
-                      <SelectItem key={role} value={role}>
-                        {role}
-                      </SelectItem>
-                    ))}
+                    <SelectItem value="User">User</SelectItem>
+                    <SelectItem value="Admin">Admin</SelectItem>
                   </SelectContent>
                 </Select>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setIsEditModalOpen(false)}
+                className="px-6 border-black text-black hover:bg-black hover:text-white"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleUpdate}
+                className="bg-black hover:bg-black/90 text-white px-6"
+              >
+                Save Changes
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
   );
 } 
