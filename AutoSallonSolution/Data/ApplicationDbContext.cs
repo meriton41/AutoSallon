@@ -23,6 +23,10 @@ namespace AutoSallonSolution.Data
         {
             base.OnModelCreating(builder);
 
+            builder.Entity<Vehicle>()
+                .Property(v => v.Price)
+                .HasColumnType("decimal(18,2)");
+
             // Configure FavoriteVehicle relationships
             builder.Entity<FavoriteVehicle>()
                 .HasOne<ApplicationUser>()
