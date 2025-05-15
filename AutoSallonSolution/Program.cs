@@ -1,4 +1,4 @@
-using AutoSallonSolution;
+﻿using AutoSallonSolution;
 using AutoSallonSolution.Data;
 using AutoSallonSolution.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -12,100 +12,214 @@ using Swashbuckle.AspNetCore.Filters;
 using System;
 using System.Text;
 using System.Security.Claims;
+using System.IdentityModel.Tokens.Jwt;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Validate JWT configuration early
+var jwtKey = builder.Configuration["Jwt:Key"];
+var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+var jwtAudience = builder.Configuration["Jwt:Audience"];
+
+if (string.IsNullOrEmpty(jwtKey) || jwtKey.Length < 32)
+{
+    throw new InvalidOperationException("JWT Key is not configured properly. It must be at least 32 characters long.");
+}
+
+if (string.IsNullOrEmpty(jwtIssuer) || string.IsNullOrEmpty(jwtAudience))
+{
+    throw new InvalidOperationException("JWT Issuer or Audience is not configured properly.");
+}
 
 // Add services to the container
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
-// Swagger Configuration
-builder.Services.AddSwaggerGen(options =>
+// Configure Swagger with JWT support
+builder.Services.AddSwaggerGen(c =>
 {
-    options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
+    c.SwaggerDoc("v1", new() { Title = "AutoSallonSolution", Version = "v1" });
+
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        In = ParameterLocation.Header,
+        Description = "JWT Authorization header using the Bearer scheme.\r\n\r\n" +
+                      "Enter 'Bearer' [space] and then your token in the text input below.\r\n\r\n" +
+                      "Example: \"Bearer 12345abcdef\"",
         Name = "Authorization",
-        Type = SecuritySchemeType.ApiKey
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
     });
-    options.OperationFilter<SecurityRequirementsOperationFilter>();
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                },
+                Scheme = "oauth2",
+                Name = "Bearer",
+                In = ParameterLocation.Header
+            },
+            new List<string>()
+        }
+    });
 });
 
-// Database
+// Database Configuration
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-{
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-});
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddSingleton<MongoDbService>();
 
-// Identity Auth
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddDefaultTokenProviders();
+// Identity Configuration
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+{
+    options.SignIn.RequireConfirmedAccount = true;
+    options.Password.RequireDigit = true;
+    options.Password.RequiredLength = 8;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase = true;
+})
+.AddEntityFrameworkStores<ApplicationDbContext>()
+.AddDefaultTokenProviders();
 
-// Authentication with JWT
+// JWT Authentication Configuration
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 })
 .AddJwtBearer(options =>
 {
-    var key = builder.Configuration["Jwt:Key"];
-    if (string.IsNullOrEmpty(key))
-    {
-        throw new ArgumentNullException("Jwt:Key", "JWT key is not set in the configuration.");
-    }
-
+    options.SaveToken = true;
+    options.RequireHttpsMetadata = false;
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
         ValidateAudience = true,
-        ValidateIssuerSigningKey = true,
         ValidateLifetime = true,
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)),
-        RoleClaimType = ClaimTypes.Role
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtIssuer,
+        ValidAudience = jwtAudience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+        ClockSkew = TimeSpan.Zero, // No clock skew for strict validation
+        NameClaimType = ClaimTypes.NameIdentifier
+    };
+
+    options.Events = new JwtBearerEvents
+    {
+        OnAuthenticationFailed = context =>
+        {
+            var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+            logger.LogError("Authentication failed: {Exception}", context.Exception);
+
+            if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
+            {
+                context.Response.Headers.Add("Token-Expired", "true");
+            }
+
+            return Task.CompletedTask;
+        },
+        OnTokenValidated = context =>
+        {
+            var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+            logger.LogInformation("Token validated for user: {User}", context.Principal.Identity.Name);
+            return Task.CompletedTask;
+        },
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+            if (!string.IsNullOrEmpty(accessToken))
+            {
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        }
     };
 });
 
-// Register Repositories & Services
+// Authorization Policies
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminPolicy", policy =>
+        policy.RequireRole("Admin")
+              .RequireAuthenticatedUser());
+
+    options.AddPolicy("UserPolicy", policy =>
+        policy.RequireRole("User")
+              .RequireAuthenticatedUser());
+});
+
+// Register Services
 builder.Services.AddScoped<IUserAccount, AccountRepository>();
 builder.Services.AddScoped<EmailService>();
 
-// Add CORS policy
+// CORS Configuration
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowReactApp",
-        builder =>
-        {
-            builder
-                .WithOrigins("http://localhost:3000")
-                .AllowAnyMethod()
-                .AllowAnyHeader()
-                .AllowCredentials();
-        });
+    options.AddPolicy("AllowReactApp", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
 });
 
-// Build App
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "AutoSallon API V1");
+        c.OAuthClientId("swagger-ui");
+        c.OAuthAppName("Swagger UI");
+        c.OAuthUsePkce();
+    });
 }
 
 app.UseHttpsRedirection();
+
+// Enhanced Request Logging Middleware
+app.Use(async (context, next) =>
+{
+    var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+
+    logger.LogInformation("Request: {Method} {Path}", context.Request.Method, context.Request.Path);
+
+    // Log all headers for debugging
+    foreach (var header in context.Request.Headers)
+    {
+        logger.LogDebug("Header: {Key} = {Value}", header.Key, header.Value);
+    }
+
+    await next();
+
+    logger.LogInformation("Response: {StatusCode}", context.Response.StatusCode);
+});
+
 app.UseCors("AllowReactApp");
+
 app.UseAuthentication();
-// app.UseAuthorization();
+app.UseAuthorization();
+
 app.MapControllers();
 
-// DEBUG: Print the JWT key at startup to verify correct config
-Console.WriteLine("[DEBUG] JWT Key at runtime: " + builder.Configuration["Jwt:Key"]);
+// Startup validation
+var loggerFactory = app.Services.GetRequiredService<ILoggerFactory>();
+var startupLogger = loggerFactory.CreateLogger<Program>();
+startupLogger.LogInformation("Application starting with JWT Configuration:");
+startupLogger.LogInformation("Issuer: {Issuer}", jwtIssuer);
+startupLogger.LogInformation("Audience: {Audience}", jwtAudience);
+startupLogger.LogInformation("Key: {Key}", jwtKey);
 
 app.Run();

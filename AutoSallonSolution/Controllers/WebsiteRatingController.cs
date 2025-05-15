@@ -4,13 +4,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
-using AutoSallonSolution.Data;
 using AutoSallonSolution.DTOs;
-using AutoSallonSolution.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize] // Added authorization
+[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+
 public class WebsiteRatingsController : ControllerBase
 {
     private readonly IMongoCollection<WebsiteRating> _ratingsCollection;
