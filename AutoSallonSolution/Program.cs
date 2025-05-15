@@ -1,4 +1,3 @@
-// Program.cs
 using AutoSallonSolution;
 using AutoSallonSolution.Data;
 using AutoSallonSolution.Services;
@@ -37,6 +36,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+
+builder.Services.AddSingleton<MongoDbService>();
 
 // Identity Auth
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()

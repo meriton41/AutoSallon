@@ -21,13 +21,11 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.9.0" />
+    <PackageReference Include="MongoDB.Bson" Version="3.4.0" />
+    <PackageReference Include="MongoDB.Driver" Version="3.4.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="8.0.2" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Models\" />
   </ItemGroup>
 
   <ItemGroup>
