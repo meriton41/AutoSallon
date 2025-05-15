@@ -263,7 +263,7 @@ namespace AutoSallonSolution.Migrations
                     b.ToTable("RefreshTokens");
                 });
 
-            modelBuilder.Entity("SharedClassLibrary.Models.FavoriteVehicle", b =>
+            modelBuilder.Entity("AutoSallonSolution.Models.FavoriteVehicle", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -290,7 +290,7 @@ namespace AutoSallonSolution.Migrations
                     b.ToTable("FavoriteVehicles");
                 });
 
-            modelBuilder.Entity("SharedClassLibrary.Models.Vehicle", b =>
+            modelBuilder.Entity("AutoSallonSolution.Models.Vehicle", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -408,7 +408,7 @@ namespace AutoSallonSolution.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("SharedClassLibrary.Models.FavoriteVehicle", b =>
+            modelBuilder.Entity("AutoSallonSolution.Models.FavoriteVehicle", b =>
                 {
                     b.HasOne("AutoSallonSolution.Data.ApplicationUser", null)
                         .WithMany()
@@ -416,7 +416,7 @@ namespace AutoSallonSolution.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SharedClassLibrary.Models.Vehicle", null)
+                    b.HasOne("AutoSallonSolution.Models.Vehicle", null)
                         .WithMany()
                         .HasForeignKey("VehicleId")
                         .OnDelete(DeleteBehavior.Cascade)

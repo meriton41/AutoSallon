@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AutoSallonSolution.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250514135134_AddCreatedAtToApplicationUser")]
-    partial class AddCreatedAtToApplicationUser
+    [Migration("20250515115454_intialCreate")]
+    partial class intialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

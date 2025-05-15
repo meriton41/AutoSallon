@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using SharedClassLibrary.DTOs;
-using SharedClassLibrary.Models;
+using AutoSallonSolution.Models;
 
 namespace AutoSallonSolution.Data
 {

@@ -1,7 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace SharedClassLibrary.Models
+namespace AutoSallonSolution.Models
 {
     public class FavoriteVehicle
     {

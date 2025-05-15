@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using SharedClassLibrary.Models;
+using AutoSallonSolution.Models;
 using AutoSallonSolution.Data;
 
 namespace AutoSallonSolution.Controllers

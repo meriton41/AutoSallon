@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace SharedClassLibrary.Models
+namespace AutoSallonSolution.Models
 {
     public class User
     {

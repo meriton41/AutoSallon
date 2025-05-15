@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using SharedClassLibrary.Models;
+using AutoSallonSolution.Models;
 using AutoSallonSolution.Data;
 using System.Security.Claims;
 
