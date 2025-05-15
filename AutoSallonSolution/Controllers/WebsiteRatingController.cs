@@ -33,22 +33,19 @@ public class WebsiteRatingsController : ControllerBase
     {
         try
         {
-            _logger.LogInformation("Received rating submission request");
-
             if (dto.Value < 1 || dto.Value > 5)
-            {
-                _logger.LogWarning("Invalid rating value: {Value}", dto.Value);
                 return BadRequest("Rating must be between 1 and 5");
-            }
 
             var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-            {
-                _logger.LogWarning("User not found in rating submission");
-                return Unauthorized();
-            }
+            if (user == null) return Unauthorized();
 
-            _logger.LogInformation("Creating rating for user {UserId}", user.Id);
+            // Check if user already submitted a rating
+            var existingRating = await _ratingsCollection
+                .Find(r => r.UserId == user.Id)
+                .FirstOrDefaultAsync();
+
+            if (existingRating != null)
+                return BadRequest("You have already submitted a rating");
 
             var rating = new WebsiteRating
             {
@@ -59,10 +56,7 @@ public class WebsiteRatingsController : ControllerBase
             };
 
             await _ratingsCollection.InsertOneAsync(rating);
-
-            _logger.LogInformation("Rating created successfully with ID {RatingId}", rating.Id);
-
-            return CreatedAtAction(nameof(GetRating), new { id = rating.Id }, rating);
+            return Ok(rating);
         }
         catch (Exception ex)
         {
@@ -70,6 +64,7 @@ public class WebsiteRatingsController : ControllerBase
             return StatusCode(500, "An error occurred while submitting your rating");
         }
     }
+
 
     // GET: api/WebsiteRatings
     [HttpGet]
@@ -178,24 +173,14 @@ public class WebsiteRatingsController : ControllerBase
     {
         try
         {
-            _logger.LogInformation("Checking if user has already rated");
-
             var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-            {
-                _logger.LogWarning("User not found in hasRated check");
-                return Unauthorized();
-            }
+            if (user == null) return Unauthorized();
 
             var existingRating = await _ratingsCollection
                 .Find(r => r.UserId == user.Id)
                 .FirstOrDefaultAsync();
 
-            var hasRated = existingRating != null;
-
-            _logger.LogInformation("User {UserId} has rated: {HasRated}", user.Id, hasRated);
-
-            return Ok(new { hasRated });
+            return Ok(new { hasRated = existingRating != null });
         }
         catch (Exception ex)
         {

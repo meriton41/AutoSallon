@@ -5,6 +5,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/context/auth-context"
 import { Menu, X, User, Heart } from "lucide-react"
+import { RatingPopup } from "./ratinng-popup"
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false)
@@ -24,6 +25,7 @@ export default function Header() {
         <Link href="/" className="flex items-center gap-2 font-bold text-2xl tracking-tight text-primary">
           Nitron
         </Link>
+
         {/* Desktop Nav */}
         <nav className="hidden md:flex gap-6 items-center">
           {navLinks.map((link) => (
@@ -35,11 +37,24 @@ export default function Header() {
               {link.name}
             </Link>
           ))}
+
+          {/* Rating Button - Desktop */}
+          {user && (
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => window.dispatchEvent(new Event('open-rating-dialog'))}
+            >
+              Rate Us
+            </Button>
+          )}
+
           {user && user.role === "Admin" && (
             <Link href="/dashboard">
               <Button variant="ghost" className="font-semibold">Dashboard</Button>
             </Link>
           )}
+
           {user && (
             <Link href="/favorites" className="relative">
               <Button variant="ghost" size="icon" className="hover:bg-primary/10">
@@ -47,6 +62,7 @@ export default function Header() {
               </Button>
             </Link>
           )}
+
           {user ? (
             <div className="flex items-center gap-2">
               <Link href="/profile">
@@ -70,13 +86,15 @@ export default function Header() {
             </div>
           )}
         </nav>
-        {/* Mobile Nav */}
+
+        {/* Mobile Nav Toggle */}
         <div className="md:hidden flex items-center">
           <Button variant="ghost" size="icon" onClick={() => setIsOpen(!isOpen)}>
             {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             <span className="sr-only">Toggle menu</span>
           </Button>
         </div>
+
         {/* Mobile Drawer */}
         {isOpen && (
           <div className="fixed inset-0 z-50 bg-black/60" onClick={() => setIsOpen(false)} />
@@ -101,11 +119,28 @@ export default function Header() {
                 {link.name}
               </Link>
             ))}
+
+            {/* Rating Button - Mobile */}
+            {user && (
+              <Button 
+                variant="outline"
+                size="sm"
+                className="w-full mt-2"
+                onClick={() => {
+                  window.dispatchEvent(new Event('open-rating-dialog'))
+                  setIsOpen(false)
+                }}
+              >
+                Rate Us
+              </Button>
+            )}
+
             {user && user.role === "Admin" && (
               <Link href="/dashboard" onClick={() => setIsOpen(false)}>
                 <Button variant="ghost" className="w-full font-semibold mt-2">Dashboard</Button>
               </Link>
             )}
+
             {user && (
               <Link href="/favorites" className="relative" onClick={() => setIsOpen(false)}>
                 <Button variant="ghost" size="icon" className="hover:bg-primary/10 w-full justify-start">
@@ -113,6 +148,7 @@ export default function Header() {
                 </Button>
               </Link>
             )}
+
             {user ? (
               <>
                 <Link href="/profile" onClick={() => setIsOpen(false)}>
@@ -137,7 +173,9 @@ export default function Header() {
           </nav>
         </div>
       </div>
+
+      {/* Rating Popup Component */}
+      <RatingPopup />
     </header>
   )
 }
-
