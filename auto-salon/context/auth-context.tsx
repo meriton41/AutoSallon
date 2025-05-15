@@ -11,13 +11,14 @@ type User = {
   userId?: string;
 };
 
-type AuthContextType = {
+interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<void>;
+  token: string | null;
+  login: (username: string, password: string) => Promise<void>;
   logout: () => void;
-  isLoading: boolean;
-  refreshToken: () => Promise<void>;
-};
+  isAuthenticated: boolean;
+  isAdmin: boolean;
+}
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -48,6 +49,7 @@ const parseJwt = (token: string) => {
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
@@ -57,10 +59,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const userData = JSON.parse(storedUser);
       if (userData.token && !isTokenExpired(userData.token)) {
         setUser(userData);
+        setToken(userData.token);
       } else {
         refreshToken().catch(() => {
           localStorage.removeItem("user");
           setUser(null);
+          setToken(null);
         });
       }
     }
@@ -110,6 +114,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         userId
       };
       setUser(loggedInUser);
+      setToken(data.token);
       localStorage.setItem("user", JSON.stringify(loggedInUser));
       if (typeof window !== "undefined") {
         router.push("/");
@@ -121,6 +126,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = () => {
     setUser(null);
+    setToken(null);
     localStorage.removeItem("user");
   };
 
@@ -139,6 +145,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const updatedUser = user ? { ...user, token: data.token } : null;
       if (updatedUser) {
         setUser(updatedUser);
+        setToken(data.token);
         localStorage.setItem("user", JSON.stringify(updatedUser));
       }
     } else {
@@ -146,9 +153,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const isAuthenticated = !!user;
+  const isAdmin = user?.role === "Admin";
+
   return (
     <AuthContext.Provider
-      value={{ user, login, logout, isLoading, refreshToken }}
+      value={{
+        user,
+        token,
+        login,
+        logout,
+        isAuthenticated,
+        isAdmin,
+      }}
     >
       {children}
     </AuthContext.Provider>

@@ -30,6 +30,7 @@ interface Vehicle {
   color: string;
   interiorColor: string;
   features: string;
+  price: number;
 }
 
 const initialForm = {
@@ -48,6 +49,7 @@ const initialForm = {
   color: "",
   interiorColor: "",
   features: "",
+  price: 0,
 };
 
 export default function DashboardVehicles() {
@@ -114,6 +116,7 @@ export default function DashboardVehicles() {
       color: vehicle.color,
       interiorColor: vehicle.interiorColor,
       features: vehicle.features,
+      price: vehicle.price,
     });
     setIsEditModalOpen(true);
   };
@@ -170,6 +173,7 @@ export default function DashboardVehicles() {
           <input name="color" value={form.color} onChange={handleChange} placeholder="Color" className="w-full px-3 py-2 rounded-lg border" />
           <input name="interiorColor" value={form.interiorColor} onChange={handleChange} placeholder="Interior Color" className="w-full px-3 py-2 rounded-lg border" />
           <input name="features" value={form.features} onChange={handleChange} placeholder="Features" className="w-full px-3 py-2 rounded-lg border" />
+          <input name="price" type="number" value={form.price} onChange={handleChange} placeholder="Price" required className="w-full px-3 py-2 rounded-lg border" />
           <button type="submit" className="col-span-1 md:col-span-2 bg-black text-white rounded p-2 mt-2">
             Add Vehicle
           </button>
@@ -224,6 +228,9 @@ export default function DashboardVehicles() {
                     </div>
                     <div className="text-gray-600 dark:text-gray-400">
                       <span className="font-medium">Power:</span> {vehicle.power}
+                    </div>
+                    <div className="text-gray-600 dark:text-gray-400">
+                      <span className="font-medium">Price:</span> €{vehicle.price}
                     </div>
                   </div>
                 </CardContent>
@@ -380,6 +387,17 @@ export default function DashboardVehicles() {
                   value={form.features}
                   onChange={handleChange}
                   placeholder="Enter vehicle features"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Price</label>
+                <input
+                  name="price"
+                  type="number"
+                  value={form.price}
+                  onChange={handleChange}
+                  placeholder="Enter price"
                   className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 />
               </div>

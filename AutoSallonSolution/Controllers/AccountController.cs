@@ -262,6 +262,23 @@ namespace AutoSallonSolution.Controllers
             await _userManager.AddToRoleAsync(user, role);
             return Ok(new { message = "User role updated successfully" });
         }
+
+        [HttpGet("me")]
+        public async Task<IActionResult> GetCurrentUserProfile()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+                return NotFound(new { message = "User not found." });
+
+            var userProfile = new UserProfileDto
+            {
+                UserName = user.UserName,
+                Email = user.Email,
+                CreatedAt = user.CreatedAt
+            };
+
+            return Ok(userProfile);
+        }
     }
 }
 

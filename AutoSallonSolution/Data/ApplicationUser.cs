@@ -9,5 +9,12 @@ namespace AutoSallonSolution.Data
 
         public string? EmailConfirmationToken { get; set; }
         public DateTime? EmailConfirmationTokenCreatedAt { get; set; }
+
+        public DateTime CreatedAt { get; set; }
+
+        public ApplicationUser()
+        {
+            CreatedAt = DateTime.UtcNow;
+        }
     }
 }
