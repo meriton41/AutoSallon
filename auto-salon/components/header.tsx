@@ -1,32 +1,33 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { useAuth } from "@/context/auth-context"
-import { Menu, X, User, Heart } from "lucide-react"
-import { RatingPopup } from "./ratinng-popup"
+import { useState } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/context/auth-context";
+import { Menu, X, User, Heart } from "lucide-react";
+import { RatingPopup } from "./ratinng-popup";
+import { usePathname } from "next/navigation";
 
 export default function Header() {
-  const [isOpen, setIsOpen] = useState(false)
-  const { user, logout } = useAuth()
+  const [isOpen, setIsOpen] = useState(false);
+  const { user, logout } = useAuth();
+  const pathname = usePathname();
 
   const navLinks = [
     { name: "Home", href: "/" },
     { name: "Vehicles", href: "/vehicles" },
     { name: "About", href: "/about" },
-    { name: "Contact", href: "/contact" },
-  ]
+    ...(user && user.role === "User" ? [{ name: "Contact", href: "/contact" }] : []),
+    ...(user && user.role === "User" ? [{ name: "Test Drive", href: "//" }] : []),
+  ];
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white/90 dark:bg-black/90 backdrop-blur shadow-sm">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        {/* Logo */}
         <Link href="/" className="flex items-center gap-2 font-bold text-2xl tracking-tight text-primary">
           Nitron
         </Link>
 
-        {/* Desktop Nav */}
         <nav className="hidden md:flex gap-6 items-center">
           {navLinks.map((link) => (
             <Link
@@ -38,7 +39,6 @@ export default function Header() {
             </Link>
           ))}
 
-          {/* Rating Button - Desktop */}
           {user && (
             <Button 
               variant="outline" 
@@ -55,7 +55,7 @@ export default function Header() {
             </Link>
           )}
 
-          {user && (
+          {user && user.role === "User" && (
             <Link href="/favorites" className="relative">
               <Button variant="ghost" size="icon" className="hover:bg-primary/10">
                 <Heart className="h-5 w-5" />
@@ -87,7 +87,6 @@ export default function Header() {
           )}
         </nav>
 
-        {/* Mobile Nav Toggle */}
         <div className="md:hidden flex items-center">
           <Button variant="ghost" size="icon" onClick={() => setIsOpen(!isOpen)}>
             {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -95,7 +94,6 @@ export default function Header() {
           </Button>
         </div>
 
-        {/* Mobile Drawer */}
         {isOpen && (
           <div className="fixed inset-0 z-50 bg-black/60" onClick={() => setIsOpen(false)} />
         )}
@@ -120,7 +118,6 @@ export default function Header() {
               </Link>
             ))}
 
-            {/* Rating Button - Mobile */}
             {user && (
               <Button 
                 variant="outline"
@@ -141,7 +138,7 @@ export default function Header() {
               </Link>
             )}
 
-            {user && (
+            {user && user.role === "User" && (
               <Link href="/favorites" className="relative" onClick={() => setIsOpen(false)}>
                 <Button variant="ghost" size="icon" className="hover:bg-primary/10 w-full justify-start">
                   <Heart className="h-5 w-5 mr-2" /> Favorites
@@ -174,8 +171,7 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Rating Popup Component */}
       <RatingPopup />
     </header>
-  )
+  );
 }
