@@ -428,9 +428,9 @@ export default function DashboardVehicles() {
             </div>
             
             <button type="submit" className="lg:col-span-3 bg-black text-white rounded p-2 mt-2 hover:bg-gray-800 transition-colors">
-              Add Vehicle
-            </button>
-          </form>
+            Add Vehicle
+          </button>
+        </form>
         </div>
         
         {error && <div className="text-red-500 mb-4 p-4 bg-red-50 border border-red-200 rounded-lg dark:bg-red-900/50 dark:border-red-800">{error}</div>}
@@ -449,11 +449,11 @@ export default function DashboardVehicles() {
               className="max-w-sm"
             />
           </div>
-
-          {loading ? (
-            <div className="flex justify-center items-center h-64">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-            </div>
+        
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          </div>
           ) : filteredVehicles.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-muted-foreground">No vehicles found.</p>
@@ -479,7 +479,7 @@ export default function DashboardVehicles() {
                       <TableCell>
                         <img
                           src={vehicle.image && vehicle.image.split(",")[0] !== "string" ? vehicle.image.split(",")[0] : "/placeholder.svg"}
-                          alt={vehicle.title}
+                    alt={vehicle.title}
                           className="w-16 h-10 object-cover rounded"
                         />
                       </TableCell>
@@ -491,18 +491,18 @@ export default function DashboardVehicles() {
                       <TableCell>{vehicle.transmission}</TableCell>
                       <TableCell className="flex gap-2">
                         <Button variant="secondary" size="icon" onClick={() => handleEdit(vehicle)}>
-                          <Pencil className="h-4 w-4" />
-                        </Button>
+                      <Pencil className="h-4 w-4" />
+                    </Button>
                         <Button variant="destructive" size="icon" onClick={() => handleDelete(vehicle.id!)}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                       </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
-            </div>
-          )}
+          </div>
+        )}
         </div>
 
         {/* Edit Vehicle Modal */}

@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card } from "@/components/ui/card";
-import { Users, Car, ShoppingCart, Settings } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Users, Car, ShoppingCart, Settings, MessageSquare } from "lucide-react";
 import Link from "next/link";
 import axios from "axios";
+import { useAuth } from "@/context/auth-context";
 
 interface DashboardStats {
   totalUsers: number;
@@ -18,28 +19,46 @@ export default function DashboardPage() {
     totalVehicles: 0,
     totalOrders: 0,
   });
+  const [unreadContacts, setUnreadContacts] = useState(0);
+  const { user, token } = useAuth();
 
   useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const [usersResponse, vehiclesResponse] = await Promise.all([
-          axios.get("https://localhost:7234/api/Account/users"),
-          axios.get("https://localhost:7234/api/Vehicles"),
-        ]);
+    const fetchData = async () => {
+      if (!token) {
+        return;
+      }
 
+      try {
+        const [usersResponse, vehiclesResponse, contactsResponse] = await Promise.all([
+          axios.get("https://localhost:7234/api/Account/users", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }),
+          axios.get("https://localhost:7234/api/Vehicles", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }),
+          axios.get("https://localhost:7234/api/Contact/unread", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }),
+        ]);
         setStats({
           totalUsers: usersResponse.data.length,
           totalVehicles: vehiclesResponse.data.length,
           totalOrders: 89, // TODO: Fetch actual total orders from backend
         });
+        setUnreadContacts(contactsResponse.data);
       } catch (error) {
-        console.error("Failed to fetch dashboard stats:", error);
-        // Optionally set an error state here
+        console.error("Error fetching dashboard data:", error);
       }
     };
 
-    fetchStats();
-  }, []);
+    fetchData();
+  }, [token]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-900 dark:to-gray-800 p-6">
@@ -81,6 +100,19 @@ export default function DashboardPage() {
                 <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.totalOrders}</p>
               </div>
             </div>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Unread Messages</CardTitle>
+              <MessageSquare className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{unreadContacts}</div>
+              <p className="text-xs text-muted-foreground">
+                New contact messages
+              </p>
+            </CardContent>
           </Card>
         </div>
 

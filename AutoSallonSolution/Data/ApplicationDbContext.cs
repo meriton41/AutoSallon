@@ -18,6 +18,7 @@ namespace AutoSallonSolution.Data
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<FavoriteVehicle> FavoriteVehicles { get; set; }
         public DbSet<Vehicle> Vehicles { get; set; }
+        public DbSet<Contact> Contacts { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

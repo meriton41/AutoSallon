@@ -4,6 +4,7 @@ import { useAuth } from "@/context/auth-context";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Link from "next/link";
+import { MessageSquare } from "lucide-react";
 
 export default function DashboardLayout({
   children,
@@ -61,6 +62,12 @@ export default function DashboardLayout({
               className="block py-2 px-4 rounded hover:bg-gray-800 transition-colors"
             >
               Settings
+            </Link>
+            <Link
+              href="/dashboard/contacts"
+              className="block py-2 px-4 rounded hover:bg-gray-800 transition-colors"
+            >
+              Contacts
             </Link>
           </nav>
         </div>
