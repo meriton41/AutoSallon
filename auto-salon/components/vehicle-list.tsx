@@ -6,11 +6,11 @@ import Image from "next/image"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useSearchParams } from "next/navigation"
 import { Heart } from "lucide-react"
 import { useAuth } from "@/context/auth-context"
 import axios from "axios"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 
 type Vehicle = {
   id: number
@@ -24,33 +24,63 @@ type Vehicle = {
   engine: string
   fuel: string
   power: string
+  price: number
+  transmission: string
+  color: string
 }
 
-export default function VehicleList() {
+type VehicleListProps = {
+  filters: {
+    searchTerm: string
+    brand: string
+    minYear: number | ""
+    maxYear: number | ""
+    minPrice: number | ""
+    maxPrice: number | ""
+    fuel: string
+    transmission: string
+    color: string
+    isNew: boolean | ""
+  }
+}
+
+export default function VehicleList({ filters }: VehicleListProps) {
   const [vehicles, setVehicles] = useState<Vehicle[]>([])
   const [loading, setLoading] = useState(true)
   const [favorites, setFavorites] = useState<number[]>([])
-  const searchParams = useSearchParams()
-  const brandFilter = searchParams.get("brand")
+  const [searchTerm, setSearchTerm] = useState("")
   const { user } = useAuth()
+
+  const buildQueryString = () => {
+    const params = new URLSearchParams()
+    if (filters.searchTerm) params.append("searchTerm", filters.searchTerm)
+    if (filters.brand) params.append("brand", filters.brand)
+    if (filters.minYear !== "") params.append("minYear", filters.minYear.toString())
+    if (filters.maxYear !== "") params.append("maxYear", filters.maxYear.toString())
+    if (filters.minPrice !== "") params.append("minPrice", filters.minPrice.toString())
+    if (filters.maxPrice !== "") params.append("maxPrice", filters.maxPrice.toString())
+    if (filters.fuel) params.append("fuel", filters.fuel)
+    if (filters.transmission) params.append("transmission", filters.transmission)
+    if (filters.color) params.append("color", filters.color)
+    if (filters.isNew !== "") params.append("isNew", filters.isNew.toString())
+    return params.toString()
+  }
 
   useEffect(() => {
     const fetchVehicles = async () => {
       setLoading(true)
       try {
-        // Fetch vehicles
-        const response = await axios.get("https://localhost:7234/api/Vehicles")
+        const queryString = buildQueryString()
+        const response = await axios.get(`https://localhost:7234/api/Vehicles?${queryString}`)
         setVehicles(response.data)
 
-        // Fetch user's favorites if logged in
-        const headers = user?.token
-          ? { Authorization: `Bearer ${user.token}` }
-          : {};
-
-        const favoritesResponse = await axios.get("https://localhost:7234/api/FavoriteVehicles", {
-          headers,
-        })
-        setFavorites(favoritesResponse.data.map((f: any) => f.vehicleId))
+        if (user?.token) {
+          const headers = { Authorization: `Bearer ${user.token}` }
+          const favoritesResponse = await axios.get("https://localhost:7234/api/FavoriteVehicles", {
+            headers,
+          })
+          setFavorites(favoritesResponse.data.map((f: any) => f.vehicleId))
+        }
       } catch (error) {
         console.error("Error fetching data:", error)
       } finally {
@@ -59,7 +89,12 @@ export default function VehicleList() {
     }
 
     fetchVehicles()
-  }, [brandFilter, user?.token])
+  }, [filters, user?.token])
+
+  // Filter vehicles based on search term
+  const filteredVehicles = vehicles.filter(vehicle =>
+    vehicle.title.toLowerCase().includes(searchTerm.toLowerCase())
+  )
 
   const toggleFavorite = async (vehicleId: number) => {
     if (!user?.token || !user?.userId) {
@@ -83,93 +118,100 @@ export default function VehicleList() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {[...Array(6)].map((_, i) => (
-          <Card key={i} className="overflow-hidden">
-            <Skeleton className="h-64 w-full" />
-            <CardContent className="p-4">
-              <Skeleton className="h-6 w-3/4 mb-2" />
-              <Skeleton className="h-4 w-1/2 mb-4" />
-              <div className="flex justify-between">
-                <Skeleton className="h-4 w-16" />
-                <Skeleton className="h-4 w-16" />
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    )
-  }
-
-  if (vehicles.length === 0) {
-    return (
-      <div className="text-center py-12">
-        <h3 className="text-xl font-medium mb-4">No vehicles found</h3>
-        <p className="text-muted-foreground">Try adjusting your filters or check back later.</p>
-      </div>
-    )
-  }
-
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-      {vehicles.map((vehicle) => (
-        <Link key={vehicle.id} href={`/vehicles/${vehicle.id}`}>
-          <Card className="car-card h-full">
-            <div className="relative h-64 w-full">
-              <Image
-                src={vehicle.image || "/placeholder.svg"}
-                alt={vehicle.title}
-                fill
-                className="object-cover transition-transform duration-300"
-              />
-              {vehicle.isNew && <Badge className="absolute top-2 left-2 z-10">New</Badge>}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute top-2 right-2 z-10 bg-white/80 hover:bg-white"
-                onClick={(e) => {
-                  e.preventDefault()
-                  toggleFavorite(vehicle.id)
-                }}
-              >
-                <Heart
-                  className={`h-5 w-5 ${
-                    favorites.includes(vehicle.id) ? "text-red-500 fill-red-500" : "text-gray-500"
-                  }`}
-                />
-              </Button>
-            </div>
-            <CardContent className="p-4">
-              <div className="flex items-center mb-2">
-                <Image
-                  src={vehicle.brandLogo || "/placeholder.svg"}
-                  alt={vehicle.brand}
-                  width={40}
-                  height={30}
-                  className="mr-2"
-                />
-                <h3 className="text-xl font-bold">{vehicle.title}</h3>
-              </div>
-              <div className="grid grid-cols-3 gap-2 mt-4">
-                <div className="car-specs-icon">
-                  <span className="text-xs text-muted-foreground">Year</span>
-                  <span className="font-medium">{vehicle.year}</span>
+    <div className="space-y-6">
+      {/* Search Input */}
+      <div className="w-full max-w-md mx-auto mb-8">
+        <Input
+          type="text"
+          placeholder="Search vehicles by name..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full"
+        />
+      </div>
+
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[...Array(6)].map((_, i) => (
+            <Card key={i} className="overflow-hidden">
+              <Skeleton className="h-48 w-full" />
+              <CardContent className="p-4">
+                <Skeleton className="h-6 w-3/4 mb-2" />
+                <Skeleton className="h-4 w-1/2" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : filteredVehicles.length === 0 ? (
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">No vehicles found.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredVehicles.map((vehicle) => (
+            <Link key={vehicle.id} href={`/vehicles/${vehicle.id}`}>
+              <Card className="overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 bg-white dark:bg-gray-800">
+                <div className="relative h-48">
+                  <Image
+                    src={vehicle.image && vehicle.image.split(",")[0] !== "string" ? vehicle.image.split(",")[0] : "/placeholder.svg"}
+                    alt={vehicle.title}
+                    fill
+                    className="object-cover"
+                  />
+                  {vehicle.isNew && (
+                    <Badge className="absolute top-2 right-2 bg-green-500 text-white text-xs font-semibold px-2 py-1 rounded">New</Badge>
+                  )}
+                  {user && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute top-2 left-2 bg-white/80 hover:bg-white dark:bg-gray-700/80 dark:hover:bg-gray-700 text-gray-900 dark:text-white"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        toggleFavorite(vehicle.id)
+                      }}
+                    >
+                      <Heart
+                        className={`h-5 w-5 ${
+                          favorites.includes(vehicle.id)
+                            ? "fill-red-500 text-red-500"
+                            : "text-gray-600 dark:text-gray-400"
+                        }`}
+                      />
+                    </Button>
+                  )}
                 </div>
-                <div className="car-specs-icon">
-                  <span className="text-xs text-muted-foreground">Engine</span>
-                  <span className="font-medium">{vehicle.engine}</span>
-                </div>
-                <div className="car-specs-icon">
-                  <span className="text-xs text-muted-foreground">Power</span>
-                  <span className="font-medium">{vehicle.power}</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
-      ))}
+                <CardContent className="p-6 space-y-4">
+                  <div className="flex items-center mb-2">
+                    {/* Brand Logo (Optional - you might want to place this differently) */}
+                     {/* <Image
+                      src={vehicle.brandLogo || "/placeholder.svg"}
+                      alt={vehicle.brand}
+                      width={40}
+                      height={30}
+                      className="mr-2"
+                    /> */}
+                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{vehicle.title}</h3>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-y-2 gap-x-4 text-sm text-gray-700 dark:text-gray-300">
+                    <div className="flex items-center space-x-1"><span className="font-semibold text-gray-900 dark:text-white">Brand:</span> <span>{vehicle.brand}</span></div>
+                    <div className="flex items-center space-x-1"><span className="font-semibold text-gray-900 dark:text-white">Year:</span> <span>{vehicle.year}</span></div>
+                    <div className="flex items-center space-x-1"><span className="font-semibold text-gray-900 dark:text-white">Mileage:</span> <span>{vehicle.mileage}</span></div>
+                    <div className="flex items-center space-x-1"><span className="font-semibold text-gray-900 dark:text-white">Fuel:</span> <span>{vehicle.fuel}</span></div>
+                    <div className="flex items-center space-x-1"><span className="font-semibold text-gray-900 dark:text-white">Transmission:</span> <span>{vehicle.transmission}</span></div>
+                    <div className="flex items-center space-x-1"><span className="font-semibold text-gray-900 dark:text-white">Color:</span> <span>{vehicle.color}</span></div>
+                  </div>
+
+                  {/* Price */}
+                  <div className="mt-4 text-xl font-bold text-blue-600 dark:text-blue-400">€{vehicle.price.toFixed(2)}</div>
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

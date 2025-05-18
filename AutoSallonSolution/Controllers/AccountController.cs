@@ -279,6 +279,17 @@ namespace AutoSallonSolution.Controllers
 
             return Ok(userProfile);
         }
+
+        [HttpPut("users/{userId}")]
+        public async Task<IActionResult> UpdateUserDetails(string userId, [FromBody] UserDetailsDTO userDetailsDTO)
+        {
+            var response = await userAccount.UpdateUser(userId, userDetailsDTO);
+            if (!response.Flag)
+            {
+                return BadRequest(response);
+            }
+            return Ok(response);
+        }
     }
 }
 

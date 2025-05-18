@@ -174,7 +174,8 @@ public class AccountRepository : IUserAccount
                 Id = user.Id,
                 UserName = user.UserName ?? string.Empty,
                 Email = user.Email ?? string.Empty,
-                Role = roles.FirstOrDefault() ?? string.Empty
+                Role = roles.FirstOrDefault() ?? string.Empty,
+                CreatedAt = user.CreatedAt
             });
         }
 

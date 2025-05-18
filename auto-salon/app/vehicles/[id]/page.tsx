@@ -1,211 +1,190 @@
-import Image from "next/image"
-import { notFound } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Calendar, Fuel, Gauge, Tag, Zap } from "lucide-react"
-import VehicleGallery from "@/components/vehicle-gallery"
-import RelatedVehicles from "@/components/related-vehicles"
+"use client";
 
-type VehiclePageProps = {
-  params: {
-    id: string
-  }
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import axios from "axios";
+import Image from "next/image";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Calendar, Fuel, Gauge, Tag, Zap } from "lucide-react";
+import VehicleGallery from "@/components/vehicle-gallery";
+import RelatedVehicles from "@/components/related-vehicles";
+
+interface Vehicle {
+  id: number;
+  title: string;
+  image: string;
+  year: number;
+  mileage: string;
+  brand: string;
+  brandLogo: string;
+  isNew: boolean;
+  engine: string;
+  fuel: string;
+  power: string;
+  description: string;
+  transmission: string;
+  color: string;
+  interiorColor: string;
+  features: string;
+  price: number;
 }
 
-export default function VehiclePage({ params }: VehiclePageProps) {
-  // In a real app, this would fetch from an API
-  const vehicles = [
-    {
-      id: "1",
-      title: "Rolls Royce Cullinan II",
-      description:
-        "The Rolls-Royce Cullinan is a full-sized luxury sport utility vehicle produced by Rolls-Royce Motor Cars. The Cullinan is the first SUV to be launched by the Rolls-Royce marque, and is also the brand's first all-wheel drive vehicle.",
-      images: [
-        "/images/cars/rolls royce cullinan.webp",
-        "/images/cars/rolls-royce-cullinan-interior.jpg",
-        "/images/cars/rolls-royce-cullinan-rear.jpg",
-      ],
-      year: 2025,
-      mileage: "0 km",
-      brand: "Rolls Royce",
-      brandLogo: "/images/brands/rolls-royce.png",
-      isNew: true,
-      engine: "6.7",
-      fuel: "Petrol",
-      power: "571 PS",
-      transmission: "Automatic",
-      color: "Silver",
-      interiorColor: "Black",
-      features: [
-        "Panoramic Roof",
-        "Massage Seats",
-        "Night Vision",
-        "Starlight Headliner",
-        "Rear Entertainment",
-        "Bespoke Audio System",
-      ],
-    },
-  ]
+export default function VehicleDetailPage() {
+  const params = useParams();
+  const vehicleId = params.id;
+  const [vehicle, setVehicle] = useState<Vehicle | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const vehicle = vehicles.find((v) => v.id === params.id)
+  useEffect(() => {
+    if (!vehicleId) return;
 
-  if (!vehicle) {
-    notFound()
+    const fetchVehicle = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get(
+          `https://localhost:7234/api/Vehicles/${vehicleId}`
+        );
+        setVehicle(response.data);
+      } catch (err) {
+        setError("Failed to fetch vehicle details");
+        console.error("Error fetching vehicle details:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchVehicle();
+  }, [vehicleId]);
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <Skeleton className="h-10 w-1/2 mb-4" />
+        <Skeleton className="h-64 w-full mb-8" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <Skeleton className="h-48 w-full" />
+          <Skeleton className="h-48 w-full" />
+        </div>
+      </div>
+    );
   }
 
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-8 text-red-500">
+        {error}
+      </div>
+    );
+  }
+
+  if (!vehicle) {
+    return (
+      <div className="container mx-auto px-4 py-8 text-muted-foreground">
+        Vehicle not found.
+      </div>
+    );
+  }
+
+  // Assuming image string is comma-separated URLs
+  const images = vehicle.image.split(',').map(img => img.trim()).filter(img => img !== "string" && img !== "");
+  const mainImage = images.length > 0 ? images[0] : "/placeholder.svg";
+  const galleryImages = images.slice(1);
+
   return (
-    <div className="container mx-auto px-4 py-12">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Column - Gallery */}
-        <div className="lg:col-span-2">
-          <VehicleGallery images={vehicle.images} />
-        </div>
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 py-12">
+      <div className="container mx-auto px-4 space-y-12">
+        <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white text-center lg:text-left">{vehicle.title}</h1>
 
-        {/* Right Column - Details */}
-        <div>
-          <div className="sticky top-20">
-            <div className="flex items-center mb-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+          {/* Left Column - Main Image / Gallery */}
+          <div className="lg:col-span-2 space-y-8">
+             {/* Main Image */}
+            <div className="relative h-80 md:h-96 rounded-xl overflow-hidden shadow-2xl border border-gray-200 dark:border-gray-700">
               <Image
-                src={vehicle.brandLogo || "/placeholder.svg"}
-                alt={vehicle.brand}
-                width={60}
-                height={40}
-                className="mr-3"
+                src={mainImage}
+                alt={vehicle.title}
+                fill
+                objectFit="cover"
               />
-              <div>
-                <h1 className="text-2xl font-bold">{vehicle.title}</h1>
-                {vehicle.isNew && <Badge className="mt-1">New</Badge>}
-              </div>
             </div>
+             {/* Gallery */}
+            {galleryImages.length > 0 && (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {galleryImages.map((img, index) => (
+                  <div key={index} className="relative h-24 md:h-32 rounded-lg overflow-hidden shadow-md border border-gray-200 dark:border-gray-700">
+                     <Image
+                      src={img}
+                      alt={`${vehicle.title} - Gallery Image ${index + 1}`}
+                      fill
+                      objectFit="cover"
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
 
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <div className="flex items-center">
-                <Calendar className="h-5 w-5 mr-2 text-muted-foreground" />
-                <span>{vehicle.year}</span>
-              </div>
-              <div className="flex items-center">
-                <Gauge className="h-5 w-5 mr-2 text-muted-foreground" />
-                <span>{vehicle.mileage}</span>
-              </div>
-              <div className="flex items-center">
-                <Fuel className="h-5 w-5 mr-2 text-muted-foreground" />
-                <span>{vehicle.fuel}</span>
-              </div>
-              <div className="flex items-center">
-                <Zap className="h-5 w-5 mr-2 text-muted-foreground" />
-                <span>{vehicle.power}</span>
-              </div>
-            </div>
+          {/* Right Column - Details */}
+          <div className="space-y-8">
+            <Card className="p-8 shadow-xl bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+              <CardContent className="p-0 space-y-8">
+                <div className="flex items-center justify-between border-b pb-4 border-gray-200 dark:border-gray-600">
+                  <span className="text-3xl md:text-4xl font-bold text-blue-600 dark:text-blue-400">€{vehicle.price.toFixed(2)}</span>
+                  {vehicle.isNew && (
+                    <Badge variant="secondary" className="bg-green-500 text-white px-3 py-1 text-sm rounded-full">New</Badge>
+                  )}
+                </div>
+                
+                {/* Specifications */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-gray-700 dark:text-gray-300">
+                  <div className="flex items-center space-x-2"><span className="font-semibold text-gray-900 dark:text-white">Brand:</span> <span>{vehicle.brand}</span></div>
+                  <div className="flex items-center space-x-2"><Calendar className="h-5 w-5 text-gray-500 dark:text-gray-400" /><span className="font-semibold text-gray-900 dark:text-white">Year:</span> <span>{vehicle.year}</span></div>
+                  <div className="flex items-center space-x-2"><Gauge className="h-5 w-5 text-gray-500 dark:text-gray-400" /><span className="font-semibold text-gray-900 dark:text-white">Mileage:</span> <span>{vehicle.mileage}</span></div>
+                  <div className="flex items-center space-x-2"><Fuel className="h-5 w-5 text-gray-500 dark:text-gray-400" /><span className="font-semibold text-gray-900 dark:text-white">Fuel:</span> <span>{vehicle.fuel}</span></div>
+                  <div className="flex items-center space-x-2"><span className="font-semibold text-gray-900 dark:text-white">Transmission:</span> <span>{vehicle.transmission}</span></div>
+                  <div className="flex items-center space-x-2"><span className="font-semibold text-gray-900 dark:text-white">Color:</span> <span>{vehicle.color}</span></div>
+                  <div className="flex items-center space-x-2"><span className="font-semibold text-gray-900 dark:text-white">Interior Color:</span> <span>{vehicle.interiorColor}</span></div>
+                  <div className="flex items-center space-x-2"><span className="font-semibold text-gray-900 dark:text-white">Engine:</span> <span>{vehicle.engine}</span></div>
+                  <div className="flex items-center space-x-2"><Zap className="h-5 w-5 text-gray-500 dark:text-gray-400" /><span className="font-semibold text-gray-900 dark:text-white">Power:</span> <span>{vehicle.power}</span></div>
+                </div>
 
-            <div className="space-y-4 mb-8">
-              <Button className="w-full">Contact Us</Button>
-              <Button variant="outline" className="w-full">
-                Schedule Test Drive
-              </Button>
-            </div>
+                {/* Description */}
+                <div className="space-y-2 border-t pt-6 border-gray-200 dark:border-gray-600">
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Description</h3>
+                  <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{vehicle.description}</p>
+                </div>
 
-            <div className="border-t pt-4">
-              <h3 className="font-medium mb-2">Quick Specs</h3>
-              <ul className="space-y-2 text-sm">
-                <li className="flex justify-between">
-                  <span className="text-muted-foreground">Transmission:</span>
-                  <span>{vehicle.transmission}</span>
-                </li>
-                <li className="flex justify-between">
-                  <span className="text-muted-foreground">Engine:</span>
-                  <span>{vehicle.engine}</span>
-                </li>
-                <li className="flex justify-between">
-                  <span className="text-muted-foreground">Exterior Color:</span>
-                  <span>{vehicle.color}</span>
-                </li>
-                <li className="flex justify-between">
-                  <span className="text-muted-foreground">Interior Color:</span>
-                  <span>{vehicle.interiorColor}</span>
-                </li>
-              </ul>
-            </div>
+                {/* Features */}
+                {vehicle.features && (
+                  <div className="space-y-2 border-t pt-6 border-gray-200 dark:border-gray-600">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Features</h3>
+                    <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{vehicle.features}</p>
+                  </div>
+                )}
+
+                {/* Contact Button */}
+                <div className="pt-6 border-t border-gray-200 dark:border-gray-600">
+                  <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold py-3 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-200">
+                    Inquire About This Vehicle
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
-      </div>
 
-      {/* Tabs Section */}
-      <div className="mt-12">
-        <Tabs defaultValue="description">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="description">Description</TabsTrigger>
-            <TabsTrigger value="features">Features</TabsTrigger>
-            <TabsTrigger value="specifications">Specifications</TabsTrigger>
-          </TabsList>
-          <TabsContent value="description" className="p-4 border rounded-b-lg">
-            <p>{vehicle.description}</p>
-          </TabsContent>
-          <TabsContent value="features" className="p-4 border rounded-b-lg">
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {vehicle.features.map((feature, index) => (
-                <div key={index} className="flex items-center">
-                  <Tag className="h-4 w-4 mr-2 text-muted-foreground" />
-                  <span>{feature}</span>
-                </div>
-              ))}
-            </div>
-          </TabsContent>
-          <TabsContent value="specifications" className="p-4 border rounded-b-lg">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <h3 className="font-medium mb-2">Engine & Performance</h3>
-                <ul className="space-y-2 text-sm">
-                  <li className="flex justify-between">
-                    <span className="text-muted-foreground">Engine:</span>
-                    <span>{vehicle.engine}</span>
-                  </li>
-                  <li className="flex justify-between">
-                    <span className="text-muted-foreground">Power:</span>
-                    <span>{vehicle.power}</span>
-                  </li>
-                  <li className="flex justify-between">
-                    <span className="text-muted-foreground">Fuel Type:</span>
-                    <span>{vehicle.fuel}</span>
-                  </li>
-                  <li className="flex justify-between">
-                    <span className="text-muted-foreground">Transmission:</span>
-                    <span>{vehicle.transmission}</span>
-                  </li>
-                </ul>
-              </div>
-              <div>
-                <h3 className="font-medium mb-2">Dimensions & Weight</h3>
-                <ul className="space-y-2 text-sm">
-                  <li className="flex justify-between">
-                    <span className="text-muted-foreground">Length:</span>
-                    <span>5341 mm</span>
-                  </li>
-                  <li className="flex justify-between">
-                    <span className="text-muted-foreground">Width:</span>
-                    <span>2164 mm</span>
-                  </li>
-                  <li className="flex justify-between">
-                    <span className="text-muted-foreground">Height:</span>
-                    <span>1835 mm</span>
-                  </li>
-                  <li className="flex justify-between">
-                    <span className="text-muted-foreground">Weight:</span>
-                    <span>2660 kg</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </TabsContent>
-        </Tabs>
-      </div>
-
-      {/* Related Vehicles */}
-      <div className="mt-16">
-        <h2 className="text-2xl font-bold mb-6">Related Vehicles</h2>
-        <RelatedVehicles currentVehicleId={params.id} />
+         {/* Related Vehicles (Optional) */}
+        {/* <div className="mt-12">
+          <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Related Vehicles</h2>
+           {/* Implement logic to fetch and display related vehicles */}
+        {/* </div> */}
       </div>
     </div>
-  )
+  );
 }
 
