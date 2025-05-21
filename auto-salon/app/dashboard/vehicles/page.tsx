@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Card, CardContent } from "@/components/ui/card";
@@ -28,8 +29,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { Label } from "@/components/ui/label"
+} from "@/components/ui/table";
+import { Label } from "@/components/ui/label";
 
 interface Vehicle {
   id?: number;
@@ -51,7 +52,7 @@ interface Vehicle {
   price: number;
 }
 
-const initialForm = {
+const initialForm: Vehicle = {
   id: undefined,
   title: "",
   image: "",
@@ -78,30 +79,35 @@ export default function DashboardVehicles() {
   const [error, setError] = useState<string | null>(null);
   const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [brands, setBrands] = useState<string[]>([])
-  const [fuelTypes, setFuelTypes] = useState<string[]>([])
-  const [transmissions, setTransmissions] = useState<string[]>([])
-  const [colors, setColors] = useState<string[]>([])
+  const [brands, setBrands] = useState<string[]>([]);
+  const [fuelTypes, setFuelTypes] = useState<string[]>([]);
+  const [transmissions, setTransmissions] = useState<string[]>([]);
+  const [colors, setColors] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const fetchVehiclesAndOptions = async () => {
       setLoading(true);
       try {
-        const [vehiclesResponse, brandsResponse, fuelResponse, transmissionResponse, colorResponse] = await Promise.all([
+        const [
+          vehiclesResponse,
+          brandsResponse,
+          fuelResponse,
+          transmissionResponse,
+          colorResponse,
+        ] = await Promise.all([
           axios.get("https://localhost:7234/api/Vehicles"),
           axios.get("https://localhost:7234/api/Vehicles/brands"),
           axios.get("https://localhost:7234/api/Vehicles/fueltypes"),
           axios.get("https://localhost:7234/api/Vehicles/transmissions"),
           axios.get("https://localhost:7234/api/Vehicles/colors"),
         ]);
-        
+
         setVehicles(vehiclesResponse.data);
         setBrands(brandsResponse.data);
         setFuelTypes(fuelResponse.data);
         setTransmissions(transmissionResponse.data);
         setColors(colorResponse.data);
-
       } catch (err) {
         setError("Failed to fetch data");
       } finally {
@@ -111,7 +117,9 @@ export default function DashboardVehicles() {
     fetchVehiclesAndOptions();
   }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     const target = e.target as HTMLInputElement;
     const type = target.type;
@@ -190,7 +198,10 @@ export default function DashboardVehicles() {
       };
       console.log("Updating vehicle with ID:", editingVehicle.id);
       console.log("Data being sent for update:", updatedVehicleData);
-      await axios.put(`https://localhost:7234/api/Vehicles/${editingVehicle.id}`, updatedVehicleData);
+      await axios.put(
+        `https://localhost:7234/api/Vehicles/${editingVehicle.id}`,
+        updatedVehicleData
+      );
       setIsEditModalOpen(false);
       setEditingVehicle(null);
       setForm({
@@ -233,186 +244,213 @@ export default function DashboardVehicles() {
   };
 
   // Filter vehicles based on search term
-  const filteredVehicles = vehicles.filter(vehicle =>
+  const filteredVehicles = vehicles.filter((vehicle) =>
     vehicle.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Vehicle Management</h1>
-        
+        <h1 className="text-3xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          Vehicle Management
+        </h1>
+
         {/* Add Vehicle Form */}
         <div className="mb-8 bg-white/50 backdrop-blur-sm p-6 rounded-lg border border-gray-200 dark:bg-gray-800/50 dark:border-gray-700">
           <h2 className="text-2xl font-semibold mb-4">Add New Vehicle</h2>
-          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <form
+            onSubmit={handleSubmit}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+          >
             <div className="space-y-2">
               <Label htmlFor="title">Title</Label>
-              <Input 
-                id="title" 
-                name="title" 
-                value={form.title} 
-                onChange={handleChange} 
-                placeholder="Title" 
-                required 
+              <Input
+                id="title"
+                name="title"
+                value={form.title}
+                onChange={handleChange}
+                placeholder="Title"
+                required
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="image">Image URL(s) - Comma Separated</Label>
-              <Input 
-                id="image" 
-                name="image" 
-                value={form.image} 
-                onChange={handleChange} 
-                placeholder="Image URL(s)" 
+              <Input
+                id="image"
+                name="image"
+                value={form.image}
+                onChange={handleChange}
+                placeholder="Image URL(s)"
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="year">Year</Label>
-              <Input 
-                id="year" 
-                name="year" 
-                type="number" 
-                value={form.year} 
-                onChange={handleChange} 
-                placeholder="Year" 
-                required 
+              <Input
+                id="year"
+                name="year"
+                type="number"
+                value={form.year}
+                onChange={handleChange}
+                placeholder="Year"
+                required
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="mileage">Mileage</Label>
-              <Input 
-                id="mileage" 
-                name="mileage" 
-                value={form.mileage} 
-                onChange={handleChange} 
-                placeholder="Mileage" 
+              <Input
+                id="mileage"
+                name="mileage"
+                value={form.mileage}
+                onChange={handleChange}
+                placeholder="Mileage"
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="brand">Brand</Label>
-              <Select value={form.brand} onValueChange={(value) => handleSelectChange("brand", value)}>
+              <Select
+                value={form.brand}
+                onValueChange={(value) => handleSelectChange("brand", value)}
+              >
                 <SelectTrigger id="brand">
                   <SelectValue placeholder="Select brand" />
                 </SelectTrigger>
                 <SelectContent>
                   {brands.map((brand) => (
-                    <SelectItem key={brand} value={brand}>{brand}</SelectItem>
+                    <SelectItem key={brand} value={brand}>
+                      {brand}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="brandLogo">Brand Logo URL</Label>
-              <Input 
-                id="brandLogo" 
-                name="brandLogo" 
-                value={form.brandLogo} 
-                onChange={handleChange} 
-                placeholder="Brand Logo URL" 
+              <Input
+                id="brandLogo"
+                name="brandLogo"
+                value={form.brandLogo}
+                onChange={handleChange}
+                placeholder="Brand Logo URL"
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="engine">Engine</Label>
-              <Input 
-                id="engine" 
-                name="engine" 
-                value={form.engine} 
-                onChange={handleChange} 
-                placeholder="Engine" 
+              <Input
+                id="engine"
+                name="engine"
+                value={form.engine}
+                onChange={handleChange}
+                placeholder="Engine"
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="fuel">Fuel</Label>
-              <Select value={form.fuel} onValueChange={(value) => handleSelectChange("fuel", value)}>
+              <Select
+                value={form.fuel}
+                onValueChange={(value) => handleSelectChange("fuel", value)}
+              >
                 <SelectTrigger id="fuel">
                   <SelectValue placeholder="Select fuel type" />
                 </SelectTrigger>
                 <SelectContent>
                   {fuelTypes.map((fuel) => (
-                    <SelectItem key={fuel} value={fuel}>{fuel}</SelectItem>
+                    <SelectItem key={fuel} value={fuel}>
+                      {fuel}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="power">Power</Label>
-              <Input 
-                id="power" 
-                name="power" 
-                value={form.power} 
-                onChange={handleChange} 
-                placeholder="Power" 
+              <Input
+                id="power"
+                name="power"
+                value={form.power}
+                onChange={handleChange}
+                placeholder="Power"
               />
             </div>
             <div className="space-y-2 lg:col-span-3">
               <Label htmlFor="description">Description</Label>
-              <Textarea 
-                id="description" 
-                name="description" 
-                value={form.description} 
-                onChange={handleChange} 
+              <Textarea
+                id="description"
+                name="description"
+                value={form.description}
+                onChange={handleChange}
                 placeholder="Description"
                 className="min-h-[100px]"
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="transmission">Transmission</Label>
-              <Select value={form.transmission} onValueChange={(value) => handleSelectChange("transmission", value)}>
+              <Select
+                value={form.transmission}
+                onValueChange={(value) =>
+                  handleSelectChange("transmission", value)
+                }
+              >
                 <SelectTrigger id="transmission">
                   <SelectValue placeholder="Select transmission" />
                 </SelectTrigger>
                 <SelectContent>
                   {transmissions.map((transmission) => (
-                    <SelectItem key={transmission} value={transmission}>{transmission}</SelectItem>
+                    <SelectItem key={transmission} value={transmission}>
+                      {transmission}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="color">Color</Label>
-              <Select value={form.color} onValueChange={(value) => handleSelectChange("color", value)}>
+              <Select
+                value={form.color}
+                onValueChange={(value) => handleSelectChange("color", value)}
+              >
                 <SelectTrigger id="color">
                   <SelectValue placeholder="Select color" />
                 </SelectTrigger>
                 <SelectContent>
                   {colors.map((color) => (
-                    <SelectItem key={color} value={color}>{color}</SelectItem>
+                    <SelectItem key={color} value={color}>
+                      {color}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="interiorColor">Interior Color</Label>
-              <Input 
-                id="interiorColor" 
-                name="interiorColor" 
-                value={form.interiorColor} 
-                onChange={handleChange} 
-                placeholder="Interior Color" 
+              <Input
+                id="interiorColor"
+                name="interiorColor"
+                value={form.interiorColor}
+                onChange={handleChange}
+                placeholder="Interior Color"
               />
             </div>
             <div className="space-y-2 lg:col-span-3">
               <Label htmlFor="features">Features</Label>
-              <Textarea 
-                id="features" 
-                name="features" 
-                value={form.features} 
-                onChange={handleChange} 
+              <Textarea
+                id="features"
+                name="features"
+                value={form.features}
+                onChange={handleChange}
                 placeholder="Features"
                 className="min-h-[100px]"
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="price">Price</Label>
-              <Input 
-                id="price" 
-                name="price" 
-                type="number" 
-                value={form.price} 
-                onChange={handleChange} 
-                placeholder="Price" 
-                required 
+              <Input
+                id="price"
+                name="price"
+                type="number"
+                value={form.price}
+                onChange={handleChange}
+                placeholder="Price"
+                required
               />
             </div>
             <div className="flex items-center space-x-2">
@@ -426,19 +464,26 @@ export default function DashboardVehicles() {
               />
               <Label htmlFor="isNew">New Vehicle</Label>
             </div>
-            
-            <button type="submit" className="lg:col-span-3 bg-black text-white rounded p-2 mt-2 hover:bg-gray-800 transition-colors">
-            Add Vehicle
-          </button>
-        </form>
+
+            <button
+              type="submit"
+              className="lg:col-span-3 bg-black text-white rounded p-2 mt-2 hover:bg-gray-800 transition-colors"
+            >
+              Add Vehicle
+            </button>
+          </form>
         </div>
-        
-        {error && <div className="text-red-500 mb-4 p-4 bg-red-50 border border-red-200 rounded-lg dark:bg-red-900/50 dark:border-red-800">{error}</div>}
-        
+
+        {error && (
+          <div className="text-red-500 mb-4 p-4 bg-red-50 border border-red-200 rounded-lg dark:bg-red-900/50 dark:border-red-800">
+            {error}
+          </div>
+        )}
+
         {/* Vehicle List Display (Table) */}
         <div className="bg-white/50 backdrop-blur-sm p-6 rounded-lg border border-gray-200 dark:bg-gray-800/50 dark:border-gray-700 overflow-x-auto">
           <h2 className="text-2xl font-semibold mb-4">Existing Vehicles</h2>
-          
+
           {/* Search Input */}
           <div className="mb-4">
             <Input
@@ -449,11 +494,11 @@ export default function DashboardVehicles() {
               className="max-w-sm"
             />
           </div>
-        
-        {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          </div>
+
+          {loading ? (
+            <div className="flex justify-center items-center h-64">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            </div>
           ) : filteredVehicles.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-muted-foreground">No vehicles found.</p>
@@ -478,31 +523,46 @@ export default function DashboardVehicles() {
                     <TableRow key={vehicle.id}>
                       <TableCell>
                         <img
-                          src={vehicle.image && vehicle.image.split(",")[0] !== "string" ? vehicle.image.split(",")[0] : "/placeholder.svg"}
-                    alt={vehicle.title}
+                          src={
+                            vehicle.image &&
+                            vehicle.image.split(",")[0] !== "string"
+                              ? vehicle.image.split(",")[0]
+                              : "/placeholder.svg"
+                          }
+                          alt={vehicle.title}
                           className="w-16 h-10 object-cover rounded"
                         />
                       </TableCell>
-                      <TableCell className="font-medium">{vehicle.title}</TableCell>
+                      <TableCell className="font-medium">
+                        {vehicle.title}
+                      </TableCell>
                       <TableCell>{vehicle.brand}</TableCell>
                       <TableCell>{vehicle.year}</TableCell>
                       <TableCell>€{vehicle.price.toFixed(2)}</TableCell>
                       <TableCell>{vehicle.fuel}</TableCell>
                       <TableCell>{vehicle.transmission}</TableCell>
                       <TableCell className="flex gap-2">
-                        <Button variant="secondary" size="icon" onClick={() => handleEdit(vehicle)}>
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                        <Button variant="destructive" size="icon" onClick={() => handleDelete(vehicle.id!)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                        <Button
+                          variant="secondary"
+                          size="icon"
+                          onClick={() => handleEdit(vehicle)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="icon"
+                          onClick={() => handleDelete(vehicle.id!)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
-          </div>
-        )}
+            </div>
+          )}
         </div>
 
         {/* Edit Vehicle Modal */}
@@ -526,7 +586,9 @@ export default function DashboardVehicles() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="edit-image">Image URL(s) - Comma Separated</Label>
+                <Label htmlFor="edit-image">
+                  Image URL(s) - Comma Separated
+                </Label>
                 <Input
                   id="edit-image"
                   name="image"
@@ -559,13 +621,18 @@ export default function DashboardVehicles() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="edit-brand">Brand</Label>
-                <Select value={form.brand} onValueChange={(value) => handleSelectChange("brand", value)}>
+                <Select
+                  value={form.brand}
+                  onValueChange={(value) => handleSelectChange("brand", value)}
+                >
                   <SelectTrigger id="edit-brand">
                     <SelectValue placeholder="Select brand" />
                   </SelectTrigger>
                   <SelectContent>
                     {brands.map((brand) => (
-                      <SelectItem key={brand} value={brand}>{brand}</SelectItem>
+                      <SelectItem key={brand} value={brand}>
+                        {brand}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -592,13 +659,18 @@ export default function DashboardVehicles() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="edit-fuel">Fuel</Label>
-                <Select value={form.fuel} onValueChange={(value) => handleSelectChange("fuel", value)}>
+                <Select
+                  value={form.fuel}
+                  onValueChange={(value) => handleSelectChange("fuel", value)}
+                >
                   <SelectTrigger id="edit-fuel">
                     <SelectValue placeholder="Select fuel type" />
                   </SelectTrigger>
                   <SelectContent>
                     {fuelTypes.map((fuel) => (
-                      <SelectItem key={fuel} value={fuel}>{fuel}</SelectItem>
+                      <SelectItem key={fuel} value={fuel}>
+                        {fuel}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -625,26 +697,38 @@ export default function DashboardVehicles() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="edit-transmission">Transmission</Label>
-                <Select value={form.transmission} onValueChange={(value) => handleSelectChange("transmission", value)}>
+                <Select
+                  value={form.transmission}
+                  onValueChange={(value) =>
+                    handleSelectChange("transmission", value)
+                  }
+                >
                   <SelectTrigger id="edit-transmission">
                     <SelectValue placeholder="Select transmission" />
                   </SelectTrigger>
                   <SelectContent>
                     {transmissions.map((transmission) => (
-                     <SelectItem key={transmission} value={transmission}>{transmission}</SelectItem>
-                  ))}
-                </SelectContent>
+                      <SelectItem key={transmission} value={transmission}>
+                        {transmission}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="edit-color">Color</Label>
-                <Select value={form.color} onValueChange={(value) => handleSelectChange("color", value)}>
+                <Select
+                  value={form.color}
+                  onValueChange={(value) => handleSelectChange("color", value)}
+                >
                   <SelectTrigger id="edit-color">
                     <SelectValue placeholder="Select color" />
                   </SelectTrigger>
                   <SelectContent>
                     {colors.map((color) => (
-                      <SelectItem key={color} value={color}>{color}</SelectItem>
+                      <SelectItem key={color} value={color}>
+                        {color}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -713,4 +797,4 @@ export default function DashboardVehicles() {
       </div>
     </div>
   );
-} 
+}

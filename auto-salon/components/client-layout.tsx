@@ -1,8 +1,10 @@
-'use client';
+"use client";
 
 import { usePathname } from "next/navigation";
-import Header from "@/components/header";
-import Footer from "@/components/footer";
+import Header from "../components/header";
+import Footer from "../components/footer";
+
+import RealTimeVehicleNotifier from "./RealTimeVehicleNotifier";
 
 export default function ClientLayout({
   children,
@@ -19,6 +21,7 @@ export default function ClientLayout({
       {!shouldHide && <Header />}
       <main className="flex-1">{children}</main>
       {!shouldHide && <Footer />}
+      <RealTimeVehicleNotifier />
     </>
   );
 }

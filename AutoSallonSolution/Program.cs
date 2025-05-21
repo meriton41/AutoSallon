@@ -35,6 +35,8 @@ if (string.IsNullOrEmpty(jwtIssuer) || string.IsNullOrEmpty(jwtAudience))
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
+builder.Services.AddSignalR();
+
 // Configure Swagger with JWT support
 builder.Services.AddSwaggerGen(c =>
 {
@@ -165,7 +167,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp", policy =>
     {
-        policy.WithOrigins("http://localhost:3000")
+        policy.WithOrigins("http://localhost:3000", "https://localhost:3000")
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
@@ -209,10 +211,16 @@ app.Use(async (context, next) =>
 
 app.UseCors("AllowReactApp");
 
+app.UseRouting();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Remove duplicate MapHub call to fix AmbiguousMatchException
+// Only map the hub once
+app.MapHub<AutoSallonSolution.Hubs.VehicleHub>("/vehicleHub");
 
 // Startup validation
 var loggerFactory = app.Services.GetRequiredService<ILoggerFactory>();

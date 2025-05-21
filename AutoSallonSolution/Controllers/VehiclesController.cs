@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using AutoSallonSolution.Models;
 using AutoSallonSolution.Data;
+using Microsoft.AspNetCore.SignalR;
+using AutoSallonSolution.Hubs;
 
 namespace AutoSallonSolution.Controllers
 {
@@ -10,6 +12,7 @@ namespace AutoSallonSolution.Controllers
     public class VehiclesController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly IHubContext<VehicleHub> _hubContext;
 
         // Static data for vehicle attributes
         private static readonly string[] Brands = new[]
@@ -35,9 +38,10 @@ namespace AutoSallonSolution.Controllers
             "Brown", "Beige", "Gold", "Bronze", "Navy Blue", "Burgundy", "Teal", "Pink"
         };
 
-        public VehiclesController(ApplicationDbContext context)
+        public VehiclesController(ApplicationDbContext context, IHubContext<VehicleHub> hubContext)
         {
             _context = context;
+            _hubContext = hubContext;
         }
 
         [HttpGet]
@@ -53,7 +57,7 @@ namespace AutoSallonSolution.Controllers
             [FromQuery] string color = "")
         {
             var query = _context.Vehicles.AsQueryable();
-            
+
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
                 query = query.Where(v => v.Title.Contains(searchTerm));
@@ -98,7 +102,7 @@ namespace AutoSallonSolution.Controllers
             {
                 query = query.Where(v => v.Color == color);
             }
-            
+
             var vehicles = await query.ToListAsync();
             return Ok(vehicles);
         }
@@ -118,6 +122,10 @@ namespace AutoSallonSolution.Controllers
         {
             _context.Vehicles.Add(vehicle);
             await _context.SaveChangesAsync();
+
+            // Notify all clients about the new vehicle with title and image
+            await _hubContext.Clients.All.SendAsync("ReceiveVehicle", new { title = vehicle.Title, image = vehicle.Image });
+
             return CreatedAtAction(nameof(GetVehicle), new { id = vehicle.Id }, vehicle);
         }
 
@@ -168,4 +176,4 @@ namespace AutoSallonSolution.Controllers
             return Ok(Colors);
         }
     }
-} 
+}
