@@ -33,11 +33,17 @@ public class WebsiteRatingsController : ControllerBase
     {
         try
         {
+            _logger.LogInformation("SubmitRating called with value: {Value}, comment: {Comment}", dto.Value, dto.Comment);
+
             if (dto.Value < 1 || dto.Value > 5)
                 return BadRequest("Rating must be between 1 and 5");
 
             var user = await _userManager.GetUserAsync(User);
-            if (user == null) return Unauthorized();
+            if (user == null) 
+            {
+                _logger.LogWarning("Unauthorized rating submission attempt");
+                return Unauthorized();
+            }
 
             // Check if user already submitted a rating
             var existingRating = await _ratingsCollection
@@ -45,7 +51,10 @@ public class WebsiteRatingsController : ControllerBase
                 .FirstOrDefaultAsync();
 
             if (existingRating != null)
+            {
+                _logger.LogWarning("User {UserId} attempted to submit multiple ratings", user.Id);
                 return BadRequest("You have already submitted a rating");
+            }
 
             var rating = new WebsiteRating
             {
@@ -56,6 +65,7 @@ public class WebsiteRatingsController : ControllerBase
             };
 
             await _ratingsCollection.InsertOneAsync(rating);
+            _logger.LogInformation("Rating submitted successfully for user {UserId}", user.Id);
             return Ok(rating);
         }
         catch (Exception ex)
