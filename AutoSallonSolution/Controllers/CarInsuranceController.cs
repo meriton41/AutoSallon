@@ -27,6 +27,12 @@ namespace AutoSallonSolution.Controllers
         [HttpPost]
         public async Task<ActionResult<CarInsurance>> Create(CarInsurance insurance)
         {
+            var existing = await _context.CarInsurances.FirstOrDefaultAsync(ci => ci.CarId == insurance.CarId);
+            if (existing != null)
+            {
+                return BadRequest("This car already has an insurance assigned.");
+            }
+
             insurance.Id = Guid.NewGuid();
             _context.CarInsurances.Add(insurance);
             await _context.SaveChangesAsync();

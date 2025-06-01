@@ -41,6 +41,11 @@ namespace AutoSallonSolution.Data
                 .WithMany()
                 .HasForeignKey(f => f.VehicleId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<CarInsurance>()
+                .HasIndex(ci => ci.CarId)
+                .IsUnique();
+
         }
     }
 }
