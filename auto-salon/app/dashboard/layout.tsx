@@ -25,7 +25,7 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-black-100">
       <div className="flex">
         {/* Sidebar */}
         <div className="w-64 bg-black text-white min-h-screen p-4">
@@ -50,6 +50,12 @@ export default function DashboardLayout({
               className="block py-2 px-4 rounded hover:bg-gray-800 transition-colors"
             >
               Vehicle Management
+            </Link>
+            <Link
+              href="/dashboard/car-insurance"
+              className="block py-2 px-4 rounded hover:bg-gray-800 transition-colors"
+            >
+              Car Insurance
             </Link>
             <Link
               href="/dashboard/orders"
