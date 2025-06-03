@@ -4,6 +4,7 @@ using AutoSallonSolution.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AutoSallonSolution.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250603161219_TestDrive")]
+    partial class TestDrive
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -143,7 +146,7 @@ namespace AutoSallonSolution.Migrations
                     b.HasIndex("CarId")
                         .IsUnique();
 
-                    b.ToTable("CarInsurances", (string)null);
+                    b.ToTable("CarInsurances");
                 });
 
             modelBuilder.Entity("AutoSallonSolution.Models.Contact", b =>
@@ -182,7 +185,7 @@ namespace AutoSallonSolution.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Contacts", (string)null);
+                    b.ToTable("Contacts");
                 });
 
             modelBuilder.Entity("AutoSallonSolution.Models.FavoriteVehicle", b =>
@@ -209,7 +212,7 @@ namespace AutoSallonSolution.Migrations
 
                     b.HasIndex("VehicleId");
 
-                    b.ToTable("FavoriteVehicles", (string)null);
+                    b.ToTable("FavoriteVehicles");
                 });
 
             modelBuilder.Entity("AutoSallonSolution.Models.TestDrive", b =>
@@ -247,7 +250,7 @@ namespace AutoSallonSolution.Migrations
 
                     b.HasIndex("VehicleId");
 
-                    b.ToTable("TestDrives", (string)null);
+                    b.ToTable("TestDrives");
                 });
 
             modelBuilder.Entity("AutoSallonSolution.Models.Vehicle", b =>
@@ -314,7 +317,7 @@ namespace AutoSallonSolution.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Vehicles", (string)null);
+                    b.ToTable("Vehicles");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -474,7 +477,7 @@ namespace AutoSallonSolution.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("RefreshTokens", (string)null);
+                    b.ToTable("RefreshTokens");
                 });
 
             modelBuilder.Entity("AutoSallonSolution.Models.FavoriteVehicle", b =>
