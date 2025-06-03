@@ -19,6 +19,7 @@ namespace AutoSallonSolution.Data
         public DbSet<FavoriteVehicle> FavoriteVehicles { get; set; }
         public DbSet<Vehicle> Vehicles { get; set; }
         public DbSet<Contact> Contacts { get; set; }
+        public DbSet<CarInsurance> CarInsurances { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -40,6 +41,11 @@ namespace AutoSallonSolution.Data
                 .WithMany()
                 .HasForeignKey(f => f.VehicleId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<CarInsurance>()
+                .HasIndex(ci => ci.CarId)
+                .IsUnique();
+
         }
     }
 }

@@ -70,7 +70,11 @@ export default function DashboardUsers() {
     setError(null);
     try {
       // Update user role
-      await axios.post(`https://localhost:7234/api/Account/users/${editingUser.id}/role`, form.role);
+      await axios.post(
+        `https://localhost:7234/api/Account/${editingUser.id}/role`,
+        JSON.stringify(form.role),
+        { headers: { "Content-Type": "application/json" } }
+      );
       
       // Update other user details if needed
       await axios.put(`https://localhost:7234/api/Account/users/${editingUser.id}`, {
