@@ -290,6 +290,51 @@ namespace AutoSallonSolution.Controllers
             }
             return Ok(response);
         }
+
+        [HttpDelete("users/{userId}")]
+        [Authorize(Roles = "Admin")]
+        [EnableCors("AllowReactApp")]
+        public async Task<IActionResult> DeleteUser(string userId)
+        {
+            try
+            {
+                Console.WriteLine($"Attempting to delete user with ID: {userId}");
+                Console.WriteLine($"Request Method: {Request.Method}");
+                Console.WriteLine($"Request Headers: {string.Join(", ", Request.Headers.Select(h => $"{h.Key}: {h.Value}"))}");
+
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null)
+                {
+                    Console.WriteLine($"User not found with ID: {userId}");
+                    return NotFound(new { message = "User not found" });
+                }
+
+                var result = await _userManager.DeleteAsync(user);
+                if (!result.Succeeded)
+                {
+                    Console.WriteLine($"Failed to delete user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                    return BadRequest(new { message = "Failed to delete user", errors = result.Errors });
+                }
+
+                Console.WriteLine($"Successfully deleted user with ID: {userId}");
+                return Ok(new { message = "User deleted successfully" });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deleting user: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                return StatusCode(500, new { message = "An error occurred while deleting the user" });
+            }
+        }
+
+        [HttpOptions("users/{userId}")]
+        [EnableCors("AllowReactApp")]
+        public IActionResult Options()
+        {
+            Response.Headers.Add("Access-Control-Allow-Methods", "DELETE, OPTIONS");
+            Response.Headers.Add("Access-Control-Allow-Headers", "Content-Type, Authorization");
+            return Ok();
+        }
     }
 }
 

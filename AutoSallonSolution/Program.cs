@@ -165,13 +165,15 @@ builder.Services.AddScoped<EmailService>();
 // CORS Configuration
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowReactApp", policy =>
-    {
-        policy.WithOrigins("http://localhost:3000", "https://localhost:3000")
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials();
-    });
+    options.AddPolicy("AllowReactApp",
+        builder =>
+        {
+            builder
+                .SetIsOriginAllowed(origin => true) // For development only
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
+        });
 });
 
 var app = builder.Build();
@@ -195,23 +197,19 @@ app.UseHttpsRedirection();
 app.Use(async (context, next) =>
 {
     var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
-
     logger.LogInformation("Request: {Method} {Path}", context.Request.Method, context.Request.Path);
-
-    // Log all headers for debugging
     foreach (var header in context.Request.Headers)
     {
         logger.LogDebug("Header: {Key} = {Value}", header.Key, header.Value);
     }
-
     await next();
-
     logger.LogInformation("Response: {StatusCode}", context.Response.StatusCode);
 });
 
-app.UseCors("AllowReactApp");
-
 app.UseRouting();
+
+// Add CORS middleware between UseRouting and UseAuthentication
+app.UseCors("AllowReactApp");
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -219,7 +217,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 // Remove duplicate MapHub call to fix AmbiguousMatchException
-// Only map the hub once
 app.MapHub<AutoSallonSolution.Hubs.VehicleHub>("/vehicleHub");
 
 // Startup validation
