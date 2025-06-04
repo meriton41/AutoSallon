@@ -290,6 +290,21 @@ namespace AutoSallonSolution.Controllers
             }
             return Ok(response);
         }
+
+       /* [HttpPost("users/{id}/revoke-token")]
+        public IActionResult RevokeToken(string id)
+        {
+            // Example: Remove the refresh token from the database for this user
+            var user = _userManager.FindByIdAsync(id).Result;
+            if (user == null)
+                return NotFound();
+
+            // Assuming you store refresh tokens in a table or user property
+            user.RefreshToken = null;
+            _userManager.UpdateAsync(user).Wait();
+
+            return Ok(new { message = "Token revoked" });
+        }*/
     }
 }
 

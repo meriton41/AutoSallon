@@ -64,6 +64,18 @@ export default function DashboardLayout({
               View Insurances
             </Link>
             <Link
+              href="/dashboard/bills"
+              className="block py-2 px-4 rounded hover:bg-gray-800 transition-colors"
+            >
+              Create Bill
+            </Link>
+            <Link
+              href="/dashboard/bills/list"
+              className="block py-2 px-4 rounded hover:bg-gray-800 transition-colors"
+            >
+              View Bills
+            </Link>
+            <Link
               href="/dashboard/orders"
               className="block py-2 px-4 rounded hover:bg-gray-800 transition-colors"
             >

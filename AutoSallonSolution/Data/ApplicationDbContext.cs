@@ -20,6 +20,7 @@ namespace AutoSallonSolution.Data
         public DbSet<Vehicle> Vehicles { get; set; }
         public DbSet<Contact> Contacts { get; set; }
         public DbSet<CarInsurance> CarInsurances { get; set; }
+        public DbSet<Bill> Bills { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "../components/theme-provider";
 import { AuthProvider } from "../context/auth-context";
 import ClientLayout from "../components/client-layout";
+import Link from "next/link";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -28,7 +29,15 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AuthProvider>
-            <ClientLayout>{children}</ClientLayout>
+            <ClientLayout>
+              {children}
+              <Link
+                href="/dashboard/bills"
+                className="block py-2 px-4 rounded hover:bg-gray-800 transition-colors"
+              >
+                Bills
+              </Link>
+            </ClientLayout>
           </AuthProvider>
         </ThemeProvider>
       </body>

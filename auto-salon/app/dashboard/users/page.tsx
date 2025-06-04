@@ -104,6 +104,18 @@ export default function DashboardUsers() {
     }
   };
 
+  const handleRevokeToken = async (userId: string) => {
+    if (!confirm("Are you sure you want to revoke this user's token?")) return;
+    try {
+      await axios.post(
+        `https://localhost:7234/api/Account/users/${userId}/revoke-token`
+      );
+      alert("Token revoked!");
+    } catch (err) {
+      alert("Failed to revoke token.");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       <div className="container mx-auto px-4 py-8">
@@ -159,6 +171,14 @@ export default function DashboardUsers() {
                           className="bg-black/90 hover:bg-black text-white"
                         >
                           <Trash2 className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="icon"
+                          onClick={() => handleRevokeToken(user.id)}
+                          className="bg-red-600 hover:bg-red-700 text-white"
+                        >
+                          <Shield className="h-4 w-4" />
                         </Button>
                       </div>
                     </td>
