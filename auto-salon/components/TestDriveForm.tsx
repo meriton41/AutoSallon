@@ -42,6 +42,7 @@ export default function TestDriveForm({ vehicleId, onSuccess }: TestDriveFormPro
   const { token, isAuthenticated, user } = useAuth();
   const router = useRouter();
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [bookedSlots, setBookedSlots] = useState<Date[]>([]);
   const [formData, setFormData] = useState<TestDriveFormData>({
     vehicleId: vehicleId || 0,
     description: '',
@@ -78,10 +79,128 @@ export default function TestDriveForm({ vehicleId, onSuccess }: TestDriveFormPro
     fetchVehicles();
   }, [isAuthenticated, token, router]);
 
+  // Fetch booked slots when vehicle changes
+  const fetchBookedSlots = async (vehicleId: number, date: Date) => {
+    if (!vehicleId || !date) {
+      console.log('Skipping fetch - missing vehicleId or date');
+      return;
+    }
+
+    try {
+      // Format the date to YYYY-MM-DD format
+      const formattedDate = date.toISOString().split('T')[0];
+      const url = `https://localhost:7234/api/TestDrive/available-slots/${vehicleId}/${formattedDate}`;
+      
+      console.log('Fetching booked slots for:', { vehicleId, date: formattedDate, url });
+      
+      const response = await fetch(url, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        // Don't show error for 404 - it's expected when no slots are booked
+        if (response.status !== 404) {
+          let errorMessage = 'Failed to fetch booked slots';
+          try {
+            const errorData = await response.json();
+            errorMessage = errorData.message || errorMessage;
+          } catch (jsonError) {
+            console.error('Error parsing error response:', jsonError);
+          }
+          console.error('Failed to fetch booked slots:', errorMessage);
+          setError(errorMessage);
+        }
+        setBookedSlots([]); // Clear booked slots on error
+        return;
+      }
+
+      const data = await response.json();
+      console.log('Received data:', data);
+      
+      if (!data.bookedSlots) {
+        setBookedSlots([]); // Clear booked slots if none are returned
+        return;
+      }
+
+      const bookedSlots = data.bookedSlots.map((slot: string) => new Date(slot));
+      console.log('Processed booked slots:', bookedSlots);
+      setBookedSlots(bookedSlots);
+      setError(''); // Clear any previous errors
+    } catch (err) {
+      console.error('Error in fetchBookedSlots:', err);
+      setBookedSlots([]); // Clear booked slots on error
+      // Only set error if it's not a network error
+      if (err instanceof TypeError && err.message === 'Failed to fetch') {
+        console.log('Network error - skipping error message');
+      } else {
+        setError('Failed to fetch booked slots. Please try again.');
+      }
+    }
+  };
+
+  const handleVehicleChange = async (value: string) => {
+    const newVehicleId = parseInt(value);
+    setFormData(prev => ({ ...prev, vehicleId: newVehicleId }));
+    if (newVehicleId && formData.date) {
+      await fetchBookedSlots(newVehicleId, formData.date);
+    }
+  };
+
+  const handleDateSelect = async (date: Date | undefined) => {
+    if (!date) return;
+
+    // Set the time to 1:00 AM by default
+    const newDate = new Date(date);
+    newDate.setHours(1, 0, 0, 0);
+    setFormData(prev => ({ ...prev, date: newDate }));
+    
+    if (formData.vehicleId) {
+      await fetchBookedSlots(formData.vehicleId, newDate);
+    }
+  };
+
+  const handleTimeSelect = async (hour: number) => {
+    // Check if the slot is already booked
+    if (isTimeSlotBooked(hour)) {
+      setError('This time slot is already booked. Please select a different time.');
+      return;
+    }
+
+    const newDate = new Date(formData.date);
+    newDate.setHours(hour, 0, 0, 0);
+    setFormData(prev => ({ ...prev, date: newDate }));
+    
+    if (formData.vehicleId) {
+      await fetchBookedSlots(formData.vehicleId, newDate);
+    }
+  };
+
+  const isTimeSlotBooked = (hour: number) => {
+    return bookedSlots.some(slot => 
+      slot.getDate() === formData.date.getDate() &&
+      slot.getMonth() === formData.date.getMonth() &&
+      slot.getFullYear() === formData.date.getFullYear() &&
+      slot.getHours() === hour
+    );
+  };
+
+  const getAvailableTimeSlots = () => {
+    return [1, 2, 3, 4].filter(hour => !isTimeSlotBooked(hour));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setError('');
+
+    // Check if the selected time slot is already booked
+    if (isTimeSlotBooked(formData.date.getHours())) {
+      setError('This time slot is already booked. Please select a different time.');
+      setIsSubmitting(false);
+      return;
+    }
 
     try {
       const response = await fetch('https://localhost:7234/api/TestDrive', {
@@ -98,6 +217,8 @@ export default function TestDriveForm({ vehicleId, onSuccess }: TestDriveFormPro
         })
       });
 
+      const data = await response.json();
+
       if (response.ok) {
         setSuccess('Test drive scheduled successfully!');
         setFormData({
@@ -111,8 +232,11 @@ export default function TestDriveForm({ vehicleId, onSuccess }: TestDriveFormPro
         }
         router.push('/dashboard/test-drive-management');
       } else {
-        const errorData = await response.json();
-        setError(errorData.message || 'Failed to schedule test drive');
+        setError(data.message || 'Failed to schedule test drive');
+        // Refresh the booked slots after a failed attempt
+        if (formData.vehicleId) {
+          await fetchBookedSlots(formData.vehicleId, formData.date);
+        }
       }
     } catch (err) {
       setError('An error occurred while scheduling the test drive');
@@ -148,7 +272,7 @@ export default function TestDriveForm({ vehicleId, onSuccess }: TestDriveFormPro
             <Label htmlFor="vehicleId">Select Vehicle</Label>
             <Select
               value={formData.vehicleId.toString()}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, vehicleId: parseInt(value) }))}
+              onValueChange={handleVehicleChange}
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select a vehicle" />
@@ -169,7 +293,10 @@ export default function TestDriveForm({ vehicleId, onSuccess }: TestDriveFormPro
           </div>
 
           <div className="space-y-2">
-            <Label>Preferred Date</Label>
+            <Label>Select Date and Time</Label>
+            <div className="text-sm text-muted-foreground mb-2">
+              Available times: 1:00 AM, 2:00 AM, 3:00 AM, 4:00 AM (Weekdays only)
+            </div>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
@@ -180,17 +307,37 @@ export default function TestDriveForm({ vehicleId, onSuccess }: TestDriveFormPro
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {formData.date ? format(formData.date, "PPP") : "Pick a date"}
+                  {formData.date ? format(formData.date, "PPP 'at' h:mm a") : "Pick a date and time"}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0">
                 <Calendar
                   mode="single"
                   selected={formData.date}
-                  onSelect={(date) => date && setFormData(prev => ({ ...prev, date }))}
+                  onSelect={handleDateSelect}
                   initialFocus
-                  disabled={(date) => date < new Date()}
+                  disabled={(date) => {
+                    const day = date.getDay();
+                    return day === 0 || day === 6; // Disable weekends
+                  }}
                 />
+                <div className="p-3 border-t">
+                  <div className="grid grid-cols-2 gap-2">
+                    {getAvailableTimeSlots().map((hour) => (
+                      <Button
+                        key={hour}
+                        variant="outline"
+                        className={cn(
+                          "justify-start",
+                          formData.date.getHours() === hour && "bg-primary text-primary-foreground"
+                        )}
+                        onClick={() => handleTimeSelect(hour)}
+                      >
+                        {hour}:00 AM
+                      </Button>
+                    ))}
+                  </div>
+                </div>
               </PopoverContent>
             </Popover>
           </div>
@@ -206,7 +353,11 @@ export default function TestDriveForm({ vehicleId, onSuccess }: TestDriveFormPro
             />
           </div>
 
-          <Button type="submit" className="w-full" disabled={isSubmitting}>
+          <Button 
+            type="submit" 
+            className="w-full" 
+            disabled={isSubmitting || isTimeSlotBooked(formData.date.getHours())}
+          >
             <Car className="mr-2 h-4 w-4" />
             {isSubmitting ? "Scheduling..." : "Schedule Test Drive"}
           </Button>
