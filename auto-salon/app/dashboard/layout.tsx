@@ -82,11 +82,30 @@ export default function DashboardLayout({
               Orders
             </Link>
             <Link
+              href="/dashboard/test-drive-management"
+              className="block py-2 px-4 rounded hover:bg-gray-800 transition-colors"
+            >
+              Test Drive
+            </Link>
+            <Link
+              href="/dashboard/leazingcalculator"
+              className="block py-2 px-4 rounded hover:bg-gray-800 transition-colors"
+            >
+              Leazing Calculator
+            </Link>
+            <Link
               href="/dashboard/contacts"
               className="block py-2 px-4 rounded hover:bg-gray-800 transition-colors"
             >
               Contacts
             </Link>
+             <Link
+              href="/dashboard/rating"
+              className="block py-2 px-4 rounded hover:bg-gray-800 transition-colors"
+            >
+              Rating
+            </Link>
+
             <Link
               href="/dashboard/settings"
               className="block py-2 px-4 rounded hover:bg-gray-800 transition-colors"

@@ -22,10 +22,9 @@ import {
 
 interface User {
   id: string;
-  username: string;
+  userName: string;
   email: string;
-  role: string;
-  createdAt: string;
+  roles: string[];
 }
 
 export default function DashboardUsers() {
@@ -58,9 +57,9 @@ export default function DashboardUsers() {
   const handleEdit = (user: User) => {
     setEditingUser(user);
     setForm({
-      username: user.username,
+      username: user.userName,
       email: user.email,
-      role: user.role,
+      role: user.roles[0] || "User",
     });
     setIsEditModalOpen(true);
   };
@@ -95,12 +94,62 @@ export default function DashboardUsers() {
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this user?")) return;
     try {
-      await axios.delete(`https://localhost:7234/api/Users/${id}`);
+      const userDataString = localStorage.getItem("user");
+      if (!userDataString) {
+        setError("Authentication token not found. Please log in again.");
+        return;
+      }
+
+      const userData = JSON.parse(userDataString);
+      const token = userData.token;
+      
+      if (!token) {
+        setError("Authentication token not found. Please log in again.");
+        return;
+      }
+
+      console.log('Attempting to delete user:', id);
+      console.log('Using token:', token);
+
+      // Then attempt to delete
+      const deleteResponse = await axios.delete(`https://localhost:7234/api/Account/users/${id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      console.log('Delete response:', deleteResponse);
+
       // Refresh list
-      const response = await axios.get("https://localhost:7234/api/Users");
+      const response = await axios.get("https://localhost:7234/api/Account/users", {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
       setUsers(response.data);
-    } catch (err) {
-      setError("Failed to delete user");
+    } catch (err: any) {
+      console.error('Delete error details:', {
+        message: err.message,
+        status: err.response?.status,
+        data: err.response?.data,
+        headers: err.response?.headers,
+        config: err.config
+      });
+      
+      if (err.response?.status === 401) {
+        setError("Authentication failed. Please log in again.");
+      } else if (err.response?.status === 403) {
+        setError("You don't have permission to delete users. Admin access required.");
+      } else if (err.response?.status === 404) {
+        setError("User not found.");
+      } else if (err.response?.status === 405) {
+        setError("Server error: Method not allowed. Please try again later.");
+      } else {
+        setError(`Failed to delete user: ${err.message}`);
+      }
     }
   };
 
@@ -186,6 +235,53 @@ export default function DashboardUsers() {
                 ))}
               </tbody>
             </table>
+          </div>
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
+            <div className="h-[600px] overflow-y-auto">
+              <table className="min-w-full">
+                <thead className="sticky top-0 bg-white dark:bg-gray-800 z-10">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {users.map((user) => (
+                    <tr key={user.id} className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                      <td className="px-6 py-4 whitespace-nowrap text-gray-800 dark:text-white">{user.userName}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-gray-600 dark:text-gray-300">{user.email}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${user.roles.includes("Admin") ? "bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300" : "bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300"}`}>
+                          {user.roles[0] || "User"}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex gap-2">
+                          <Button
+                            variant="secondary"
+                            size="icon"
+                            onClick={() => handleEdit(user)}
+                            className="bg-black/90 hover:bg-black text-white"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="icon"
+                            onClick={() => handleDelete(user.id)}
+                            className="bg-black/90 hover:bg-black text-white"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
 

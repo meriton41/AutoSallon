@@ -21,6 +21,7 @@ namespace AutoSallonSolution.Data
         public DbSet<Contact> Contacts { get; set; }
         public DbSet<CarInsurance> CarInsurances { get; set; }
         public DbSet<Bill> Bills { get; set; }
+        public DbSet<TestDrive> TestDrives { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -47,6 +48,18 @@ namespace AutoSallonSolution.Data
                 .HasIndex(ci => ci.CarId)
                 .IsUnique();
 
+            // Configure TestDrive relationships
+            builder.Entity<TestDrive>()
+                .HasOne(t => t.User)
+                .WithMany()
+                .HasForeignKey(t => t.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<TestDrive>()
+                .HasOne(t => t.Vehicle)
+                .WithMany()
+                .HasForeignKey(t => t.VehicleId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

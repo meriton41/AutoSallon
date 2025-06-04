@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/auth-context";
-import { Menu, X, User, Heart } from "lucide-react";
+import { Menu, X, User, Heart, Car } from "lucide-react";
 import { RatingPopup } from "./ratinng-popup";
 import { usePathname } from "next/navigation";
 
@@ -17,8 +17,7 @@ export default function Header() {
     { name: "Home", href: "/" },
     { name: "Vehicles", href: "/vehicles" },
     { name: "About", href: "/about" },
-    ...(user && user.role === "User" ? [{ name: "Contact", href: "/contact" }] : []),
-    ...(user && user.role === "User" ? [{ name: "Test Drive", href: "//" }] : []),
+    { name: "Contact", href: "/contact" },
   ];
 
   return (
@@ -59,6 +58,14 @@ export default function Header() {
             <Link href="/favorites" className="relative">
               <Button variant="ghost" size="icon" className="hover:bg-primary/10">
                 <Heart className="h-5 w-5" />
+              </Button>
+            </Link>
+          )}
+
+          {user && user.role === "User" && (
+            <Link href="/test-drive" className="relative">
+              <Button variant="ghost" size="icon" className="hover:bg-primary/10">
+                <Car className="h-5 w-5" />
               </Button>
             </Link>
           )}
@@ -142,6 +149,14 @@ export default function Header() {
               <Link href="/favorites" className="relative" onClick={() => setIsOpen(false)}>
                 <Button variant="ghost" size="icon" className="hover:bg-primary/10 w-full justify-start">
                   <Heart className="h-5 w-5 mr-2" /> Favorites
+                </Button>
+              </Link>
+            )}
+
+            {user && user.role === "User" && (
+              <Link href="/test-drive" className="relative" onClick={() => setIsOpen(false)}>
+                <Button variant="ghost" size="icon" className="hover:bg-primary/10 w-full justify-start">
+                  <Car className="h-5 w-5 mr-2" /> Test Drive
                 </Button>
               </Link>
             )}
