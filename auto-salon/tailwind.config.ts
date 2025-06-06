@@ -1,7 +1,7 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
-    darkMode: ["class"],
+    darkMode: 'class',
     content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -11,8 +11,14 @@ const config: Config = {
   theme: {
   	extend: {
   		colors: {
-  			background: 'hsl(var(--background))',
-  			foreground: 'hsl(var(--foreground))',
+  			background: {
+  				DEFAULT: "hsl(var(--background))",
+  				dark: "hsl(var(--background-dark))",
+  			},
+  			foreground: {
+  				DEFAULT: "hsl(var(--foreground))",
+  				dark: "hsl(var(--foreground-dark))",
+  			},
   			card: {
   				DEFAULT: 'hsl(var(--card))',
   				foreground: 'hsl(var(--card-foreground))'
@@ -22,20 +28,20 @@ const config: Config = {
   				foreground: 'hsl(var(--popover-foreground))'
   			},
   			primary: {
-  				DEFAULT: 'hsl(var(--primary))',
-  				foreground: 'hsl(var(--primary-foreground))'
+  				DEFAULT: "hsl(var(--primary))",
+  				foreground: "hsl(var(--primary-foreground))",
   			},
   			secondary: {
-  				DEFAULT: 'hsl(var(--secondary))',
-  				foreground: 'hsl(var(--secondary-foreground))'
+  				DEFAULT: "hsl(var(--secondary))",
+  				foreground: "hsl(var(--secondary-foreground))",
   			},
   			muted: {
-  				DEFAULT: 'hsl(var(--muted))',
-  				foreground: 'hsl(var(--muted-foreground))'
+  				DEFAULT: "hsl(var(--muted))",
+  				foreground: "hsl(var(--muted-foreground))",
   			},
   			accent: {
-  				DEFAULT: 'hsl(var(--accent))',
-  				foreground: 'hsl(var(--accent-foreground))'
+  				DEFAULT: "hsl(var(--accent))",
+  				foreground: "hsl(var(--accent-foreground))",
   			},
   			destructive: {
   				DEFAULT: 'hsl(var(--destructive))',

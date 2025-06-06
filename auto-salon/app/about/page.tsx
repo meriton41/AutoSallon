@@ -6,13 +6,15 @@ export default function AboutPage() {
       {/* Hero Section */}
       <div className="relative h-96 overflow-hidden">
         <Image
-          src="/images/about/hero.jpg" // Place your hero image in public/images/about/hero.jpg
+          src="/images/bb1604102689139.5f3c3f2239ee7.jpg"
           alt="About Us Hero"
           layout="fill"
           objectFit="cover"
-          className="z-0"
+          objectPosition="center 70%"
+          className="z-0 brightness-75"
+          priority
         />
-        <div className="absolute inset-0 bg-black opacity-50 z-10"></div>
+        <div className="absolute inset-0 bg-black opacity-40 z-10"></div>
         <div className="relative z-20 flex items-center justify-center h-full">
           <h1 className="text-5xl font-bold text-white text-center drop-shadow-lg">About Nitron</h1>
         </div>
@@ -45,7 +47,7 @@ export default function AboutPage() {
             </div>
             <div className="rounded-lg overflow-hidden shadow-xl">
               <Image
-                src="/images/about/mission-vision.jpg" // Place an image related to mission/vision in public/images/about/mission-vision.jpg
+                src="/images/car-gallery-black-background-gray-600nw-2512783209.webp" // Place an image related to mission/vision in public/images/about/mission-vision.jpg
                 alt="Mission and Vision"
                 width={600}
                 height={400}
@@ -109,35 +111,37 @@ export default function AboutPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
             <div className="rounded-lg overflow-hidden shadow-lg">
               <Image
-                src="/images/about/gallery1.jpg" // Place your gallery image 1 in public/images/about/gallery1.jpg
+                src="/images/BONDED-12-View-small.jpeg"
                 alt="Gallery Image 1"
-                width={400}
-                height={300}
+                width={300}
+                height={200}
                 layout="responsive"
                 objectFit="cover"
+                className="hover:scale-105 transition-transform duration-300"
               />
             </div>
             <div className="rounded-lg overflow-hidden shadow-lg">
               <Image
-                src="/images/about/gallery2.jpg" // Place your gallery image 2 in public/images/about/gallery2.jpg
+                src="/images/munich-germany-january-20-2017-600nw-1034034238.webp"
                 alt="Gallery Image 2"
-                width={400}
-                height={300}
+                width={300}
+                height={200}
                 layout="responsive"
                 objectFit="cover"
+                className="hover:scale-105 transition-transform duration-300"
               />
             </div>
             <div className="rounded-lg overflow-hidden shadow-lg">
               <Image
-                src="/images/about/gallery3.jpg" // Place your gallery image 3 in public/images/about/gallery3.jpg
+                src="/images/191213134220-03-car-lairs-1213.jpg"
                 alt="Gallery Image 3"
-                width={400}
-                height={300}
+                width={300}
+                height={200}
                 layout="responsive"
                 objectFit="cover"
+                className="hover:scale-105 transition-transform duration-300"
               />
             </div>
-            {/* Add more gallery images as needed */}
           </div>
         </section>
       </div>
