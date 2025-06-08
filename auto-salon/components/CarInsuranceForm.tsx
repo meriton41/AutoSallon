@@ -45,7 +45,7 @@ export default function CarInsuranceForm({ onSubmit }: Props) {
     // Fetch all cars
     const fetchCars = async () => {
       try {
-        const res = await fetch("https://localhost:7234/api/Car");
+        const res = await fetch("https://localhost:7234/api/Vehicles");
         const data = await res.json();
         setCars(data);
       } catch (error) {
