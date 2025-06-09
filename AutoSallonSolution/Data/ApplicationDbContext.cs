@@ -49,9 +49,19 @@ namespace AutoSallonSolution.Data
                 .HasForeignKey(f => f.VehicleId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // Configure CarInsurance relationships
             builder.Entity<CarInsurance>()
-                .HasIndex(ci => ci.CarId)
-                .IsUnique();
+                .HasOne(ci => ci.Vehicle)
+                .WithMany(v => v.CarInsurances)
+                .HasForeignKey(ci => ci.VehicleId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Configure Bill relationships
+            builder.Entity<Bill>()
+                .HasOne(b => b.Vehicle)
+                .WithMany(v => v.Bills)
+                .HasForeignKey(b => b.VehicleId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             // Configure TestDrive relationships
             builder.Entity<TestDrive>()

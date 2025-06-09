@@ -1,17 +1,11 @@
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
-namespace AutoSallonSolution.Models
+namespace SharedClassLibrary.DTOs
 {
-    public class Vehicle
+    public class VehicleDTO
     {
-        [Key]
-        public int Id { get; set; }
-
         [Required(ErrorMessage = "Title is required")]
-        public string Title { get; set; }
+        public required string Title { get; set; }
 
         [Required(ErrorMessage = "Image URL is required")]
         public string Image { get; set; }
@@ -28,7 +22,7 @@ namespace AutoSallonSolution.Models
 
         [Required(ErrorMessage = "Brand logo URL is required")]
         public string BrandLogo { get; set; }
-       
+
         [Required(ErrorMessage = "Engine details are required")]
         public string Engine { get; set; }
 
@@ -49,15 +43,9 @@ namespace AutoSallonSolution.Models
 
         [Required(ErrorMessage = "Interior color is required")]
         public string InteriorColor { get; set; }
-       
+
         [Required(ErrorMessage = "Price is required")]
-        [Column(TypeName = "decimal(18,2)")]
         [Range(0, double.MaxValue, ErrorMessage = "Price must be greater than 0")]
         public decimal Price { get; set; }
-
-
-        // Navigation properties
-        public ICollection<Bill> Bills { get; set; }
-        public ICollection<CarInsurance> CarInsurances { get; set; }
     }
 } 
