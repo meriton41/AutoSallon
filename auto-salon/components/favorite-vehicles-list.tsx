@@ -99,7 +99,7 @@ export default function FavoriteVehiclesList() {
           <Card className="overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 bg-white dark:bg-gray-800">
             <div className="relative h-48">
               <Image
-                src={vehicle.image && vehicle.image !== "string" ? vehicle.image : "/placeholder.svg"}
+                src={vehicle.image && vehicle.image.split(",")[0] !== "string" ? vehicle.image.split(",")[0] : "/placeholder.svg"}
                 alt={vehicle.title || `Vehicle ${vehicle.id}` || "Vehicle image"}
                 fill
                 className="object-cover"
