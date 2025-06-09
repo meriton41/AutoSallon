@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import axios from "axios";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +12,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar, Fuel, Gauge, Tag, Zap } from "lucide-react";
 import VehicleGallery from "@/components/vehicle-gallery";
 import RelatedVehicles from "@/components/related-vehicles";
+import { useAuth } from "@/context/auth-context";
+import { toast } from "react-toastify";
 
 interface Vehicle {
   id: number;
@@ -35,10 +37,13 @@ interface Vehicle {
 
 export default function VehicleDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const vehicleId = params.id;
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [hasOrdered, setHasOrdered] = useState(false);
+  const { token, isAuthenticated } = useAuth();
 
   useEffect(() => {
     if (!vehicleId) return;
@@ -58,8 +63,67 @@ export default function VehicleDetailPage() {
       }
     };
 
+    const checkOrderStatus = async () => {
+      if (!isAuthenticated || !token) return;
+      
+      try {
+        const numericVehicleId = parseInt(vehicleId as string);
+        if (isNaN(numericVehicleId)) return;
+
+        const response = await axios.get(
+          `https://localhost:7234/api/Order/check/${numericVehicleId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        );
+        setHasOrdered(response.data);
+      } catch (err) {
+        console.error("Error checking order status:", err);
+      }
+    };
+
     fetchVehicle();
-  }, [vehicleId]);
+    checkOrderStatus();
+  }, [vehicleId, isAuthenticated, token]);
+
+  const handleOrder = async () => {
+    if (!isAuthenticated) {
+      toast.error("Please login to place an order");
+      router.push("/login");
+      return;
+    }
+
+    try {
+      const numericVehicleId = parseInt(vehicleId as string);
+      if (isNaN(numericVehicleId)) {
+        toast.error("Invalid vehicle ID");
+        return;
+      }
+
+      await axios.post(
+        "https://localhost:7234/api/Order",
+        {
+          vehicleId: numericVehicleId,
+          shippingAddress: "",
+          shippingMethod: "Standard",
+          userNotes: ""
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+      
+      setHasOrdered(true);
+      toast.success("Order placed successfully!");
+    } catch (err) {
+      console.error("Error placing order:", err);
+      toast.error("Failed to place order");
+    }
+  };
 
   if (loading) {
     return (
@@ -167,9 +231,27 @@ export default function VehicleDetailPage() {
                   </div>
                 )}
 
-                {/* Contact Button */}
-                <div className="pt-6 border-t border-gray-200 dark:border-gray-600">
-                  <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold py-3 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-200">
+                {/* Action Buttons */}
+                <div className="pt-6 border-t border-gray-200 dark:border-gray-600 space-y-4">
+                  {!hasOrdered ? (
+                    <Button 
+                      onClick={handleOrder}
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold py-3 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-200"
+                    >
+                      Order Now
+                    </Button>
+                  ) : (
+                    <Button 
+                      disabled
+                      className="w-full bg-gray-400 text-white text-lg font-semibold py-3 rounded-lg"
+                    >
+                      Already Ordered
+                    </Button>
+                  )}
+                  <Button 
+                    variant="outline"
+                    className="w-full text-lg font-semibold py-3 rounded-lg"
+                  >
                     Inquire About This Vehicle
                   </Button>
                 </div>
