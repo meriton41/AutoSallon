@@ -86,12 +86,26 @@ export default function Header() {
             </Link>
           )}
 
+          {user && user.role === "User" && (
+            <Link href="/leasing" className="relative">
+              <Button variant="ghost" size="icon" className="hover:bg-primary/10 dark:text-gray-200 dark:hover:bg-gray-800">
+                <span className="font-semibold">Leasing</span>
+              </Button>
+            </Link>
+          )}
+
           {user ? (
             <div className="flex items-center gap-2">
               <Link href="/profile">
                 <Button variant="outline" size="sm" className="flex items-center gap-2 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800">
                   <User className="h-4 w-4" />
                   Profile
+                </Button>
+              </Link>
+              <Link href="/my-orders">
+                <Button variant="outline" size="sm" className="flex items-center gap-2 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800">
+                  <Car className="h-4 w-4" />
+                  My Orders
                 </Button>
               </Link>
               <Button variant="destructive" size="sm" onClick={logout}>
@@ -189,11 +203,24 @@ export default function Header() {
               </Link>
             )}
 
+            {user && user.role === "User" && (
+              <Link href="/leasing" className="relative" onClick={() => setIsOpen(false)}>
+                <Button variant="ghost" size="icon" className="hover:bg-primary/10 w-full justify-start dark:text-gray-200 dark:hover:bg-gray-800">
+                  <span className="font-semibold">Leasing</span>
+                </Button>
+              </Link>
+            )}
+
             {user ? (
               <>
                 <Link href="/profile" onClick={() => setIsOpen(false)}>
                   <Button variant="outline" size="sm" className="w-full flex items-center gap-2 mt-2 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800">
                     <User className="h-4 w-4" /> Profile
+                  </Button>
+                </Link>
+                <Link href="/my-orders" onClick={() => setIsOpen(false)}>
+                  <Button variant="outline" size="sm" className="w-full flex items-center gap-2 mt-2 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800">
+                    <Car className="h-4 w-4" /> My Orders
                   </Button>
                 </Link>
                 <Button variant="destructive" size="sm" className="w-full mt-2" onClick={() => { logout(); setIsOpen(false); }}>

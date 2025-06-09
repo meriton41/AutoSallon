@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Car, CreditCard, DollarSign, Calendar, TrendingUp, Search, Filter, ArrowUpDown } from "lucide-react"
 import { motion } from "framer-motion"
+import Link from "next/link"
 
 // Sample data for demonstration
 const sampleVehicles = [

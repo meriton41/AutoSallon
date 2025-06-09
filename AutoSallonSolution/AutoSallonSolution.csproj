@@ -4,6 +4,12 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <StaticWebAssetsPrerenderMode>Disable</StaticWebAssetsPrerenderMode>
+    <StaticWebAssetsEnabled>false</StaticWebAssetsEnabled>
+    <StaticWebAssetsDisableCompress>true</StaticWebAssetsDisableCompress>
+    <PreserveCompilationContext>true</PreserveCompilationContext>
+    <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
   </PropertyGroup>
 
   <ItemGroup>
@@ -37,5 +43,18 @@
   <ItemGroup>
     <Folder Include="Migrations\" />
   </ItemGroup>
+
+  <!-- Clean up static web assets on build -->
+  <Target Name="CleanStaticWebAssets" BeforeTargets="Build">
+    <RemoveDir Directories="$(MSBuildProjectDirectory)\wwwroot\staticwebasssets" />
+  </Target>
+
+  <!-- Disable static web assets discovery -->
+  <Target Name="RemoveStaticWebAssetsManifest" BeforeTargets="GetCopyToPublishDirectoryItems">
+    <ItemGroup>
+      <ContentWithTargetPath Remove="$(MSBuildProjectDirectory)\obj\$(Configuration)\$(TargetFramework)\staticwebassets\**" />
+      <ContentWithTargetPath Remove="$(MSBuildProjectDirectory)\wwwroot\staticwebassets\**" />
+    </ItemGroup>
+  </Target>
 
 </Project>

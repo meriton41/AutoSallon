@@ -29,7 +29,7 @@ export default function DashboardPage() {
       }
 
       try {
-        const [usersResponse, vehiclesResponse, contactsResponse] = await Promise.all([
+        const [usersResponse, vehiclesResponse, contactsResponse, ordersResponse] = await Promise.all([
           axios.get("https://localhost:7234/api/Account/users", {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -45,11 +45,16 @@ export default function DashboardPage() {
               Authorization: `Bearer ${token}`,
             },
           }),
+          axios.get("https://localhost:7234/api/Order", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }),
         ]);
         setStats({
           totalUsers: usersResponse.data.length,
           totalVehicles: vehiclesResponse.data.length,
-          totalOrders: 89, // TODO: Fetch actual total orders from backend
+          totalOrders: ordersResponse.data.length,
         });
         setUnreadContacts(contactsResponse.data);
       } catch (error) {

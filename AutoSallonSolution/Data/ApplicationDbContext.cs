@@ -14,7 +14,7 @@ namespace AutoSallonSolution.Data
         {
         }
 
-        public DbSet<ApplicationUser> Users { get; set; }
+        public override DbSet<ApplicationUser> Users { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<FavoriteVehicle> FavoriteVehicles { get; set; }
         public DbSet<Vehicle> Vehicles { get; set; }
@@ -22,6 +22,7 @@ namespace AutoSallonSolution.Data
         public DbSet<CarInsurance> CarInsurances { get; set; }
         public DbSet<Bill> Bills { get; set; }
         public DbSet<TestDrive> TestDrives { get; set; }
+        public DbSet<Order> Orders { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -29,6 +30,10 @@ namespace AutoSallonSolution.Data
 
             builder.Entity<Vehicle>()
                 .Property(v => v.Price)
+                .HasColumnType("decimal(18,2)");
+
+            builder.Entity<Order>()
+                .Property(o => o.TotalAmount)
                 .HasColumnType("decimal(18,2)");
 
             // Configure FavoriteVehicle relationships
@@ -70,6 +75,28 @@ namespace AutoSallonSolution.Data
                 .WithMany()
                 .HasForeignKey(t => t.VehicleId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // Configure Order relationships
+            builder.Entity<Order>()
+                .HasOne(o => o.User)
+                .WithMany()
+                .HasForeignKey(o => o.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<Order>()
+                .HasOne(o => o.Vehicle)
+                .WithMany()
+                .HasForeignKey(o => o.VehicleId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Configure decimal precision for CarInsurance and Bill
+            builder.Entity<CarInsurance>()
+                .Property(ci => ci.Price)
+                .HasColumnType("decimal(18,2)");
+
+            builder.Entity<Bill>()
+                .Property(b => b.Amount)
+                .HasColumnType("decimal(18,2)");
         }
     }
 }

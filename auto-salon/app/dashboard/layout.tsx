@@ -4,7 +4,7 @@ import { useAuth } from "@/context/auth-context";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Link from "next/link";
-import { MessageSquare } from "lucide-react";
+import { MessageSquare, ShoppingCart, Car } from "lucide-react";
 
 export default function DashboardLayout({
   children,
@@ -77,14 +77,16 @@ export default function DashboardLayout({
             </Link>
             <Link
               href="/dashboard/orders"
-              className="block py-2 px-4 rounded hover:bg-gray-800 transition-colors"
+              className="block py-2 px-4 rounded hover:bg-gray-800 transition-colors flex items-center gap-2"
             >
+              <ShoppingCart className="h-4 w-4" />
               Orders
             </Link>
             <Link
               href="/dashboard/test-drive-management"
-              className="block py-2 px-4 rounded hover:bg-gray-800 transition-colors"
+              className="block py-2 px-4 rounded hover:bg-gray-800 transition-colors flex items-center gap-2"
             >
+              <Car className="h-4 w-4" />
               Test Drive
             </Link>
             <Link
