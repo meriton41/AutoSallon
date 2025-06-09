@@ -65,12 +65,15 @@ export default function CarInsuranceForm({ onSubmit }: Props) {
   const handleSaveAndSend = async (e: React.FormEvent) => {
     e.preventDefault();
     // Save to backend
-    const { id, price, startDate, endDate, ...rest } = form;
     const insuranceData = {
-      ...rest,
-      price: Number(price),
-      startDate: startDate ? new Date(startDate).toISOString() : null,
-      endDate: endDate ? new Date(endDate).toISOString() : null,
+      policyNumber: form.policyNumber,
+      vehicleId: parseInt(form.carId),
+      clientName: form.clientName,
+      clientEmail: form.clientEmail,
+      startDate: new Date(form.startDate).toISOString(),
+      endDate: new Date(form.endDate).toISOString(),
+      coverageDetails: form.coverageDetails,
+      price: Number(form.price)
     };
 
     try {

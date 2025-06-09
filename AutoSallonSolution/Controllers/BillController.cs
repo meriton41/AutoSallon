@@ -1,76 +1,141 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using AutoSallonSolution.Models;
 using AutoSallonSolution.Data;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
-[Route("api/[controller]")]
-[ApiController]
-public class BillsController : ControllerBase
+namespace AutoSallonSolution.Controllers
 {
-    private readonly ApplicationDbContext _context;
-
-    public BillsController(ApplicationDbContext context)
+    [Route("api/[controller]")]
+    [ApiController]
+    public class BillController : ControllerBase
     {
-        _context = context;
-    }
+        private readonly ApplicationDbContext _context;
 
-    // GET: api/Bills
-    [HttpGet]
-    public IActionResult GetBills()
-    {
-        return Ok(_context.Bills.ToList());
-    }
+        public BillController(ApplicationDbContext context)
+        {
+            _context = context;
+        }
 
-    // POST: api/Bills
-    [HttpPost]
-    public IActionResult CreateBill([FromBody] Bill bill)
-    {
-        if (bill == null)
-            return BadRequest();
+        // GET: api/Bill
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Bill>>> GetBills()
+        {
+            return await _context.Bills
+                .Include(b => b.Vehicle)
+                .ToListAsync();
+        }
 
-        // Check if a bill already exists for this CarId
-        var existingBill = _context.Bills.FirstOrDefault(b => b.CarId == bill.CarId);
-        if (existingBill != null)
-            return Conflict("A bill for this car already exists.");
+        // GET: api/Bill/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Bill>> GetBill(Guid id)
+        {
+            var bill = await _context.Bills
+                .Include(b => b.Vehicle)
+                .FirstOrDefaultAsync(b => b.Id == id);
 
-        bill.Id = Guid.NewGuid();
-        _context.Bills.Add(bill);
-        _context.SaveChanges();
-        return Ok(bill);
-    }
+            if (bill == null)
+            {
+                return NotFound();
+            }
 
-    // PUT: api/Bills/{id}
-    [HttpPut("{id}")]
-    public IActionResult UpdateBill(Guid id, [FromBody] Bill bill)
-    {
-        if (bill == null || id != bill.Id)
-            return BadRequest();
+            return bill;
+        }
 
-        var existingBill = _context.Bills.Find(id);
-        if (existingBill == null)
-            return NotFound();
+        // GET: api/Bill/vehicle/5
+        [HttpGet("vehicle/{vehicleId}")]
+        public async Task<ActionResult<IEnumerable<Bill>>> GetBillsByVehicle(int vehicleId)
+        {
+            return await _context.Bills
+                .Include(b => b.Vehicle)
+                .Where(b => b.VehicleId == vehicleId)
+                .ToListAsync();
+        }
 
-        // Update properties
-        existingBill.ClientName = bill.ClientName;
-        existingBill.ClientEmail = bill.ClientEmail;
-        existingBill.CarId = bill.CarId;
-        existingBill.Amount = bill.Amount;
-        existingBill.Description = bill.Description;
-        existingBill.Date = bill.Date;
+        // POST: api/Bill
+        [HttpPost]
+        public async Task<ActionResult<Bill>> CreateBill([FromBody] Bill bill)
+        {
+            if (bill == null)
+                return BadRequest();
 
-        _context.SaveChanges();
-        return Ok(existingBill);
-    }
+            // Check if vehicle exists
+            var vehicle = await _context.Vehicles.FindAsync(bill.VehicleId);
+            if (vehicle == null)
+                return BadRequest("Invalid VehicleId");
 
-    // DELETE: api/Bills/{id}
-    [HttpDelete("{id}")]
-    public IActionResult DeleteBill(Guid id)
-    {
-        var bill = _context.Bills.Find(id);
-        if (bill == null)
-            return NotFound();
+            bill.Id = Guid.NewGuid();
+            bill.Date = DateTime.UtcNow;
 
-        _context.Bills.Remove(bill);
-        _context.SaveChanges();
-        return NoContent();
+            _context.Bills.Add(bill);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetBill), new { id = bill.Id }, bill);
+        }
+
+        // PUT: api/Bill/{id}
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateBill(Guid id, [FromBody] Bill bill)
+        {
+            if (bill == null || id != bill.Id)
+                return BadRequest();
+
+            // Check if vehicle exists
+            var vehicle = await _context.Vehicles.FindAsync(bill.VehicleId);
+            if (vehicle == null)
+                return BadRequest("Invalid VehicleId");
+
+            var existingBill = await _context.Bills.FindAsync(id);
+            if (existingBill == null)
+                return NotFound();
+
+            // Update properties
+            existingBill.ClientName = bill.ClientName;
+            existingBill.ClientEmail = bill.ClientEmail;
+            existingBill.VehicleId = bill.VehicleId;
+            existingBill.Amount = bill.Amount;
+            existingBill.Description = bill.Description;
+            existingBill.Date = bill.Date;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!BillExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+        }
+
+        // DELETE: api/Bill/{id}
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteBill(Guid id)
+        {
+            var bill = await _context.Bills.FindAsync(id);
+            if (bill == null)
+                return NotFound();
+
+            _context.Bills.Remove(bill);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        private bool BillExists(Guid id)
+        {
+            return _context.Bills.Any(e => e.Id == id);
+        }
     }
 }

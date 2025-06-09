@@ -4,6 +4,7 @@ using AutoSallonSolution.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AutoSallonSolution.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250608162448_BillRelation")]
+    partial class BillRelation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -143,6 +146,10 @@ namespace AutoSallonSolution.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("CarId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("ClientEmail")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -168,12 +175,10 @@ namespace AutoSallonSolution.Migrations
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("VehicleId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("VehicleId");
+                    b.HasIndex("CarId")
+                        .IsUnique();
 
                     b.ToTable("CarInsurances");
                 });
@@ -520,17 +525,6 @@ namespace AutoSallonSolution.Migrations
                     b.Navigation("Vehicle");
                 });
 
-            modelBuilder.Entity("AutoSallonSolution.Models.CarInsurance", b =>
-                {
-                    b.HasOne("AutoSallonSolution.Models.Vehicle", "Vehicle")
-                        .WithMany("CarInsurances")
-                        .HasForeignKey("VehicleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Vehicle");
-                });
-
             modelBuilder.Entity("AutoSallonSolution.Models.FavoriteVehicle", b =>
                 {
                     b.HasOne("AutoSallonSolution.Data.ApplicationUser", null)
@@ -619,8 +613,6 @@ namespace AutoSallonSolution.Migrations
             modelBuilder.Entity("AutoSallonSolution.Models.Vehicle", b =>
                 {
                     b.Navigation("Bills");
-
-                    b.Navigation("CarInsurances");
                 });
 #pragma warning restore 612, 618
         }

@@ -168,11 +168,10 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowReactApp",
         builder =>
         {
-            builder
-                .SetIsOriginAllowed(origin => true) // For development only
-                .AllowAnyHeader()
-                .AllowAnyMethod()
-                .AllowCredentials();
+            builder.WithOrigins("http://localhost:3000")
+                   .AllowAnyMethod()
+                   .AllowAnyHeader()
+                   .AllowCredentials();
         });
 });
 
@@ -191,6 +190,9 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+// Add CORS middleware before other middleware
+app.UseCors("AllowReactApp");
+
 app.UseHttpsRedirection();
 
 // Enhanced Request Logging Middleware
@@ -207,9 +209,6 @@ app.Use(async (context, next) =>
 });
 
 app.UseRouting();
-
-// Add CORS middleware between UseRouting and UseAuthentication
-app.UseCors("AllowReactApp");
 
 app.UseAuthentication();
 app.UseAuthorization();
