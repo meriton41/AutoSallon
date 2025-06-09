@@ -249,19 +249,19 @@ namespace AutoSallonSolution.Controllers
             return Ok(userList);
         }
 
-        [HttpPost("users/{userId}/role")]
-        public async Task<IActionResult> UpdateUserRole(string userId, [FromBody] string role)
+            [HttpPost("users/{userId}/role")]
+            public async Task<IActionResult> UpdateUserRole(string userId, [FromBody] string role)
         {
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
-                return NotFound(new { message = "User not found" });
-            if (!await _roleManager.RoleExistsAsync(role))
-                return BadRequest(new { message = "Role does not exist" });
-            var currentRoles = await _userManager.GetRolesAsync(user);
-            await _userManager.RemoveFromRolesAsync(user, currentRoles);
-            await _userManager.AddToRoleAsync(user, role);
-            return Ok(new { message = "User role updated successfully" });
-        }
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null)
+                    return NotFound(new { message = "User not found" });
+                if (!await _roleManager.RoleExistsAsync(role))
+                    return BadRequest(new { message = "Role does not exist" });
+                var currentRoles = await _userManager.GetRolesAsync(user);
+                await _userManager.RemoveFromRolesAsync(user, currentRoles);
+                await _userManager.AddToRoleAsync(user, role);
+                return Ok(new { message = "User role updated successfully" });
+            }
 
         [HttpGet("me")]
         public async Task<IActionResult> GetCurrentUserProfile()
@@ -336,7 +336,7 @@ namespace AutoSallonSolution.Controllers
             return Ok();
         }
 
-       /* [HttpPost("users/{id}/revoke-token")]
+/*        [HttpPost("users/{id}/revoke-token")]
         public IActionResult RevokeToken(string id)
         {
             // Example: Remove the refresh token from the database for this user
