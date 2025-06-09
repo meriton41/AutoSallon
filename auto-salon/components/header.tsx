@@ -102,12 +102,14 @@ export default function Header() {
                   Profile
                 </Button>
               </Link>
-              <Link href="/my-orders">
-                <Button variant="outline" size="sm" className="flex items-center gap-2 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800">
-                  <Car className="h-4 w-4" />
-                  My Orders
-                </Button>
-              </Link>
+              {user && user.role === "User" && (
+                <Link href="/my-orders">
+                  <Button variant="outline" size="sm" className="flex items-center gap-2 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800">
+                    <Car className="h-4 w-4" />
+                    My Orders
+                  </Button>
+                </Link>
+              )}
               <Button variant="destructive" size="sm" onClick={logout}>
                 Logout
               </Button>
@@ -218,11 +220,13 @@ export default function Header() {
                     <User className="h-4 w-4" /> Profile
                   </Button>
                 </Link>
-                <Link href="/my-orders" onClick={() => setIsOpen(false)}>
-                  <Button variant="outline" size="sm" className="w-full flex items-center gap-2 mt-2 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800">
-                    <Car className="h-4 w-4" /> My Orders
-                  </Button>
-                </Link>
+                {user && user.role === "User" && (
+                  <Link href="/my-orders" onClick={() => setIsOpen(false)}>
+                    <Button variant="outline" size="sm" className="w-full flex items-center gap-2 mt-2 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800">
+                      <Car className="h-4 w-4" /> My Orders
+                    </Button>
+                  </Link>
+                )}
                 <Button variant="destructive" size="sm" className="w-full mt-2" onClick={() => { logout(); setIsOpen(false); }}>
                   Logout
                 </Button>
