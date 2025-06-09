@@ -86,6 +86,14 @@ export default function Header() {
             </Link>
           )}
 
+          {user && user.role === "User" && (
+            <Link href="/leasing" className="relative">
+              <Button variant="ghost" size="icon" className="hover:bg-primary/10 dark:text-gray-200 dark:hover:bg-gray-800">
+                <span className="font-semibold">Leasing</span>
+              </Button>
+            </Link>
+          )}
+
           {user ? (
             <div className="flex items-center gap-2">
               <Link href="/profile">
@@ -191,6 +199,14 @@ export default function Header() {
               <Link href="/test-drive" className="relative" onClick={() => setIsOpen(false)}>
                 <Button variant="ghost" size="icon" className="hover:bg-primary/10 w-full justify-start dark:text-gray-200 dark:hover:bg-gray-800">
                   <Car className="h-5 w-5 mr-2" /> Test Drive
+                </Button>
+              </Link>
+            )}
+
+            {user && user.role === "User" && (
+              <Link href="/leasing" className="relative" onClick={() => setIsOpen(false)}>
+                <Button variant="ghost" size="icon" className="hover:bg-primary/10 w-full justify-start dark:text-gray-200 dark:hover:bg-gray-800">
+                  <span className="font-semibold">Leasing</span>
                 </Button>
               </Link>
             )}
