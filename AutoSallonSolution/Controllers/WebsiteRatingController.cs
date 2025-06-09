@@ -122,9 +122,17 @@ public class WebsiteRatingsController : ControllerBase
             }
 
             var user = await _userManager.GetUserAsync(User);
-            if (user?.Id != existingRating.UserId)
+            if (user == null)
             {
-                _logger.LogWarning("User {UserId} not authorized to update rating {RatingId}", user?.Id, id);
+                _logger.LogWarning("User not found for rating update");
+                return Unauthorized();
+            }
+
+            // Check if user is admin or the rating owner
+            var isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
+            if (!isAdmin && user.Id != existingRating.UserId)
+            {
+                _logger.LogWarning("User {UserId} not authorized to update rating {RatingId}", user.Id, id);
                 return Forbid();
             }
 
@@ -159,9 +167,17 @@ public class WebsiteRatingsController : ControllerBase
             }
 
             var user = await _userManager.GetUserAsync(User);
-            if (user?.Id != rating.UserId)
+            if (user == null)
             {
-                _logger.LogWarning("User {UserId} not authorized to delete rating {RatingId}", user?.Id, id);
+                _logger.LogWarning("User not found for rating deletion");
+                return Unauthorized();
+            }
+
+            // Check if user is admin or the rating owner
+            var isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
+            if (!isAdmin && user.Id != rating.UserId)
+            {
+                _logger.LogWarning("User {UserId} not authorized to delete rating {RatingId}", user.Id, id);
                 return Forbid();
             }
 

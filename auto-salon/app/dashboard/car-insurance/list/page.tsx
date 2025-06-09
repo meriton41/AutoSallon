@@ -145,237 +145,242 @@ export default function InsuranceListPage() {
   });
 
   return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-6 text-white">All Car Insurances</h1>
-      {loading ? (
-        <p className="text-white">Loading...</p>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full bg-gray-900 text-white rounded-lg">
-            <thead>
-              <tr>
-                <th className="px-4 py-2">Policy #</th>
-                <th className="px-4 py-2">Client</th>
-                <th className="px-4 py-2">Car ID</th>
-                <th className="px-4 py-2">Start</th>
-                <th className="px-4 py-2">End</th>
-                <th className="px-4 py-2">Price</th>
-                <th className="px-4 py-2">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {insurances.map((insurance) => (
-                <tr key={insurance.id} className="border-t border-gray-700">
-                  <td className="px-4 py-2">{insurance.policyNumber}</td>
-                  <td className="px-4 py-2">{insurance.clientName}</td>
-                  <td className="px-4 py-2">{insurance.vehicleId || insurance.carId}</td>
-                  <td className="px-4 py-2">{insurance.startDate?.slice(0, 10)}</td>
-                  <td className="px-4 py-2">{insurance.endDate?.slice(0, 10)}</td>
-                  <td className="px-4 py-2">€{insurance.price}</td>
-                  <td className="px-4 py-2">
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleDownloadPdf(insurance)}
-                        className="bg-slate-700 hover:bg-slate-600 text-white p-2 rounded transition-colors"
-                        title="Download PDF"
-                      >
-                        <Download size={16} />
-                      </button>
-                      <button
-                        onClick={() => handleEdit(insurance)}
-                        className="bg-slate-700 hover:bg-slate-600 text-white p-2 rounded transition-colors"
-                        title="Edit Insurance"
-                      >
-                        <Edit3 size={16} />
-                      </button>
-                      <button
-                        onClick={() => setDeleteConfirm(insurance.id)}
-                        className="bg-red-600 hover:bg-red-500 text-white p-2 rounded transition-colors"
-                        title="Delete Insurance"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-              {insurances.length === 0 && (
-                <tr>
-                  <td colSpan={7} className="text-center py-4 text-gray-400">
-                    No insurances found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 py-8">
+      <div className="w-full max-w-5xl mx-auto bg-gray-900 rounded-2xl shadow-lg p-8 border border-gray-800">
+        <h1 className="text-3xl font-bold mb-8 text-blue-500 text-left">View Insurances</h1>
+        {loading ? (
+          <p className="text-white">Loading...</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <div className="max-h-[500px] overflow-y-auto">
+              <table className="min-w-full bg-gray-900 rounded-2xl shadow divide-y divide-gray-800">
+                <thead>
+                  <tr>
+                    <th className="px-6 py-4 text-left text-base font-bold text-gray-200 uppercase tracking-wider">Policy #</th>
+                    <th className="px-6 py-4 text-left text-base font-bold text-gray-200 uppercase tracking-wider">Client</th>
+                    <th className="px-6 py-4 text-left text-base font-bold text-gray-200 uppercase tracking-wider">Car ID</th>
+                    <th className="px-6 py-4 text-left text-base font-bold text-gray-200 uppercase tracking-wider">Start</th>
+                    <th className="px-6 py-4 text-left text-base font-bold text-gray-200 uppercase tracking-wider">End</th>
+                    <th className="px-6 py-4 text-left text-base font-bold text-gray-200 uppercase tracking-wider">Price</th>
+                    <th className="px-6 py-4 text-left text-base font-bold text-gray-200 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-800">
+                  {insurances.length > 0 ? (
+                    insurances.map((insurance) => (
+                      <tr key={insurance.id} className="hover:bg-gray-800/70 transition rounded-xl">
+                        <td className="px-6 py-4 whitespace-nowrap text-gray-100">{insurance.policyNumber}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-gray-100">{insurance.clientName}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-gray-100">{insurance.vehicleId || insurance.carId}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-gray-100">{insurance.startDate?.slice(0, 10)}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-gray-100">{insurance.endDate?.slice(0, 10)}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-gray-100">€{insurance.price}</td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleDownloadPdf(insurance)}
+                              className="bg-slate-700 hover:bg-slate-600 text-white p-2 rounded transition-colors"
+                              title="Download PDF"
+                            >
+                              <Download size={16} />
+                            </button>
+                            <button
+                              onClick={() => handleEdit(insurance)}
+                              className="bg-slate-700 hover:bg-slate-600 text-white p-2 rounded transition-colors"
+                              title="Edit Insurance"
+                            >
+                              <Edit3 size={16} />
+                            </button>
+                            <button
+                              onClick={() => setDeleteConfirm(insurance.id)}
+                              className="bg-red-600 hover:bg-red-500 text-white p-2 rounded transition-colors"
+                              title="Delete Insurance"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={7} className="text-center py-12 text-gray-400 bg-gray-800/60 rounded-xl">
+                        No insurances found.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
 
-      {/* Edit Modal */}
-      {isEditModalOpen && editingInsurance && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-gray-900 p-6 rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <h2 className="text-2xl font-bold mb-4 text-white">Edit Insurance</h2>
-            <form onSubmit={handleUpdate} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1 text-white">Policy Number</label>
-                <input
-                  name="policyNumber"
-                  value={editingInsurance.policyNumber}
-                  onChange={handleEditInputChange}
-                  className="w-full border rounded px-3 py-2 bg-gray-800 text-white border-gray-700"
-                  required
-                />
-              </div>
-              
+        {/* Edit Modal */}
+        {isEditModalOpen && editingInsurance && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-gray-900 p-6 rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+              <h2 className="text-2xl font-bold mb-4 text-white">Edit Insurance</h2>
+              <form onSubmit={handleUpdate} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-white">Policy Number</label>
+                  <input
+                    name="policyNumber"
+                    value={editingInsurance.policyNumber}
+                    onChange={handleEditInputChange}
+                    className="w-full border rounded px-3 py-2 bg-gray-800 text-white border-gray-700"
+                    required
+                  />
+                </div>
+                
                              <div>
-                 <label className="block text-sm font-medium mb-1 text-white">Car</label>
-                 <select
-                   name="carId"
-                   value={editingInsurance.carId}
-                   onChange={handleEditInputChange}
-                   className="w-full border rounded px-3 py-2 bg-gray-800 text-white border-gray-700"
-                   required
-                 >
-                   <option value="">Select a car</option>
-                   {cars.map(car => {
-                     const carIdNum = parseInt(car.id);
-                     const isAssigned = assignedCarIds.has(carIdNum);
-                     const isCurrentCar = car.id === editingInsurance.carId;
-                     
-                     return (
-                       <option key={car.id} value={car.id}>
-                         {car.title ? `${car.title} (${car.id})` : `Car ID: ${car.id}`}
-                         {isAssigned && !isCurrentCar ? " (Already assigned)" : ""}
-                         {isCurrentCar ? " (Current)" : ""}
-                       </option>
-                     );
-                   })}
-                 </select>
-               </div>
+                   <label className="block text-sm font-medium mb-1 text-white">Car</label>
+                   <select
+                     name="carId"
+                     value={editingInsurance.carId}
+                     onChange={handleEditInputChange}
+                     className="w-full border rounded px-3 py-2 bg-gray-800 text-white border-gray-700"
+                     required
+                   >
+                     <option value="">Select a car</option>
+                     {cars.map(car => {
+                       const carIdNum = parseInt(car.id);
+                       const isAssigned = assignedCarIds.has(carIdNum);
+                       const isCurrentCar = car.id === editingInsurance.carId;
+                       
+                       return (
+                         <option key={car.id} value={car.id}>
+                           {car.title ? `${car.title} (${car.id})` : `Car ID: ${car.id}`}
+                           {isAssigned && !isCurrentCar ? " (Already assigned)" : ""}
+                           {isCurrentCar ? " (Current)" : ""}
+                         </option>
+                       );
+                     })}
+                   </select>
+                 </div>
 
-              <div>
-                <label className="block text-sm font-medium mb-1 text-white">Client Name</label>
-                <input
-                  name="clientName"
-                  value={editingInsurance.clientName}
-                  onChange={handleEditInputChange}
-                  className="w-full border rounded px-3 py-2 bg-gray-800 text-white border-gray-700"
-                  required
-                />
-              </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-white">Client Name</label>
+                  <input
+                    name="clientName"
+                    value={editingInsurance.clientName}
+                    onChange={handleEditInputChange}
+                    className="w-full border rounded px-3 py-2 bg-gray-800 text-white border-gray-700"
+                    required
+                  />
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium mb-1 text-white">Client Email</label>
-                <input
-                  name="clientEmail"
-                  type="email"
-                  value={editingInsurance.clientEmail}
-                  onChange={handleEditInputChange}
-                  className="w-full border rounded px-3 py-2 bg-gray-800 text-white border-gray-700"
-                  required
-                />
-              </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-white">Client Email</label>
+                  <input
+                    name="clientEmail"
+                    type="email"
+                    value={editingInsurance.clientEmail}
+                    onChange={handleEditInputChange}
+                    className="w-full border rounded px-3 py-2 bg-gray-800 text-white border-gray-700"
+                    required
+                  />
+                </div>
 
+                <div className="flex gap-4">
+                  <div className="flex-1">
+                    <label className="block text-sm font-medium mb-1 text-white">Start Date</label>
+                    <input
+                      name="startDate"
+                      type="date"
+                      value={editingInsurance.startDate}
+                      onChange={handleEditInputChange}
+                      className="w-full border rounded px-3 py-2 bg-gray-800 text-white border-gray-700"
+                      required
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <label className="block text-sm font-medium mb-1 text-white">End Date</label>
+                    <input
+                      name="endDate"
+                      type="date"
+                      value={editingInsurance.endDate}
+                      onChange={handleEditInputChange}
+                      className="w-full border rounded px-3 py-2 bg-gray-800 text-white border-gray-700"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-white">Coverage Details</label>
+                  <textarea
+                    name="coverageDetails"
+                    value={editingInsurance.coverageDetails}
+                    onChange={handleEditInputChange}
+                    className="w-full border rounded px-3 py-2 bg-gray-800 text-white border-gray-700"
+                    rows={3}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-white">Price</label>
+                  <input
+                    name="price"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={editingInsurance.price}
+                    onChange={handleEditInputChange}
+                    className="w-full border rounded px-3 py-2 bg-gray-800 text-white border-gray-700"
+                    required
+                  />
+                </div>
+
+                <div className="flex gap-4 pt-4">
+                  <button
+                    type="submit"
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded"
+                  >
+                    Update Insurance
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsEditModalOpen(false);
+                      setEditingInsurance(null);
+                    }}
+                    className="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-2 rounded"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Delete Confirmation Modal */}
+        {deleteConfirm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-gray-900 p-6 rounded-lg">
+              <h2 className="text-xl font-bold mb-4 text-white">Confirm Delete</h2>
+              <p className="text-white mb-6">Are you sure you want to delete this insurance policy?</p>
               <div className="flex gap-4">
-                <div className="flex-1">
-                  <label className="block text-sm font-medium mb-1 text-white">Start Date</label>
-                  <input
-                    name="startDate"
-                    type="date"
-                    value={editingInsurance.startDate}
-                    onChange={handleEditInputChange}
-                    className="w-full border rounded px-3 py-2 bg-gray-800 text-white border-gray-700"
-                    required
-                  />
-                </div>
-                <div className="flex-1">
-                  <label className="block text-sm font-medium mb-1 text-white">End Date</label>
-                  <input
-                    name="endDate"
-                    type="date"
-                    value={editingInsurance.endDate}
-                    onChange={handleEditInputChange}
-                    className="w-full border rounded px-3 py-2 bg-gray-800 text-white border-gray-700"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1 text-white">Coverage Details</label>
-                <textarea
-                  name="coverageDetails"
-                  value={editingInsurance.coverageDetails}
-                  onChange={handleEditInputChange}
-                  className="w-full border rounded px-3 py-2 bg-gray-800 text-white border-gray-700"
-                  rows={3}
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1 text-white">Price</label>
-                <input
-                  name="price"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={editingInsurance.price}
-                  onChange={handleEditInputChange}
-                  className="w-full border rounded px-3 py-2 bg-gray-800 text-white border-gray-700"
-                  required
-                />
-              </div>
-
-              <div className="flex gap-4 pt-4">
                 <button
-                  type="submit"
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded"
+                  onClick={() => handleDelete(deleteConfirm)}
+                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
                 >
-                  Update Insurance
+                  Delete
                 </button>
                 <button
-                  type="button"
-                  onClick={() => {
-                    setIsEditModalOpen(false);
-                    setEditingInsurance(null);
-                  }}
-                  className="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-2 rounded"
+                  onClick={() => setDeleteConfirm(null)}
+                  className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded"
                 >
                   Cancel
                 </button>
               </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Delete Confirmation Modal */}
-      {deleteConfirm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-gray-900 p-6 rounded-lg">
-            <h2 className="text-xl font-bold mb-4 text-white">Confirm Delete</h2>
-            <p className="text-white mb-6">Are you sure you want to delete this insurance policy?</p>
-            <div className="flex gap-4">
-              <button
-                onClick={() => handleDelete(deleteConfirm)}
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
-              >
-                Delete
-              </button>
-              <button
-                onClick={() => setDeleteConfirm(null)}
-                className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded"
-              >
-                Cancel
-              </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      <ToastContainer theme="dark" />
+        <ToastContainer theme="dark" />
+      </div>
     </div>
   );
 }

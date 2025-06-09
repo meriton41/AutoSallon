@@ -32,6 +32,7 @@ export default function DashboardUsers() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [form, setForm] = useState({
@@ -55,6 +56,16 @@ export default function DashboardUsers() {
     fetchUsers();
   }, []);
 
+  // Auto-hide success message after 3 seconds
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => {
+        setSuccessMessage(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage]);
+
   const handleEdit = (user: User) => {
     setEditingUser(user);
     setForm({
@@ -62,24 +73,45 @@ export default function DashboardUsers() {
       email: user.email,
       role: user.roles[0] || "User",
     });
+    setError(null); // Clear any previous errors
+    setSuccessMessage(null); // Clear any previous success messages
     setIsEditModalOpen(true);
   };
 
   const handleUpdate = async () => {
     if (!editingUser) return;
     setError(null);
+    setSuccessMessage(null);
     try {
-      // Update user role
+      // Get authentication token
+      const userDataString = localStorage.getItem("user");
+      const userData = userDataString ? JSON.parse(userDataString) : null;
+      const token = userData?.token;
+
+      // Update user role - backend expects just the role string
       await axios.post(
-        `https://localhost:7234/api/Account/${editingUser.id}/role`,
-        JSON.stringify(form.role),
-        { headers: { "Content-Type": "application/json" } }
+        `https://localhost:7234/api/Account/users/${editingUser.id}/role`,
+        form.role,
+        { 
+          headers: { 
+            "Content-Type": "application/json",
+            ...(token && { "Authorization": `Bearer ${token}` })
+          } 
+        }
       );
       
-      // Update other user details if needed
+      // Update other user details - backend expects UserDetailsDTO with Id, Role, UserName, Email, CreatedAt
       await axios.put(`https://localhost:7234/api/Account/users/${editingUser.id}`, {
-        username: form.username,
-        email: form.email
+        id: editingUser.id,
+        userName: form.username,
+        email: form.email,
+        role: form.role,
+        createdAt: editingUser.createdAt
+      }, {
+        headers: {
+          "Content-Type": "application/json",
+          ...(token && { "Authorization": `Bearer ${token}` })
+        }
       });
 
       setIsEditModalOpen(false);
@@ -87,6 +119,7 @@ export default function DashboardUsers() {
       // Refresh list
       const response = await axios.get("https://localhost:7234/api/Account/users");
       setUsers(response.data);
+      setSuccessMessage("User updated successfully!");
     } catch (err) {
       setError("Failed to update user");
     }
@@ -94,6 +127,8 @@ export default function DashboardUsers() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this user?")) return;
+    setError(null);
+    setSuccessMessage(null);
     try {
       const userDataString = localStorage.getItem("user");
       if (!userDataString) {
@@ -107,6 +142,16 @@ export default function DashboardUsers() {
       if (!token) {
         setError("Authentication token not found. Please log in again.");
         return;
+      }
+
+      // Add token debugging
+      try {
+        const tokenParts = token.split('.');
+        const payload = JSON.parse(atob(tokenParts[1]));
+        console.log('Token payload:', payload);
+        console.log('User role from token:', payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role']);
+      } catch (e) {
+        console.error('Error parsing token:', e);
       }
 
       console.log('Attempting to delete user:', id);
@@ -131,6 +176,7 @@ export default function DashboardUsers() {
       });
 
       setUsers(response.data);
+      setSuccessMessage("User deleted successfully!");
     } catch (err: any) {
       console.error('Delete error details:', {
         message: err.message,
@@ -149,20 +195,55 @@ export default function DashboardUsers() {
       } else if (err.response?.status === 405) {
         setError("Server error: Method not allowed. Please try again later.");
       } else {
-        setError(`Failed to delete user: ${err.message}`);
+        setError(`Failed to delete user: ${err.response?.data || err.message}`);
       }
     }
   };
 
   const handleRevokeToken = async (userId: string) => {
     if (!confirm("Are you sure you want to revoke this user's token?")) return;
+    setError(null);
+    setSuccessMessage(null);
+    
     try {
-      await axios.post(
-        `https://localhost:7234/api/Account/users/${userId}/revoke-token`
+      const userDataString = localStorage.getItem("user");
+      if (!userDataString) {
+        setError("Authentication token not found. Please log in again.");
+        return;
+      }
+
+      const userData = JSON.parse(userDataString);
+      const token = userData.token;
+      
+      if (!token) {
+        setError("Authentication token not found. Please log in again.");
+        return;
+      }
+
+      const response = await axios.post(
+        `https://localhost:7234/api/Account/users/${userId}/revoke-token`,
+        {},
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          withCredentials: true
+        }
       );
-      alert("Token revoked!");
-    } catch (err) {
-      alert("Failed to revoke token.");
+
+      setSuccessMessage("User token revoked successfully!");
+    } catch (err: any) {
+      console.error('Revoke token error:', err);
+      if (err.response?.status === 401) {
+        setError("Authentication failed. Please log in again.");
+      } else if (err.response?.status === 403) {
+        setError("You don't have permission to revoke tokens. Admin access required.");
+      } else if (err.response?.status === 404) {
+        setError("User not found.");
+      } else {
+        setError(`Failed to revoke token: ${err.response?.data?.message || err.message}`);
+      }
     }
   };
 
@@ -175,8 +256,26 @@ export default function DashboardUsers() {
           </h1>
 
           {error && (
-            <div className="text-red-500 mb-4 p-4 bg-red-50 border border-red-200 rounded-lg dark:bg-red-900/50 dark:border-red-800">
+            <div className="text-red-500 mb-4 p-4 bg-red-50 border border-red-200 rounded-lg dark:bg-red-900/50 dark:border-red-800 relative">
               {error}
+              <button
+                onClick={() => setError(null)}
+                className="absolute top-2 right-2 text-red-700 hover:text-red-900 text-xl font-bold"
+              >
+                ×
+              </button>
+            </div>
+          )}
+
+          {successMessage && (
+            <div className="text-green-500 mb-4 p-4 bg-green-50 border border-green-200 rounded-lg dark:bg-green-900/50 dark:border-green-800 relative">
+              {successMessage}
+              <button
+                onClick={() => setSuccessMessage(null)}
+                className="absolute top-2 right-2 text-green-700 hover:text-green-900 text-xl font-bold"
+              >
+                ×
+              </button>
             </div>
           )}
 

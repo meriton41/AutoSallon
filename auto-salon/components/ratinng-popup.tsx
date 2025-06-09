@@ -310,7 +310,7 @@ export function RatingPopup() {
               ))}
             </div>
             <textarea
-              className="border rounded p-2 min-h-[100px]"
+              className="border rounded p-2 min-h-[100px] bg-gray-900 text-white"
               placeholder="Optional feedback..."
               value={comment}
               onChange={(e) => setComment(e.target.value)}
