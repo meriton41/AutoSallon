@@ -7,6 +7,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using System.IO;
+using System.Text.Json;
 
 namespace AutoSallonSolution.Controllers
 {
@@ -24,18 +26,60 @@ namespace AutoSallonSolution.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<CarInsurance>>> GetAll()
+        public async Task<ActionResult<IEnumerable<object>>> GetAll()
         {
-            return await _context.CarInsurances
+            var insurances = await _context.CarInsurances
                 .Include(ci => ci.Vehicle)
+                .Select(ci => new
+                {
+                    ci.Id,
+                    ci.PolicyNumber,
+                    ci.VehicleId,
+                    ci.ClientName,
+                    ci.ClientEmail,
+                    ci.StartDate,
+                    ci.EndDate,
+                    ci.CoverageDetails,
+                    ci.Price,
+                    Vehicle = new
+                    {
+                        ci.Vehicle.Id,
+                        ci.Vehicle.Title,
+                        ci.Vehicle.Brand,
+                        ci.Vehicle.Year,
+                        ci.Vehicle.Color
+                    }
+                })
                 .ToListAsync();
+            
+            return Ok(insurances);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<CarInsurance>> GetById(Guid id)
+        public async Task<ActionResult<object>> GetById(Guid id)
         {
             var insurance = await _context.CarInsurances
                 .Include(ci => ci.Vehicle)
+                .Select(ci => new
+                {
+                    ci.Id,
+                    ci.PolicyNumber,
+                    ci.VehicleId,
+                    ci.ClientName,
+                    ci.ClientEmail,
+                    ci.StartDate,
+                    ci.EndDate,
+                    ci.CoverageDetails,
+                    ci.Price,
+                    Vehicle = new
+                    {
+                        ci.Vehicle.Id,
+                        ci.Vehicle.Title,
+                        ci.Vehicle.Brand,
+                        ci.Vehicle.Year,
+                        ci.Vehicle.Color
+                    }
+                })
                 .FirstOrDefaultAsync(ci => ci.Id == id);
 
             if (insurance == null)
@@ -43,16 +87,38 @@ namespace AutoSallonSolution.Controllers
                 return NotFound();
             }
 
-            return insurance;
+            return Ok(insurance);
         }
 
         [HttpGet("vehicle/{vehicleId}")]
-        public async Task<ActionResult<IEnumerable<CarInsurance>>> GetByVehicleId(int vehicleId)
+        public async Task<ActionResult<IEnumerable<object>>> GetByVehicleId(int vehicleId)
         {
-            return await _context.CarInsurances
+            var insurances = await _context.CarInsurances
                 .Include(ci => ci.Vehicle)
                 .Where(ci => ci.VehicleId == vehicleId)
+                .Select(ci => new
+                {
+                    ci.Id,
+                    ci.PolicyNumber,
+                    ci.VehicleId,
+                    ci.ClientName,
+                    ci.ClientEmail,
+                    ci.StartDate,
+                    ci.EndDate,
+                    ci.CoverageDetails,
+                    ci.Price,
+                    Vehicle = new
+                    {
+                        ci.Vehicle.Id,
+                        ci.Vehicle.Title,
+                        ci.Vehicle.Brand,
+                        ci.Vehicle.Year,
+                        ci.Vehicle.Color
+                    }
+                })
                 .ToListAsync();
+            
+            return Ok(insurances);
         }
 
         [HttpPost]
@@ -120,37 +186,89 @@ namespace AutoSallonSolution.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, CarInsurance insurance)
+        public async Task<IActionResult> Update(Guid id)
         {
-            if (id != insurance.Id)
+            try
             {
-                return BadRequest();
-            }
+                using var reader = new StreamReader(Request.Body);
+                var requestBody = await reader.ReadToEndAsync();
+                _logger.LogInformation("Received raw update request for ID {Id}: {Body}", id, requestBody);
 
-            // Check if vehicle exists
-            var vehicle = await _context.Vehicles.FindAsync(insurance.VehicleId);
-            if (vehicle == null)
+                if (string.IsNullOrEmpty(requestBody))
+                {
+                    return BadRequest("Request body is empty");
+                }
+
+                var updateData = System.Text.Json.JsonSerializer.Deserialize<UpdateCarInsuranceDTO>(requestBody, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                if (updateData == null)
+                {
+                    return BadRequest("Invalid JSON data");
+                }
+
+                _logger.LogInformation("Deserialized update data: {@UpdateData}", updateData);
+
+                // Manual validation
+                if (string.IsNullOrEmpty(updateData.PolicyNumber))
+                    return BadRequest("PolicyNumber is required");
+                if (updateData.VehicleId <= 0)
+                    return BadRequest("Valid VehicleId is required");
+                if (string.IsNullOrEmpty(updateData.ClientName))
+                    return BadRequest("ClientName is required");
+                if (string.IsNullOrEmpty(updateData.ClientEmail))
+                    return BadRequest("ClientEmail is required");
+                if (string.IsNullOrEmpty(updateData.CoverageDetails))
+                    return BadRequest("CoverageDetails is required");
+                if (updateData.Price <= 0)
+                    return BadRequest("Price must be greater than 0");
+                var existingInsurance = await _context.CarInsurances.FindAsync(id);
+                if (existingInsurance == null)
+                {
+                    return NotFound();
+                }
+
+                // Check if vehicle exists
+                var vehicle = await _context.Vehicles.FindAsync(updateData.VehicleId);
+                if (vehicle == null)
+                {
+                    return BadRequest("Invalid VehicleId");
+                }
+
+                // Check if another vehicle already has this insurance (exclude current insurance)
+                var duplicateInsurance = await _context.CarInsurances
+                    .FirstOrDefaultAsync(ci => ci.VehicleId == updateData.VehicleId && ci.Id != id);
+                if (duplicateInsurance != null)
+                {
+                    return BadRequest("This vehicle already has an insurance assigned.");
+                }
+
+                // Validate dates
+                if (updateData.EndDate <= updateData.StartDate)
+                {
+                    return BadRequest("End date must be after start date");
+                }
+
+                // Update the existing insurance
+                existingInsurance.PolicyNumber = updateData.PolicyNumber;
+                existingInsurance.VehicleId = updateData.VehicleId;
+                existingInsurance.ClientName = updateData.ClientName;
+                existingInsurance.ClientEmail = updateData.ClientEmail;
+                existingInsurance.StartDate = updateData.StartDate;
+                existingInsurance.EndDate = updateData.EndDate;
+                existingInsurance.CoverageDetails = updateData.CoverageDetails;
+                existingInsurance.Price = updateData.Price;
+
+                await _context.SaveChangesAsync();
+                return NoContent();
+            }
+            catch (Exception ex)
             {
-                return BadRequest("Invalid VehicleId");
+                _logger.LogError(ex, "Error updating car insurance with ID: {InsuranceId}", id);
+                return StatusCode(500, "An error occurred while updating the insurance");
             }
-
-            var existingInsurance = await _context.CarInsurances.FindAsync(id);
-            if (existingInsurance == null)
-            {
-                return NotFound();
-            }
-
-            // Check if another vehicle already has this insurance
-            var duplicateInsurance = await _context.CarInsurances
-                .FirstOrDefaultAsync(ci => ci.VehicleId == insurance.VehicleId && ci.Id != id);
-            if (duplicateInsurance != null)
-            {
-                return BadRequest("This vehicle already has an insurance assigned.");
-            }
-
-            _context.Entry(existingInsurance).CurrentValues.SetValues(insurance);
-            await _context.SaveChangesAsync();
-            return NoContent();
         }
 
         [HttpDelete("{id}")]
