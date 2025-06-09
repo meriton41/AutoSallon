@@ -1,8 +1,8 @@
 export interface Bill {
-  id: string;
+  id: string;  // This will be a string representation of the Guid
   clientName: string;
   clientEmail: string;
-  carId: string;
+  vehicleId: number;
   amount: number;
   description: string;
   date: string; // ISO string
