@@ -202,13 +202,48 @@ export default function DashboardUsers() {
 
   const handleRevokeToken = async (userId: string) => {
     if (!confirm("Are you sure you want to revoke this user's token?")) return;
+    setError(null);
+    setSuccessMessage(null);
+    
     try {
-      await axios.post(
-        `https://localhost:7234/api/Account/users/${userId}/revoke-token`
+      const userDataString = localStorage.getItem("user");
+      if (!userDataString) {
+        setError("Authentication token not found. Please log in again.");
+        return;
+      }
+
+      const userData = JSON.parse(userDataString);
+      const token = userData.token;
+      
+      if (!token) {
+        setError("Authentication token not found. Please log in again.");
+        return;
+      }
+
+      const response = await axios.post(
+        `https://localhost:7234/api/Account/users/${userId}/revoke-token`,
+        {},
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          withCredentials: true
+        }
       );
-      alert("Token revoked!");
-    } catch (err) {
-      alert("Failed to revoke token.");
+
+      setSuccessMessage("User token revoked successfully!");
+    } catch (err: any) {
+      console.error('Revoke token error:', err);
+      if (err.response?.status === 401) {
+        setError("Authentication failed. Please log in again.");
+      } else if (err.response?.status === 403) {
+        setError("You don't have permission to revoke tokens. Admin access required.");
+      } else if (err.response?.status === 404) {
+        setError("User not found.");
+      } else {
+        setError(`Failed to revoke token: ${err.response?.data?.message || err.message}`);
+      }
     }
   };
 

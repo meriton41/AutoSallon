@@ -205,9 +205,9 @@ namespace AutoSallonSolution.Controllers
                 });
 
                 if (updateData == null)
-                {
+            {
                     return BadRequest("Invalid JSON data");
-                }
+            }
 
                 _logger.LogInformation("Deserialized update data: {@UpdateData}", updateData);
 
@@ -224,11 +224,11 @@ namespace AutoSallonSolution.Controllers
                     return BadRequest("CoverageDetails is required");
                 if (updateData.Price <= 0)
                     return BadRequest("Price must be greater than 0");
-                var existingInsurance = await _context.CarInsurances.FindAsync(id);
-                if (existingInsurance == null)
-                {
-                    return NotFound();
-                }
+            var existingInsurance = await _context.CarInsurances.FindAsync(id);
+            if (existingInsurance == null)
+            {
+                return NotFound();
+            }
 
                 // Check if vehicle exists
                 var vehicle = await _context.Vehicles.FindAsync(updateData.VehicleId);
@@ -238,12 +238,12 @@ namespace AutoSallonSolution.Controllers
                 }
 
                 // Check if another vehicle already has this insurance (exclude current insurance)
-                var duplicateInsurance = await _context.CarInsurances
+            var duplicateInsurance = await _context.CarInsurances
                     .FirstOrDefaultAsync(ci => ci.VehicleId == updateData.VehicleId && ci.Id != id);
-                if (duplicateInsurance != null)
-                {
-                    return BadRequest("This vehicle already has an insurance assigned.");
-                }
+            if (duplicateInsurance != null)
+            {
+                return BadRequest("This vehicle already has an insurance assigned.");
+            }
 
                 // Validate dates
                 if (updateData.EndDate <= updateData.StartDate)
@@ -261,8 +261,8 @@ namespace AutoSallonSolution.Controllers
                 existingInsurance.CoverageDetails = updateData.CoverageDetails;
                 existingInsurance.Price = updateData.Price;
 
-                await _context.SaveChangesAsync();
-                return NoContent();
+            await _context.SaveChangesAsync();
+            return NoContent();
             }
             catch (Exception ex)
             {

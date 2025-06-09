@@ -358,20 +358,41 @@ namespace AutoSallonSolution.Controllers
             return Ok();
         }
 
-/*        [HttpPost("users/{id}/revoke-token")]
-        public IActionResult RevokeToken(string id)
+        [HttpPost("users/{id}/revoke-token")]
+        [Authorize(Roles = "Admin")]
+        [EnableCors("AllowReactApp")]
+        public async Task<IActionResult> RevokeToken(string id)
         {
-            // Example: Remove the refresh token from the database for this user
-            var user = _userManager.FindByIdAsync(id).Result;
-            if (user == null)
-                return NotFound();
+            try
+            {
+                var user = await _userManager.FindByIdAsync(id);
+                if (user == null)
+                    return NotFound(new { message = "User not found" });
 
-            // Assuming you store refresh tokens in a table or user property
-            user.RefreshToken = null;
-            _userManager.UpdateAsync(user).Wait();
+                // Remove all refresh tokens for this user
+                var refreshTokens = await _context.RefreshTokens
+                    .Where(rt => rt.UserId == id)
+                    .ToListAsync();
 
-            return Ok(new { message = "Token revoked" });
-        }*/
+                _context.RefreshTokens.RemoveRange(refreshTokens);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { message = "Token revoked successfully" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while revoking the token" });
+            }
+        }
+
+        [HttpOptions("users/{id}/revoke-token")]
+        [EnableCors("AllowReactApp")]
+        public IActionResult RevokeTokenOptions()
+        {
+            Response.Headers.Add("Access-Control-Allow-Methods", "POST, OPTIONS");
+            Response.Headers.Add("Access-Control-Allow-Headers", "Content-Type, Authorization");
+            return Ok();
+        }
     }
 }
 
