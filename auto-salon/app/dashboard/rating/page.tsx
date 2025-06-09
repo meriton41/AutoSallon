@@ -44,8 +44,8 @@ export default function RatingPage() {
     setEditingId(rating.id);
     setEditForm({
       userId: rating.userId,
-      value: rating.value,
-      comment: rating.comment,
+      value: rating.value || 0,
+      comment: rating.comment || "",
       createdAt: rating.createdAt,
     });
     setShowModal(true);
@@ -61,12 +61,15 @@ export default function RatingPage() {
         },
         body: JSON.stringify(editForm),
       });
-      if (!response.ok) {
-        throw new Error("Failed to update rating");
+      if (response.ok) {
+        setEditingId(null);
+        setShowModal(false);
+        fetchRatings();
+      } else if (response.status === 403) {
+        setError("You are not authorized to edit this rating");
+      } else {
+        setError("Failed to update rating");
       }
-      setEditingId(null);
-      setShowModal(false);
-      fetchRatings();
     } catch (err) {
       setError("Failed to update rating");
     }
@@ -75,12 +78,14 @@ export default function RatingPage() {
   const handleDelete = async (id: string) => {
     if (window.confirm("Are you sure you want to delete this rating?")) {
       try {
-        const response = await fetch(`https://localhost:7234/api/WebsiteRating/${id}`, {
+        const response = await fetch(`https://localhost:7234/api/WebsiteRatings/${id}`, {
           method: "DELETE",
           headers: { Authorization: `Bearer ${token}` },
         });
         if (response.ok) {
           fetchRatings();
+        } else if (response.status === 403) {
+          setError("You are not authorized to delete this rating");
         } else {
           setError("Failed to delete rating");
         }
@@ -94,7 +99,7 @@ export default function RatingPage() {
     const { name, value } = e.target;
     setEditForm((prev) => ({
       ...prev,
-      [name]: name === "value" ? Number(value) : value,
+      [name]: name === "value" ? Math.max(1, Math.min(5, parseInt(value) || 0)) : value,
     }));
   };
 
@@ -191,24 +196,26 @@ export default function RatingPage() {
                   <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Value</label>
                   <input
                     type="number"
+                    name="value"
                     min="1"
                     max="5"
                     value={editForm.value}
-                    onChange={(e) => setEditForm({ ...editForm, value: parseInt(e.target.value) })}
+                    onChange={handleChange}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                   />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Comment</label>
                   <textarea
+                    name="comment"
                     value={editForm.comment}
-                    onChange={(e) => setEditForm({ ...editForm, comment: e.target.value })}
+                    onChange={handleChange}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                     rows={3}
                   />
                 </div>
               </div>
-              <div className="flex justify-end space-x-3 mt-8">
+              <div className="flex justify-end gap-3 mt-6">
                 <button
                   onClick={() => setShowModal(false)}
                   className="px-5 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600"

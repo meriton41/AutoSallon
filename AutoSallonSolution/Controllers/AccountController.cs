@@ -293,7 +293,6 @@ namespace AutoSallonSolution.Controllers
 
         [HttpDelete("users/{userId}")]
         [Authorize(Roles = "Admin")]
-        [EnableCors("AllowReactApp")]
         public async Task<IActionResult> DeleteUser(string userId)
         {
             try
@@ -301,6 +300,19 @@ namespace AutoSallonSolution.Controllers
                 Console.WriteLine($"Attempting to delete user with ID: {userId}");
                 Console.WriteLine($"Request Method: {Request.Method}");
                 Console.WriteLine($"Request Headers: {string.Join(", ", Request.Headers.Select(h => $"{h.Key}: {h.Value}"))}");
+                
+                // Add user role check logging
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser != null)
+                {
+                    var roles = await _userManager.GetRolesAsync(currentUser);
+                    Console.WriteLine($"Current user roles: {string.Join(", ", roles)}");
+                }
+                else
+                {
+                    Console.WriteLine("Current user is null");
+                    return Unauthorized(new { message = "User not authenticated" });
+                }
 
                 var user = await _userManager.FindByIdAsync(userId);
                 if (user == null)
@@ -309,11 +321,18 @@ namespace AutoSallonSolution.Controllers
                     return NotFound(new { message = "User not found" });
                 }
 
+                // Check if trying to delete self
+                if (user.Id == currentUser.Id)
+                {
+                    return BadRequest(new { message = "Cannot delete your own account" });
+                }
+
                 var result = await _userManager.DeleteAsync(user);
                 if (!result.Succeeded)
                 {
-                    Console.WriteLine($"Failed to delete user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
-                    return BadRequest(new { message = "Failed to delete user", errors = result.Errors });
+                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                    Console.WriteLine($"Failed to delete user: {errors}");
+                    return BadRequest(new { message = "Failed to delete user", errors = errors });
                 }
 
                 Console.WriteLine($"Successfully deleted user with ID: {userId}");
@@ -323,12 +342,15 @@ namespace AutoSallonSolution.Controllers
             {
                 Console.WriteLine($"Error deleting user: {ex.Message}");
                 Console.WriteLine($"Stack trace: {ex.StackTrace}");
-                return StatusCode(500, new { message = "An error occurred while deleting the user" });
+                return StatusCode(500, new { 
+                    message = "An error occurred while deleting the user",
+                    error = ex.Message,
+                    stackTrace = ex.StackTrace
+                });
             }
         }
 
         [HttpOptions("users/{userId}")]
-        [EnableCors("AllowReactApp")]
         public IActionResult Options()
         {
             Response.Headers.Add("Access-Control-Allow-Methods", "DELETE, OPTIONS");

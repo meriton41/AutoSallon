@@ -166,10 +166,6 @@ export default function DashboardPage() {
                 <Car className="w-5 h-5 text-green-600 dark:text-green-300" />
                 <span className="text-gray-900 dark:text-white font-medium">Manage Vehicles</span>
               </Link>
-              <Link href="/dashboard/settings" className="w-full flex items-center space-x-2 p-3 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
-                <Settings className="w-5 h-5 text-gray-600" />
-                <span>System Settings</span>
-              </Link>
             </div>
           </Card>
         </div>

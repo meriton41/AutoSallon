@@ -107,13 +107,6 @@ export default function DashboardLayout({
             >
               Rating
             </Link>
-
-            <Link
-              href="/dashboard/settings"
-              className="block py-2 px-4 rounded hover:bg-gray-800 transition-colors"
-            >
-              Settings
-            </Link>
           </nav>
         </div>
 

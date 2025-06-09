@@ -109,6 +109,16 @@ export default function DashboardUsers() {
         return;
       }
 
+      // Add token debugging
+      try {
+        const tokenParts = token.split('.');
+        const payload = JSON.parse(atob(tokenParts[1]));
+        console.log('Token payload:', payload);
+        console.log('User role from token:', payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role']);
+      } catch (e) {
+        console.error('Error parsing token:', e);
+      }
+
       console.log('Attempting to delete user:', id);
       console.log('Using token:', token);
 
@@ -149,7 +159,7 @@ export default function DashboardUsers() {
       } else if (err.response?.status === 405) {
         setError("Server error: Method not allowed. Please try again later.");
       } else {
-        setError(`Failed to delete user: ${err.message}`);
+        setError(`Failed to delete user: ${err.response?.data || err.message}`);
       }
     }
   };

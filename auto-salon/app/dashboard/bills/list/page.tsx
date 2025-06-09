@@ -171,207 +171,206 @@ export default function BillListPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto bg-black p-8 rounded-lg shadow-md border border-gray-800">
-      <h1 className="text-3xl font-bold mb-6 text-white text-center">All Bills</h1>
-      <div className="overflow-x-auto">
-        <div className="max-h-[500px] overflow-y-auto">
-          <table className="min-w-full divide-y divide-gray-700 bg-gray-900 rounded-lg">
-            <thead>
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-300 uppercase">Client</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-300 uppercase">Car</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-300 uppercase">Amount</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-300 uppercase">Date</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-300 uppercase">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-800">
-              {bills.length > 0 ? (
-                bills.map((bill) => (
-                  <tr
-                    key={bill.id}
-                    className="bg-gray-800 hover:bg-gray-700"
-                  >
-                    <td className="px-4 py-3">{bill.clientName}</td>
-                    <td className="px-4 py-3">{bill.vehicleId}</td>
-                    <td className="px-4 py-3">${bill.amount}</td>
-                    <td className="px-4 py-3">{new Date(bill.date).toLocaleDateString()}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={async () => {
-                            // Fetch car details
-                            const res = await fetch(`https://localhost:7234/api/Vehicles/${bill.vehicleId}`);
-                            const car = await res.json();
-                            const doc = generateBillPdf(bill, car);
-                            doc.save(`Bill-${bill.id}.pdf`);
-                          }}
-                          className="bg-gray-700 hover:bg-gray-600 p-3 rounded-lg flex items-center justify-center transition"
-                          title="Download"
-                        >
-                          {/* Download Icon */}
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
-                          </svg>
-                        </button>
-                        <button
-                          onClick={() => handleEdit(bill)}
-                          className="bg-gray-700 hover:bg-gray-600 p-3 rounded-lg flex items-center justify-center transition"
-                          title="Edit"
-                        >
-                          {/* Pencil Icon */}
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536M9 13l6-6m2 2l-6 6m-2 2H7v-2l6-6z" />
-                          </svg>
-                        </button>
-                        <button
-                          onClick={() => handleDelete(bill.id)}
-                          className="bg-red-600 hover:bg-red-700 p-3 rounded-lg flex items-center justify-center transition"
-                          title="Delete"
-                        >
-                          {/* Trash Icon */}
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                        </button>
-                      </div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 py-8">
+      <div className="w-full max-w-5xl mx-auto bg-gray-900 rounded-2xl shadow-lg p-8 border border-gray-800">
+        <h1 className="text-3xl font-bold mb-8 text-blue-500 text-left">View Bills</h1>
+        <div className="overflow-x-auto">
+          <div className="max-h-[500px] overflow-y-auto">
+            <table className="min-w-full bg-gray-900 rounded-2xl shadow divide-y divide-gray-800">
+              <thead>
+                <tr>
+                  <th className="px-6 py-4 text-left text-base font-bold text-gray-200 uppercase tracking-wider">Client</th>
+                  <th className="px-6 py-4 text-left text-base font-bold text-gray-200 uppercase tracking-wider">Car</th>
+                  <th className="px-6 py-4 text-left text-base font-bold text-gray-200 uppercase tracking-wider">Amount</th>
+                  <th className="px-6 py-4 text-left text-base font-bold text-gray-200 uppercase tracking-wider">Date</th>
+                  <th className="px-6 py-4 text-left text-base font-bold text-gray-200 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-800">
+                {bills.length > 0 ? (
+                  bills.map((bill) => (
+                    <tr key={bill.id} className="hover:bg-gray-800/70 transition rounded-xl">
+                      <td className="px-6 py-4 whitespace-nowrap text-gray-100">{bill.clientName}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-gray-100">{bill.vehicleId}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-gray-100">${bill.amount}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-gray-100">{new Date(bill.date).toLocaleDateString()}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={async () => {
+                              // Fetch car details
+                              const res = await fetch(`https://localhost:7234/api/Vehicles/${bill.vehicleId}`);
+                              const car = await res.json();
+                              const doc = generateBillPdf(bill, car);
+                              doc.save(`Bill-${bill.id}.pdf`);
+                            }}
+                            className="bg-gray-700 hover:bg-gray-600 p-3 rounded-lg flex items-center justify-center transition"
+                            title="Download"
+                          >
+                            {/* Download Icon */}
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={() => handleEdit(bill)}
+                            className="bg-gray-700 hover:bg-gray-600 p-3 rounded-lg flex items-center justify-center transition"
+                            title="Edit"
+                          >
+                            {/* Pencil Icon */}
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536M9 13l6-6m2 2l-6 6m-2 2H7v-2l6-6z" />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={() => handleDelete(bill.id)}
+                            className="bg-red-600 hover:bg-red-700 p-3 rounded-lg flex items-center justify-center transition"
+                            title="Delete"
+                          >
+                            {/* Trash Icon */}
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={5} className="text-center py-12 text-gray-400 bg-gray-800/60 rounded-xl">
+                      No bills found.
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={5} className="text-center text-gray-400 py-6">
-                    No bills found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-      {/* Edit Modal */}
-      {showModal && editingBill && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-          <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md">
-            <h2 className="text-xl font-semibold mb-4 text-white">Edit Bill</h2>
-            <form onSubmit={handleEditSubmit} className="space-y-4">
-              <div>
-                <label htmlFor="clientName" className="block text-sm font-medium text-gray-300 mb-1">
-                  Client Name
-                </label>
-                <input
-                  type="text"
-                  id="clientName"
-                  name="clientName"
-                  value={editForm.clientName}
-                  onChange={handleEditChange}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                />
-              </div>
-
-              <div>
-                <label htmlFor="clientEmail" className="block text-sm font-medium text-gray-300 mb-1">
-                  Client Email
-                </label>
-                <input
-                  type="email"
-                  id="clientEmail"
-                  name="clientEmail"
-                  value={editForm.clientEmail}
-                  onChange={handleEditChange}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                />
-              </div>
-
-              <div>
-                <label htmlFor="vehicleId" className="block text-sm font-medium text-gray-300 mb-1">
-                  Vehicle
-                </label>
-                <select
-                  id="vehicleId"
-                  name="vehicleId"
-                  value={editForm.vehicleId}
-                  onChange={handleEditChange}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                >
-                  <option key="default" value="">Select a vehicle</option>
-                  {cars.map((car) => (
-                    <option key={car.id} value={car.id}>
-                      {car.brand} {car.model} ({car.year})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label htmlFor="amount" className="block text-sm font-medium text-gray-300 mb-1">
-                  Amount
-                </label>
-                <input
-                  type="number"
-                  id="amount"
-                  name="amount"
-                  value={editForm.amount}
-                  onChange={handleEditChange}
-                  step="0.01"
-                  min="0.01"
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                />
-              </div>
-
-              <div>
-                <label htmlFor="description" className="block text-sm font-medium text-gray-300 mb-1">
-                  Description
-                </label>
-                <textarea
-                  id="description"
-                  name="description"
-                  value={editForm.description}
-                  onChange={handleEditChange}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  rows={3}
-                  required
-                />
-              </div>
-
-              <div>
-                <label htmlFor="date" className="block text-sm font-medium text-gray-300 mb-1">
-                  Date
-                </label>
-                <input
-                  type="datetime-local"
-                  id="date"
-                  name="date"
-                  value={editForm.date}
-                  onChange={handleEditChange}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                />
-              </div>
-
-              <div className="flex justify-end space-x-3 mt-6">
-                <button
-                  type="button"
-                  onClick={() => setEditingBill(null)}
-                  className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white bg-gray-700 hover:bg-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                >
-                  Save Changes
-                </button>
-              </div>
-            </form>
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
-      )}
+        {/* Edit Modal */}
+        {showModal && editingBill && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+            <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md">
+              <h2 className="text-xl font-semibold mb-4 text-white">Edit Bill</h2>
+              <form onSubmit={handleEditSubmit} className="space-y-4">
+                <div>
+                  <label htmlFor="clientName" className="block text-sm font-medium text-gray-300 mb-1">
+                    Client Name
+                  </label>
+                  <input
+                    type="text"
+                    id="clientName"
+                    name="clientName"
+                    value={editForm.clientName}
+                    onChange={handleEditChange}
+                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="clientEmail" className="block text-sm font-medium text-gray-300 mb-1">
+                    Client Email
+                  </label>
+                  <input
+                    type="email"
+                    id="clientEmail"
+                    name="clientEmail"
+                    value={editForm.clientEmail}
+                    onChange={handleEditChange}
+                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="vehicleId" className="block text-sm font-medium text-gray-300 mb-1">
+                    Vehicle
+                  </label>
+                  <select
+                    id="vehicleId"
+                    name="vehicleId"
+                    value={editForm.vehicleId}
+                    onChange={handleEditChange}
+                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  >
+                    <option key="default" value="">Select a vehicle</option>
+                    {cars.map((car) => (
+                      <option key={car.id} value={car.id}>
+                        {car.brand} {car.model} ({car.year})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label htmlFor="amount" className="block text-sm font-medium text-gray-300 mb-1">
+                    Amount
+                  </label>
+                  <input
+                    type="number"
+                    id="amount"
+                    name="amount"
+                    value={editForm.amount}
+                    onChange={handleEditChange}
+                    step="0.01"
+                    min="0.01"
+                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="description" className="block text-sm font-medium text-gray-300 mb-1">
+                    Description
+                  </label>
+                  <textarea
+                    id="description"
+                    name="description"
+                    value={editForm.description}
+                    onChange={handleEditChange}
+                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    rows={3}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="date" className="block text-sm font-medium text-gray-300 mb-1">
+                    Date
+                  </label>
+                  <input
+                    type="datetime-local"
+                    id="date"
+                    name="date"
+                    value={editForm.date}
+                    onChange={handleEditChange}
+                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+
+                <div className="flex justify-end space-x-3 mt-6">
+                  <button
+                    type="button"
+                    onClick={() => setEditingBill(null)}
+                    className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white bg-gray-700 hover:bg-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  >
+                    Save Changes
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
