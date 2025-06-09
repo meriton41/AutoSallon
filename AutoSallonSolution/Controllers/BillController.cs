@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using AutoSallonSolution.Models;
 using AutoSallonSolution.Data;
+using AutoSallonSolution.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -57,23 +58,37 @@ namespace AutoSallonSolution.Controllers
 
         // POST: api/Bill
         [HttpPost]
-        public async Task<ActionResult<Bill>> CreateBill([FromBody] Bill bill)
+        public async Task<ActionResult<Bill>> CreateBill([FromBody] CreateBillDTO billDto)
         {
-            if (bill == null)
-                return BadRequest();
+            if (billDto == null)
+                return BadRequest("Bill data is required");
 
             // Check if vehicle exists
-            var vehicle = await _context.Vehicles.FindAsync(bill.VehicleId);
+            var vehicle = await _context.Vehicles.FindAsync(billDto.VehicleId);
             if (vehicle == null)
-                return BadRequest("Invalid VehicleId");
+                return BadRequest($"Vehicle with ID {billDto.VehicleId} not found");
 
-            bill.Id = Guid.NewGuid();
-            bill.Date = DateTime.UtcNow;
+            var bill = new Bill
+            {
+                Id = Guid.NewGuid(),
+                ClientName = billDto.ClientName,
+                ClientEmail = billDto.ClientEmail,
+                VehicleId = billDto.VehicleId,
+                Amount = billDto.Amount,
+                Description = billDto.Description,
+                Date = billDto.Date
+            };
 
-            _context.Bills.Add(bill);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetBill), new { id = bill.Id }, bill);
+            try
+            {
+                _context.Bills.Add(bill);
+                await _context.SaveChangesAsync();
+                return CreatedAtAction(nameof(GetBill), new { id = bill.Id }, bill);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error creating bill: {ex.Message}");
+            }
         }
 
         // PUT: api/Bill/{id}

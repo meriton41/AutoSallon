@@ -8,7 +8,7 @@ const initialState: Bill = {
   id: "",
   clientName: "",
   clientEmail: "",
-  carId: "",
+  vehicleId: 0,
   amount: 0,
   description: "",
   date: "",
@@ -44,12 +44,12 @@ export default function BillForm() {
       const payload = {
         clientName: form.clientName,
         clientEmail: form.clientEmail,
-        carId: form.carId,
+        vehicleId: Number(form.vehicleId),
         amount: Number(form.amount),
         description: form.description,
         date: form.date ? new Date(form.date).toISOString() : null
       };
-      const response = await fetch("https://localhost:7234/api/Bills", {
+      const response = await fetch("https://localhost:7234/api/Bill", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -81,7 +81,7 @@ export default function BillForm() {
         </div>
         <div>
           <label className="block text-sm font-medium mb-1 text-white">Car</label>
-          <select name="carId" value={form.carId} onChange={handleChange} className="w-full border rounded px-3 py-2 bg-gray-900 text-white" required>
+          <select name="vehicleId" value={form.vehicleId} onChange={handleChange} className="w-full border rounded px-3 py-2 bg-gray-900 text-white" required>
             <option value="">Select a car</option>
             {cars.map(car => (
               <option key={car.id} value={car.id}>

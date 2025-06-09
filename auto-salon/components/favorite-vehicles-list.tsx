@@ -40,7 +40,10 @@ export default function FavoriteVehiclesList() {
           ? `https://localhost:7234/api/FavoriteVehicles?userId=${userId}`
           : "https://localhost:7234/api/FavoriteVehicles";
         const response = await axios.get(url, { headers });
-        setVehicles(response.data)
+        console.log('Favorite vehicles API response:', response.data);
+        // Extract the vehicle data from the response
+        const favoriteVehicles = response.data.map((fav: any) => fav.vehicle);
+        setVehicles(favoriteVehicles);
       } catch (error) {
         console.error("Error fetching favorite vehicles:", error)
       } finally {
@@ -90,53 +93,46 @@ export default function FavoriteVehiclesList() {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {vehicles.map((vehicle) => (
-        <Card key={vehicle.id} className="car-card h-full">
-          <div className="relative h-64 w-full">
-            <Image
-              src={vehicle.image && vehicle.image !== "string" ? vehicle.image : "/placeholder.svg"}
-              alt={vehicle.title}
-              fill
-              className="object-cover transition-transform duration-300"
-            />
-            {vehicle.isNew && <Badge className="absolute top-2 left-2 z-10">New</Badge>}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute top-2 right-2 z-10 bg-white/80 hover:bg-white"
-              onClick={() => removeFromFavorites(vehicle.id)}
-            >
-              <Heart className="h-5 w-5 text-red-500 fill-red-500" />
-            </Button>
-          </div>
-          <CardContent className="p-4">
-            <div className="flex items-center mb-2">
+        <Link key={vehicle.id} href={`/vehicles/${vehicle.id}`}>
+          <Card className="overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 bg-white dark:bg-gray-800">
+            <div className="relative h-48">
               <Image
-                src={vehicle.brandLogo && vehicle.brandLogo !== "string" ? vehicle.brandLogo : "/placeholder.svg"}
-                alt={vehicle.brand}
-                width={40}
-                height={30}
-                className="mr-2"
+                src={vehicle.image && vehicle.image !== "string" ? vehicle.image : "/placeholder.svg"}
+                alt={vehicle.title || `Vehicle ${vehicle.id}` || "Vehicle image"}
+                fill
+                className="object-cover"
               />
-              <h3 className="text-xl font-bold">{vehicle.title}</h3>
+              {vehicle.isNew && (
+                <Badge className="absolute top-2 right-2 bg-green-500 text-white text-xs font-semibold px-2 py-1 rounded">New</Badge>
+              )}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-2 left-2 bg-white/80 hover:bg-white dark:bg-gray-700/80 dark:hover:bg-gray-700 text-gray-900 dark:text-white"
+                onClick={(e) => {
+                  e.preventDefault()
+                  removeFromFavorites(vehicle.id)
+                }}
+              >
+                <Heart className="h-5 w-5 fill-red-500 text-red-500" />
+              </Button>
             </div>
-            <div className="grid grid-cols-3 gap-2 mt-4">
-              <div className="car-specs-icon">
-                <span className="text-xs text-muted-foreground">Year</span>
-                <span className="font-medium">{vehicle.year}</span>
+            <CardContent className="p-4">
+              <div className="flex items-center mb-2">
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{vehicle.title}</h3>
               </div>
-              <div className="car-specs-icon">
-                <span className="text-xs text-muted-foreground">Engine</span>
-                <span className="font-medium">{vehicle.engine}</span>
+
+              <div className="grid grid-cols-2 gap-y-2 gap-x-4 text-sm text-gray-700 dark:text-gray-300">
+                <div className="flex items-center space-x-1"><span className="font-semibold text-gray-900 dark:text-white">Brand:</span> <span>{vehicle.brand}</span></div>
+                <div className="flex items-center space-x-1"><span className="font-semibold text-gray-900 dark:text-white">Year:</span> <span>{vehicle.year}</span></div>
+                <div className="flex items-center space-x-1"><span className="font-semibold text-gray-900 dark:text-white">Engine:</span> <span>{vehicle.engine}</span></div>
+                <div className="flex items-center space-x-1"><span className="font-semibold text-gray-900 dark:text-white">Fuel:</span> <span>{vehicle.fuel}</span></div>
               </div>
-              <div className="car-specs-icon">
-                <span className="text-xs text-muted-foreground">Power</span>
-                <span className="font-medium">{vehicle.power}</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </Link>
       ))}
     </div>
   )
