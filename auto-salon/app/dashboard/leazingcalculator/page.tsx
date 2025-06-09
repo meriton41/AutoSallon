@@ -154,280 +154,89 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
-      <header className="bg-white dark:bg-slate-950 shadow-md">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center space-x-2">
-              <Car className="h-8 w-8 text-primary" />
-              <h1 className="text-2xl font-bold">AutoSalon Finance</h1>
-            </div>
-            <nav className="hidden md:flex space-x-6">
-              <Button variant="ghost">Dashboard</Button>
-              <Button variant="ghost">Inventory</Button>
-              <Button variant="default">Payments</Button>
-              <Button variant="ghost">Reports</Button>
-            </nav>
-          </div>
-        </div>
-      </header>
-
-      <main className="container mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 flex flex-col items-center justify-center">
+      <main className="w-full max-w-lg px-4 py-12 flex flex-col items-center">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-          <h2 className="text-3xl font-bold mb-8">Vehicle Payment Management</h2>
+          <h2 className="text-4xl font-extrabold mb-8 text-center bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent drop-shadow-lg text-white">
+            Leasing Calculator
+          </h2>
         </motion.div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <motion.div
-            className="lg:col-span-1"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
-              <CardHeader className="bg-gradient-to-r from-primary/10 to-primary/5">
-                <CardTitle className="flex items-center">
-                  <CreditCard className="mr-2 h-5 w-5" />
-                  Leasing Calculator
-                </CardTitle>
-                <CardDescription>Calculate your monthly payments</CardDescription>
-              </CardHeader>
-              <CardContent className="pt-6 space-y-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <Label htmlFor="vehicle-price">Vehicle Price</Label>
-                    <span className="font-medium">${leasingParams.vehiclePrice.toLocaleString()}</span>
-                  </div>
-                  <Slider
-                    id="vehicle-price"
-                    min={10000}
-                    max={200000}
-                    step={1000}
-                    value={[leasingParams.vehiclePrice]}
-                    onValueChange={(value) => setLeasingParams({ ...leasingParams, vehiclePrice: value[0] })}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <Label htmlFor="down-payment">Down Payment</Label>
-                    <span className="font-medium">${leasingParams.downPayment.toLocaleString()}</span>
-                  </div>
-                  <Slider
-                    id="down-payment"
-                    min={0}
-                    max={leasingParams.vehiclePrice / 2}
-                    step={500}
-                    value={[leasingParams.downPayment]}
-                    onValueChange={(value) => setLeasingParams({ ...leasingParams, downPayment: value[0] })}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="term">Lease Term</Label>
-                  <Select
-                    value={leasingParams.term.toString()}
-                    onValueChange={(value) => setLeasingParams({ ...leasingParams, term: Number.parseInt(value) })}
-                  >
-                    <SelectTrigger id="term">
-                      <SelectValue placeholder="Select term" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="24">24 months</SelectItem>
-                      <SelectItem value="36">36 months</SelectItem>
-                      <SelectItem value="48">48 months</SelectItem>
-                      <SelectItem value="60">60 months</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <Label htmlFor="interest-rate">Interest Rate (%)</Label>
-                    <span className="font-medium">{leasingParams.interestRate}%</span>
-                  </div>
-                  <Slider
-                    id="interest-rate"
-                    min={1}
-                    max={10}
-                    step={0.1}
-                    value={[leasingParams.interestRate]}
-                    onValueChange={(value) => setLeasingParams({ ...leasingParams, interestRate: value[0] })}
-                  />
-                </div>
-              </CardContent>
-              <CardFooter className="flex flex-col space-y-4">
-                <div className="w-full p-4 bg-primary/10 rounded-lg">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium">Monthly Payment:</span>
-                    <span className="text-2xl font-bold">${calculateMonthlyPayment()}</span>
-                  </div>
-                </div>
-                <Button className="w-full" onClick={addVehicle}>
-                  <DollarSign className="mr-2 h-4 w-4" />
-                  Add Vehicle with These Terms
-                </Button>
-              </CardFooter>
-            </Card>
-
-            <Card className="mt-8 shadow-lg hover:shadow-xl transition-shadow duration-300">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <TrendingUp className="mr-2 h-5 w-5" />
-                  Payment Overview
-                </CardTitle>
-                <CardDescription>Summary of your vehicle payments</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-primary/10 p-4 rounded-lg">
-                    <p className="text-sm text-muted-foreground">Total Vehicles</p>
-                    <p className="text-2xl font-bold">{vehicles.length}</p>
-                  </div>
-                  <div className="bg-primary/10 p-4 rounded-lg">
-                    <p className="text-sm text-muted-foreground">Monthly Total</p>
-                    <p className="text-2xl font-bold">
-                      ${vehicles.reduce((sum, vehicle) => sum + vehicle.monthlyPayment, 0).toLocaleString()}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Active Leases</span>
-                    <span>{vehicles.filter((v) => v.status === "Active").length}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span>Pending Approval</span>
-                    <span>{vehicles.filter((v) => v.status === "Pending").length}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span>Overdue Payments</span>
-                    <span className="text-red-500 font-medium">
-                      {vehicles.filter((v) => v.status === "Overdue").length}
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          <motion.div
-            className="lg:col-span-2"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-          >
-            <Card className="shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <Calendar className="mr-2 h-5 w-5" />
-                    Vehicle Payments
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Tabs defaultValue="all" className="w-[300px]">
-                      <TabsList className="grid w-full grid-cols-3">
-                        <TabsTrigger value="all">All</TabsTrigger>
-                        <TabsTrigger value="active">Active</TabsTrigger>
-                        <TabsTrigger value="overdue">Overdue</TabsTrigger>
-                      </TabsList>
-                    </Tabs>
-                  </div>
-                </CardTitle>
-                <CardDescription>Manage your vehicle payment schedule</CardDescription>
-                <div className="flex items-center space-x-2 mt-4">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Search vehicles..."
-                      className="pl-8"
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                  </div>
-                  <Button variant="outline" size="icon">
-                    <Filter className="h-4 w-4" />
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <ScrollArea className="h-[500px] w-full pr-4">
-                  <Table>
-                    <TableHeader className="sticky top-0 bg-background">
-                      <TableRow>
-                        <TableHead className="w-[200px] cursor-pointer" onClick={() => requestSort("name")}>
-                          <div className="flex items-center">
-                            Vehicle
-                            <ArrowUpDown className="ml-2 h-4 w-4" />
-                          </div>
-                        </TableHead>
-                        <TableHead className="cursor-pointer" onClick={() => requestSort("price")}>
-                          <div className="flex items-center">
-                            Price
-                            <ArrowUpDown className="ml-2 h-4 w-4" />
-                          </div>
-                        </TableHead>
-                        <TableHead className="cursor-pointer" onClick={() => requestSort("monthlyPayment")}>
-                          <div className="flex items-center">
-                            Monthly
-                            <ArrowUpDown className="ml-2 h-4 w-4" />
-                          </div>
-                        </TableHead>
-                        <TableHead className="cursor-pointer" onClick={() => requestSort("remainingPayments")}>
-                          <div className="flex items-center">
-                            Remaining
-                            <ArrowUpDown className="ml-2 h-4 w-4" />
-                          </div>
-                        </TableHead>
-                        <TableHead className="cursor-pointer" onClick={() => requestSort("nextPayment")}>
-                          <div className="flex items-center">
-                            Next Payment
-                            <ArrowUpDown className="ml-2 h-4 w-4" />
-                          </div>
-                        </TableHead>
-                        <TableHead className="cursor-pointer" onClick={() => requestSort("status")}>
-                          <div className="flex items-center">
-                            Status
-                            <ArrowUpDown className="ml-2 h-4 w-4" />
-                          </div>
-                        </TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredVehicles.map((vehicle) => (
-                        <TableRow key={vehicle.id} className="hover:bg-primary/5 cursor-pointer transition-colors">
-                          <TableCell className="font-medium">{vehicle.name}</TableCell>
-                          <TableCell>${vehicle.price.toLocaleString()}</TableCell>
-                          <TableCell>${vehicle.monthlyPayment.toLocaleString()}</TableCell>
-                          <TableCell>{vehicle.remainingPayments} months</TableCell>
-                          <TableCell>{vehicle.nextPayment}</TableCell>
-                          <TableCell>
-                            <Badge
-                              variant={
-                                vehicle.status === "Active"
-                                  ? "default"
-                                  : vehicle.status === "Overdue"
-                                    ? "destructive"
-                                    : "secondary"
-                              }
-                            >
-                              {vehicle.status}
-                            </Badge>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </ScrollArea>
-              </CardContent>
-              <CardFooter className="flex justify-between">
-                <Button variant="outline">Export Data</Button>
-                <Button>Make Payment</Button>
-              </CardFooter>
-            </Card>
-          </motion.div>
-        </div>
+        <Card className="shadow-2xl border-0 bg-white/90 dark:bg-gray-900/90 w-full">
+          <CardHeader className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-t-xl">
+            <CardTitle className="flex items-center text-2xl font-bold text-gray-900 dark:text-white">
+              <CreditCard className="mr-2 h-6 w-6 text-blue-600" />
+              Calculate Your Monthly Payment
+            </CardTitle>
+            <CardDescription className="text-gray-500 dark:text-gray-300">Enter your leasing details below</CardDescription>
+          </CardHeader>
+          <CardContent className="pt-6 space-y-6">
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <Label htmlFor="vehicle-price">Vehicle Price</Label>
+                <span className="font-medium">${leasingParams.vehiclePrice.toLocaleString()}</span>
+              </div>
+              <Slider
+                id="vehicle-price"
+                min={10000}
+                max={200000}
+                step={1000}
+                value={[leasingParams.vehiclePrice]}
+                onValueChange={(value) => setLeasingParams({ ...leasingParams, vehiclePrice: value[0] })}
+              />
+            </div>
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <Label htmlFor="down-payment">Down Payment</Label>
+                <span className="font-medium">${leasingParams.downPayment.toLocaleString()}</span>
+              </div>
+              <Slider
+                id="down-payment"
+                min={0}
+                max={leasingParams.vehiclePrice / 2}
+                step={500}
+                value={[leasingParams.downPayment]}
+                onValueChange={(value) => setLeasingParams({ ...leasingParams, downPayment: value[0] })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="term">Lease Term</Label>
+              <Select
+                value={leasingParams.term.toString()}
+                onValueChange={(value) => setLeasingParams({ ...leasingParams, term: Number.parseInt(value) })}
+              >
+                <SelectTrigger id="term">
+                  <SelectValue placeholder="Select term" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="24">24 months</SelectItem>
+                  <SelectItem value="36">36 months</SelectItem>
+                  <SelectItem value="48">48 months</SelectItem>
+                  <SelectItem value="60">60 months</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <Label htmlFor="interest-rate">Interest Rate (%)</Label>
+                <span className="font-medium">{leasingParams.interestRate}%</span>
+              </div>
+              <Slider
+                id="interest-rate"
+                min={1}
+                max={10}
+                step={0.1}
+                value={[leasingParams.interestRate]}
+                onValueChange={(value) => setLeasingParams({ ...leasingParams, interestRate: value[0] })}
+              />
+            </div>
+          </CardContent>
+          <CardFooter className="flex flex-col space-y-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/30 dark:to-purple-900/30 rounded-b-xl">
+            <div className="w-full p-4 rounded-lg flex flex-col items-center">
+              <span className="text-lg font-medium text-gray-700 dark:text-gray-200 mb-2">Estimated Monthly Payment</span>
+              <span className="text-4xl font-extrabold text-blue-700 dark:text-blue-300 drop-shadow">${calculateMonthlyPayment()}</span>
+            </div>
+          </CardFooter>
+        </Card>
       </main>
     </div>
   )
