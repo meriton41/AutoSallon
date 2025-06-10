@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/auth-context";
@@ -11,9 +11,20 @@ import { useTheme } from "@/context/ThemeContext";
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
+  const [hasRated, setHasRated] = useState(false);
   const { user, logout } = useAuth();
   const pathname = usePathname();
   const { isDarkMode, toggleDarkMode } = useTheme();
+
+  useEffect(() => {
+    if (user) {
+      const userId = user.email;
+      if (userId) {
+        const hasRatedLocal = localStorage.getItem(`hasRated-${userId}`) === "true";
+        setHasRated(hasRatedLocal);
+      }
+    }
+  }, [user]);
 
   const navLinks = [
     { name: "Home", href: "/" },
@@ -53,7 +64,7 @@ export default function Header() {
             )}
           </Button>
 
-          {user && (
+          {user && !hasRated && (
             <Button 
               variant="outline" 
               size="sm"
@@ -169,7 +180,7 @@ export default function Header() {
               </Link>
             ))}
 
-            {user && (
+            {user && !hasRated && (
               <Button 
                 variant="outline"
                 size="sm"

@@ -36,13 +36,13 @@ public class WebsiteRatingsController : ControllerBase
             _logger.LogInformation("SubmitRating called with value: {Value}, comment: {Comment}", dto.Value, dto.Comment);
 
             if (dto.Value < 1 || dto.Value > 5)
-                return BadRequest("Rating must be between 1 and 5");
+                return BadRequest(new { message = "Rating must be between 1 and 5" });
 
             var user = await _userManager.GetUserAsync(User);
             if (user == null) 
             {
                 _logger.LogWarning("Unauthorized rating submission attempt");
-                return Unauthorized();
+                return Unauthorized(new { message = "Unauthorized" });
             }
 
             // Check if user already submitted a rating
@@ -53,7 +53,7 @@ public class WebsiteRatingsController : ControllerBase
             if (existingRating != null)
             {
                 _logger.LogWarning("User {UserId} attempted to submit multiple ratings", user.Id);
-                return BadRequest("You have already submitted a rating");
+                return BadRequest(new { message = "You have already submitted a rating" });
             }
 
             var rating = new WebsiteRating
@@ -71,7 +71,7 @@ public class WebsiteRatingsController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error submitting rating");
-            return StatusCode(500, "An error occurred while submitting your rating");
+            return StatusCode(500, new { message = "An error occurred while submitting your rating" });
         }
     }
 
@@ -88,7 +88,7 @@ public class WebsiteRatingsController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting all ratings");
-            return StatusCode(500, "An error occurred while retrieving ratings");
+            return StatusCode(500, new { message = "An error occurred while retrieving ratings" });
         }
     }
 
@@ -99,12 +99,12 @@ public class WebsiteRatingsController : ControllerBase
         try
         {
             var rating = await _ratingsCollection.Find(r => r.Id == id).FirstOrDefaultAsync();
-            return rating == null ? NotFound() : Ok(rating);
+            return rating == null ? NotFound(new { message = "Rating not found" }) : Ok(rating);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting rating with ID {RatingId}", id);
-            return StatusCode(500, "An error occurred while retrieving the rating");
+            return StatusCode(500, new { message = "An error occurred while retrieving the rating" });
         }
     }
 
@@ -118,14 +118,14 @@ public class WebsiteRatingsController : ControllerBase
             if (existingRating == null)
             {
                 _logger.LogWarning("Rating with ID {RatingId} not found for update", id);
-                return NotFound();
+                return NotFound(new { message = "Rating not found" });
             }
 
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
                 _logger.LogWarning("User not found for rating update");
-                return Unauthorized();
+                return Unauthorized(new { message = "Unauthorized" });
             }
 
             // Check if user is admin or the rating owner
@@ -133,7 +133,7 @@ public class WebsiteRatingsController : ControllerBase
             if (!isAdmin && user.Id != existingRating.UserId)
             {
                 _logger.LogWarning("User {UserId} not authorized to update rating {RatingId}", user.Id, id);
-                return Forbid();
+                return Forbid(new { message = "Forbidden" });
             }
 
             updatedRating.Id = id;
@@ -149,7 +149,7 @@ public class WebsiteRatingsController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating rating with ID {RatingId}", id);
-            return StatusCode(500, "An error occurred while updating the rating");
+            return StatusCode(500, new { message = "An error occurred while updating the rating" });
         }
     }
 
@@ -163,14 +163,14 @@ public class WebsiteRatingsController : ControllerBase
             if (rating == null)
             {
                 _logger.LogWarning("Rating with ID {RatingId} not found for deletion", id);
-                return NotFound();
+                return NotFound(new { message = "Rating not found" });
             }
 
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
                 _logger.LogWarning("User not found for rating deletion");
-                return Unauthorized();
+                return Unauthorized(new { message = "Unauthorized" });
             }
 
             // Check if user is admin or the rating owner
@@ -178,7 +178,7 @@ public class WebsiteRatingsController : ControllerBase
             if (!isAdmin && user.Id != rating.UserId)
             {
                 _logger.LogWarning("User {UserId} not authorized to delete rating {RatingId}", user.Id, id);
-                return Forbid();
+                return Forbid(new { message = "Forbidden" });
             }
 
             await _ratingsCollection.DeleteOneAsync(r => r.Id == id);
@@ -190,7 +190,7 @@ public class WebsiteRatingsController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting rating with ID {RatingId}", id);
-            return StatusCode(500, "An error occurred while deleting the rating");
+            return StatusCode(500, new { message = "An error occurred while deleting the rating" });
         }
     }
     // Add this new endpoint to your WebsiteRatingsController
@@ -200,7 +200,7 @@ public class WebsiteRatingsController : ControllerBase
         try
         {
             var user = await _userManager.GetUserAsync(User);
-            if (user == null) return Unauthorized();
+            if (user == null) return Unauthorized(new { message = "Unauthorized" });
 
             var existingRating = await _ratingsCollection
                 .Find(r => r.UserId == user.Id)
@@ -211,7 +211,7 @@ public class WebsiteRatingsController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error checking if user has rated");
-            return StatusCode(500, "An error occurred while checking rating status");
+            return StatusCode(500, new { message = "An error occurred while checking rating status" });
         }
     }
 

@@ -35,6 +35,7 @@ export function RatingPopup() {
   const [isSuccess, setIsSuccess] = useState(false);
   const [hasRated, setHasRated] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [showAlreadyRatedDialog, setShowAlreadyRatedDialog] = useState(false);
 
   const getAuthToken = (): string | null => {
     if (typeof window === "undefined") return null;
@@ -235,9 +236,34 @@ export function RatingPopup() {
       }
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error("Error response data:", errorData);
-        throw new Error(errorData.message || "Failed to submit rating");
+        let errorMessage = "Failed to submit rating";
+        const contentType = response.headers.get("content-type");
+        
+        try {
+          if (contentType && contentType.includes("application/json")) {
+            const errorData = await response.json();
+            if (errorData && errorData.message) {
+              errorMessage = errorData.message;
+            }
+          } else {
+            const errorText = await response.text();
+            if (errorText) {
+              errorMessage = errorText;
+            }
+          }
+        } catch (e) {
+          console.error("Error reading error response:", e);
+        }
+
+        if (errorMessage.includes("already submitted a rating")) {
+          setHasRated(true);
+          localStorage.setItem(`hasRated-${userId}`, "true");
+          setOpen(false);
+          setShowAlreadyRatedDialog(true);
+          return;
+        }
+        
+        throw new Error(errorMessage);
       }
 
       localStorage.setItem(`hasRated-${userId}`, "true");
@@ -251,11 +277,9 @@ export function RatingPopup() {
         setRating(0);
         setComment("");
       }, 1500);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Rating submission error:", error);
-      toast.error(
-        error.message || "Failed to submit rating. Please try again."
-      );
+      toast.error(error instanceof Error ? error.message : "Failed to submit rating. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -275,55 +299,79 @@ export function RatingPopup() {
   if (isCheckingAuth) return null;
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="z-[1000] max-w-md">
-        <DialogHeader>
-          <DialogTitle>Rate Your Experience</DialogTitle>
-          <DialogDescription>Your feedback helps us improve</DialogDescription>
-        </DialogHeader>
-        {isSuccess ? (
+    <>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="z-[1000] max-w-md">
+          <DialogHeader>
+            <DialogTitle>Rate Your Experience</DialogTitle>
+            <DialogDescription>Your feedback helps us improve</DialogDescription>
+          </DialogHeader>
+          
+          {isSuccess ? (
+            <div className="flex flex-col items-center justify-center py-8">
+              <div className="text-5xl mb-4">🎉</div>
+              <h3 className="text-xl font-semibold">Thank You!</h3>
+              <p className="text-muted-foreground">
+                Your rating has been submitted successfully.
+              </p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-4 py-4">
+              <div className="flex justify-center gap-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    className={`text-3xl focus:outline-none ${
+                      star <= (hover || rating)
+                        ? "text-yellow-500"
+                        : "text-gray-300"
+                    }`}
+                    onClick={() => setRating(star)}
+                    onMouseEnter={() => setHover(star)}
+                    onMouseLeave={() => setHover(0)}
+                    aria-label={`${star} star`}
+                  >
+                    {star <= (hover || rating) ? "★" : "☆"}
+                  </button>
+                ))}
+              </div>
+              <textarea
+                className="border rounded p-2 min-h-[100px] bg-gray-900 text-white"
+                placeholder="Optional feedback..."
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+              />
+              <Button
+                onClick={submitRating}
+                disabled={isSubmitting || rating === 0}
+              >
+                {isSubmitting ? "Submitting..." : "Submit Rating"}
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showAlreadyRatedDialog} onOpenChange={setShowAlreadyRatedDialog}>
+        <DialogContent className="z-[1000] max-w-md">
+          <DialogHeader>
+            <DialogTitle>Already Rated</DialogTitle>
+            <DialogDescription>Thank you for your feedback!</DialogDescription>
+          </DialogHeader>
           <div className="flex flex-col items-center justify-center py-8">
-            <div className="text-5xl mb-4">🎉</div>
-            <h3 className="text-xl font-semibold">Thank You!</h3>
-            <p className="text-muted-foreground">
-              Your rating has been submitted successfully.
+            <div className="text-5xl mb-4">✨</div>
+            <h3 className="text-xl font-semibold">You've Already Rated Us</h3>
+            <p className="text-muted-foreground text-center mt-2">
+              We appreciate your previous feedback. Thank you for helping us improve!
             </p>
           </div>
-        ) : (
-          <div className="flex flex-col gap-4 py-4">
-            <div className="flex justify-center gap-2">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  className={`text-3xl focus:outline-none ${
-                    star <= (hover || rating)
-                      ? "text-yellow-500"
-                      : "text-gray-300"
-                  }`}
-                  onClick={() => setRating(star)}
-                  onMouseEnter={() => setHover(star)}
-                  onMouseLeave={() => setHover(0)}
-                  aria-label={`${star} star`}
-                >
-                  {star <= (hover || rating) ? "★" : "☆"}
-                </button>
-              ))}
-            </div>
-            <textarea
-              className="border rounded p-2 min-h-[100px] bg-gray-900 text-white"
-              placeholder="Optional feedback..."
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-            />
-            <Button
-              onClick={submitRating}
-              disabled={isSubmitting || rating === 0}
-            >
-              {isSubmitting ? "Submitting..." : "Submit Rating"}
+          <div className="flex justify-end">
+            <Button onClick={() => setShowAlreadyRatedDialog(false)}>
+              Close
             </Button>
           </div>
-        )}
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
