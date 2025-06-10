@@ -289,7 +289,10 @@ namespace AutoSallonSolution.Controllers
                     await _context.SaveChangesAsync();
                     _logger.LogInformation("Vehicle created successfully with ID: {Id}", vehicle.Id);
 
-                    await _hubContext.Clients.All.SendAsync("VehicleAdded", vehicle);
+                    await _hubContext.Clients.All.SendAsync("VehicleAdded", new { 
+                        title = vehicle.Title,
+                        image = vehicle.Image
+                    });
                     return CreatedAtAction(nameof(GetVehicle), new { id = vehicle.Id }, vehicle);
                 }
                 catch (DbUpdateException dbEx)

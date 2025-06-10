@@ -20,7 +20,7 @@ export default function RealTimeVehicleNotifier() {
       });
 
     connection.on(
-      "ReceiveVehicle",
+      "VehicleAdded",
       (vehicle: { title: string; image: string }) => {
         const notification = document.createElement("div");
         notification.style.display = "flex";
