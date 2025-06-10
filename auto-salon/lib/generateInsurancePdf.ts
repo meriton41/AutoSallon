@@ -45,13 +45,41 @@ export function generateInsurancePdf(insurance: CarInsurance): jsPDF {
   doc.setFont('helvetica', 'bold');
   doc.text("Car Information", 14, 104);
   doc.setFont('helvetica', 'normal');
-  doc.text(`Car ID: ${insurance.carId}`, 14, 110);
+  
+  // Draw a rectangle for car details
+  const carInfoY = 110;
+  const carInfoHeight = 60;
+  doc.setDrawColor(0);
+  doc.rect(14, carInfoY, 182, carInfoHeight);
+
+  // Left column car details
+  let leftX = 20;
+  let rightX = 100;
+  let y = carInfoY + 8;
+
+  doc.text(`Car ID: ${insurance.vehicleId || insurance.carId}`, leftX, y);
+  if (insurance.Vehicle) {
+    doc.text(`Title: ${insurance.Vehicle.title || ""}`, leftX, y + 8);
+    doc.text(`Brand: ${insurance.Vehicle.brand || ""}`, leftX, y + 16);
+    doc.text(`Year: ${insurance.Vehicle.year || ""}`, leftX, y + 24);
+    doc.text(`Color: ${insurance.Vehicle.color || ""}`, leftX, y + 32);
+    doc.text(`Interior Color: ${insurance.Vehicle.interiorColor || ""}`, leftX, y + 40);
+  }
+
+  // Right column car details
+  if (insurance.Vehicle) {
+    doc.text(`Engine: ${insurance.Vehicle.engine || ""}`, rightX, y);
+    doc.text(`Fuel: ${insurance.Vehicle.fuel || ""}`, rightX, y + 8);
+    doc.text(`Power: ${insurance.Vehicle.power || ""}`, rightX, y + 16);
+    doc.text(`Transmission: ${insurance.Vehicle.transmission || ""}`, rightX, y + 24);
+    doc.text(`Mileage: ${insurance.Vehicle.mileage || ""}`, rightX, y + 32);
+  }
 
   // Coverage
   doc.setFont('helvetica', 'bold');
-  doc.text("Coverage Details", 14, 120);
+  doc.text("Coverage Details", 14, carInfoY + carInfoHeight + 10);
   doc.setFont('helvetica', 'normal');
-  doc.text(insurance.coverageDetails, 14, 126, { maxWidth: 180 });
+  doc.text(insurance.coverageDetails, 14, carInfoY + carInfoHeight + 18, { maxWidth: 180 });
 
   // Signature area
   doc.setFont('helvetica', 'bold');

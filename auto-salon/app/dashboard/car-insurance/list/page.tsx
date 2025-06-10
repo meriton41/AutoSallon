@@ -46,9 +46,27 @@ export default function InsuranceListPage() {
     fetchCars();
   }, []);
 
-  const handleDownloadPdf = (insurance: CarInsurance) => {
-    const doc = generateInsurancePdf(insurance);
-    doc.save(`Insurance-${insurance.policyNumber}.pdf`);
+  const handleDownloadPdf = async (insurance: CarInsurance) => {
+    try {
+      // Fetch the car details
+      const carResponse = await fetch(`https://localhost:7234/api/Vehicles/${insurance.vehicleId || insurance.carId}`);
+      if (!carResponse.ok) {
+        throw new Error('Failed to fetch car details');
+      }
+      const carData = await carResponse.json();
+      
+      // Create a new insurance object with the car details
+      const insuranceWithCar = {
+        ...insurance,
+        Vehicle: carData
+      };
+      
+      const doc = generateInsurancePdf(insuranceWithCar);
+      doc.save(`Insurance-${insurance.policyNumber}.pdf`);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast.error('Failed to generate PDF. Please try again.');
+    }
   };
 
   const handleEdit = (insurance: CarInsurance) => {
