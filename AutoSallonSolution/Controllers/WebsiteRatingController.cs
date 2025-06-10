@@ -153,6 +153,11 @@ public class WebsiteRatingsController : ControllerBase
         }
     }
 
+    private IActionResult Forbid(object value)
+    {
+        throw new NotImplementedException();
+    }
+
     // DELETE: api/WebsiteRatings/{id}
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteRating(string id)
