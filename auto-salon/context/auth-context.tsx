@@ -128,6 +128,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     setToken(null);
     localStorage.removeItem("user");
+    if (typeof window !== "undefined") {
+      router.push("/");
+    }
   };
 
   const refreshToken = async () => {

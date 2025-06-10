@@ -24,6 +24,7 @@ interface Vehicle {
   engine: string;
   fuel: string;
   transmission: string;
+  imageUrl?: string;
 }
 
 interface TestDriveFormData {
@@ -69,7 +70,12 @@ export default function TestDriveForm({ vehicleId, onSuccess }: TestDriveFormPro
         });
         if (response.ok) {
           const data = await response.json();
-          setVehicles(data);
+          // Map backend Image to imageUrl
+          const mapped = data.map((v: any) => ({
+            ...v,
+            imageUrl: v.Image || v.image || v.imageUrl // fallback if needed
+          }));
+          setVehicles(mapped);
         }
       } catch (err) {
         setError('Failed to fetch vehicles');
@@ -280,11 +286,20 @@ export default function TestDriveForm({ vehicleId, onSuccess }: TestDriveFormPro
               <SelectContent>
                 {vehicles.map((vehicle) => (
                   <SelectItem key={vehicle.id} value={vehicle.id.toString()}>
-                    <div className="flex flex-col">
-                      <span className="font-semibold">{vehicle.title}</span>
-                      <span className="text-sm text-muted-foreground">
-                        {vehicle.year} • {vehicle.engine} • {vehicle.transmission}
-                      </span>
+                    <div className="flex items-center gap-3">
+                      {vehicle.imageUrl && (
+                        <img
+                          src={vehicle.imageUrl}
+                          alt={vehicle.title}
+                          className="w-12 h-8 object-cover rounded"
+                        />
+                      )}
+                      <div className="flex flex-col">
+                        <span className="font-semibold">{vehicle.title}</span>
+                        <span className="text-sm text-muted-foreground">
+                          {vehicle.year} • {vehicle.engine} • {vehicle.transmission}
+                        </span>
+                      </div>
                     </div>
                   </SelectItem>
                 ))}
