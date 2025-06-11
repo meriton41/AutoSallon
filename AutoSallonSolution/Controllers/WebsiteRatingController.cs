@@ -28,6 +28,7 @@ public class WebsiteRatingsController : ControllerBase
     }
 
     // POST: api/WebsiteRatings
+    [Authorize(Roles = "User")]
     [HttpPost]
     public async Task<IActionResult> SubmitRating([FromBody] RatingSubmissionDTO dto)
     {
@@ -77,6 +78,7 @@ public class WebsiteRatingsController : ControllerBase
 
 
     // GET: api/WebsiteRatings
+    [Authorize(Roles = "Admin")]
     [HttpGet]
     public async Task<IActionResult> GetAllRatings()
     {
@@ -93,6 +95,7 @@ public class WebsiteRatingsController : ControllerBase
     }
 
     // GET: api/WebsiteRatings/{id}
+    [Authorize(Roles = "Admin")]
     [HttpGet("{id}")]
     public async Task<ActionResult<WebsiteRating>> GetRating(string id)
     {
@@ -109,6 +112,7 @@ public class WebsiteRatingsController : ControllerBase
     }
 
     // PUT: api/WebsiteRatings/{id}
+    [Authorize(Roles = "Admin")]
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateRating(string id, [FromBody] WebsiteRating updatedRating)
     {
@@ -159,6 +163,7 @@ public class WebsiteRatingsController : ControllerBase
     }
 
     // DELETE: api/WebsiteRatings/{id}
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteRating(string id)
     {
