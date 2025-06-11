@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-
 interface QA {
   question: string;
   answer: string;
@@ -87,6 +86,16 @@ export default function LiveChat() {
 
   const [isTyping, setIsTyping] = React.useState(false);
 
+  const chatWindowRef = useRef<HTMLDivElement>(null);
+  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
+
+  useEffect(() => {
+    if (chatWindowRef.current) {
+      const rect = chatWindowRef.current.getBoundingClientRect();
+      setContainerSize({ width: rect.width, height: rect.height });
+    }
+  }, [isOpen]);
+
   const handleQuestionClick = (qa: QA) => {
     // Count how many times this question has been asked in the current messages
     const count = messages.filter(
@@ -103,6 +112,9 @@ export default function LiveChat() {
     setTimeout(() => {
       addMessage("system", qa.answer);
       setIsTyping(false);
+      // Removed confetti display as per user request
+      // setShowConfetti(true);
+      // setTimeout(() => setShowConfetti(false), 3000);
     }, 3000);
   };
 
@@ -118,7 +130,7 @@ export default function LiveChat() {
       <button
         onClick={toggleChat}
         aria-label="Toggle Live Chat"
-        className="fixed bottom-6 right-6 z-50 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white p-4 shadow-xl transform transition-transform duration-300 ease-in-out hover:scale-110 focus:outline-none focus:ring-4 focus:ring-blue-300"
+        className="fixed bottom-6 right-6 z-50 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white p-4 shadow-xl transform transition-transform duration-700 ease-in-out hover:scale-110 focus:outline-none focus:ring-4 focus:ring-blue-300"
       >
         {isOpen ? (
           <svg
@@ -155,31 +167,54 @@ export default function LiveChat() {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-20 right-6 z-50 w-80 max-w-full bg-white rounded-lg shadow-2xl border border-gray-300 flex flex-col overflow-hidden">
-          <div className="p-4 border-b border-gray-200 font-semibold text-lg bg-gradient-to-r from-blue-500 to-indigo-600 text-white">
-            Live Chat
+        <div
+          ref={chatWindowRef}
+          className="fixed bottom-20 right-6 z-50 w-80 max-w-full bg-white rounded-xl shadow-2xl border border-gray-300 flex flex-col overflow-hidden ring-2 ring-blue-500"
+        >
+          <div className="p-5 border-b border-blue-500 font-semibold text-xl bg-gradient-to-r from-blue-600 to-indigo-700 text-white flex items-center justify-between">
+            <span>Live Chat</span>
+            <button
+              onClick={toggleChat}
+              aria-label="Close Live Chat"
+              className="text-white hover:text-gray-300 focus:outline-none"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
           </div>
-          <div className="p-4 flex-1 flex flex-col space-y-3 overflow-y-auto max-h-96">
+          <div className="p-4 flex-1 flex flex-col space-y-4 overflow-y-auto max-h-96 bg-gradient-to-b from-white to-blue-50 relative">
             {messages.length === 0 && (
-              <p className="text-black font-medium mb-2">
+              <p className="text-gray-900 font-semibold mb-3">
                 How can we help you today? Select a question:
               </p>
             )}
-            <div className="flex flex-col space-y-2">
+            <div className="flex flex-col space-y-3">
               {messages.map((msg) => (
                 <div
                   key={msg.id}
-                  className={`max-w-[75%] px-4 py-2 rounded-lg ${
+                  className={`max-w-[75%] px-5 py-3 rounded-2xl shadow-md ${
                     msg.type === "user"
                       ? "self-end bg-blue-600 text-white"
-                      : "self-start bg-gray-200 text-gray-900"
+                      : "self-start bg-white text-gray-900 border border-gray-300"
                   }`}
                 >
                   {msg.text}
                 </div>
               ))}
               {isTyping && (
-                <div className="max-w-[75%] px-4 py-2 rounded-lg self-start bg-gray-200 text-gray-900 flex items-center space-x-2">
+                <div className="max-w-[75%] px-5 py-3 rounded-2xl self-start bg-white text-gray-900 border border-gray-300 flex items-center space-x-2 shadow-md">
                   <div className="w-3 h-3 bg-gray-500 rounded-full animate-bounce animation-delay-0"></div>
                   <div className="w-3 h-3 bg-gray-500 rounded-full animate-bounce animation-delay-200"></div>
                   <div className="w-3 h-3 bg-gray-500 rounded-full animate-bounce animation-delay-400"></div>
@@ -187,22 +222,26 @@ export default function LiveChat() {
               )}
               <div ref={messagesEndRef} />
             </div>
-            <div className="mt-auto pt-2 border-t border-gray-300">
-              <p className="text-gray-900 font-medium mb-2">
+            <div className="mt-auto pt-4 border-t border-blue-500">
+              <p className="text-gray-900 font-semibold mb-3">
                 Choose a question:
               </p>
-              <ul className="space-y-2 max-h-40 overflow-y-auto">
+              <ul className="space-y-3 max-h-44 overflow-y-auto">
                 {preConfiguredQA.map((qa, index) => (
                   <li key={index}>
                     <button
                       onClick={() => handleQuestionClick(qa)}
-                      className="w-full text-left px-3 py-2 rounded hover:bg-gray-100 focus:outline-none focus:bg-gray-100 text-black"
+                      className="w-full text-left px-4 py-3 rounded-xl bg-white hover:bg-blue-100 focus:outline-none focus:bg-blue-100 text-black shadow"
                     >
                       {qa.question}
                     </button>
                   </li>
                 ))}
               </ul>
+            </div>
+            {/* Visual effect: subtle animated background */}
+            <div className="absolute inset-0 pointer-events-none">
+              <div className="w-full h-full bg-gradient-to-r from-blue-100 via-blue-200 to-blue-100 animate-gradient-x opacity-20 rounded-xl"></div>
             </div>
           </div>
         </div>
