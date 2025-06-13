@@ -224,29 +224,29 @@ export default function BillListPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 py-8">
-      <div className="w-full max-w-5xl mx-auto bg-gray-900 rounded-2xl shadow-lg p-8 border border-gray-800">
-        <h1 className="text-3xl font-bold mb-8 text-blue-500 text-left">View Bills</h1>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-8">
+      <div className="w-full max-w-5xl mx-auto bg-white dark:bg-gray-900 rounded-2xl shadow-lg p-8 border border-gray-200 dark:border-gray-800">
+        <h1 className="text-3xl font-bold mb-8 text-blue-600 dark:text-blue-500 text-left">View Bills</h1>
         <div className="overflow-x-auto">
           <div className="max-h-[500px] overflow-y-auto">
-            <table className="min-w-full bg-gray-900 rounded-2xl shadow divide-y divide-gray-800">
+            <table className="min-w-full bg-white dark:bg-gray-900 rounded-2xl shadow divide-y divide-gray-200 dark:divide-gray-800">
               <thead>
                 <tr>
-                  <th className="px-6 py-4 text-left text-base font-bold text-gray-200 uppercase tracking-wider">Client</th>
-                  <th className="px-6 py-4 text-left text-base font-bold text-gray-200 uppercase tracking-wider">Car</th>
-                  <th className="px-6 py-4 text-left text-base font-bold text-gray-200 uppercase tracking-wider">Amount</th>
-                  <th className="px-6 py-4 text-left text-base font-bold text-gray-200 uppercase tracking-wider">Date</th>
-                  <th className="px-6 py-4 text-left text-base font-bold text-gray-200 uppercase tracking-wider">Actions</th>
+                  <th className="px-6 py-4 text-left text-base font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">Client</th>
+                  <th className="px-6 py-4 text-left text-base font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">Car</th>
+                  <th className="px-6 py-4 text-left text-base font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">Amount</th>
+                  <th className="px-6 py-4 text-left text-base font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">Date</th>
+                  <th className="px-6 py-4 text-left text-base font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-800">
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
                 {bills.length > 0 ? (
                   bills.map((bill) => (
-                    <tr key={bill.id} className="hover:bg-gray-800/70 transition rounded-xl">
-                      <td className="px-6 py-4 whitespace-nowrap text-gray-100">{bill.clientName}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-gray-100">{bill.vehicleId}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-gray-100">${bill.amount}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-gray-100">{new Date(bill.date).toLocaleDateString()}</td>
+                    <tr key={bill.id} className="hover:bg-gray-100 dark:hover:bg-gray-800/70 transition rounded-xl">
+                      <td className="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">{bill.clientName}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">{bill.vehicleId}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">${bill.amount}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">{new Date(bill.date).toLocaleDateString()}</td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex space-x-2">
                           <button
@@ -291,7 +291,7 @@ export default function BillListPage() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={7} className="text-center py-12 text-gray-400 bg-gray-800/60 rounded-xl">
+                    <td colSpan={7} className="text-center py-12 text-gray-400 bg-gray-100 dark:bg-gray-800/60 rounded-xl">
                       {loading ? "Loading bills..." : error || "No bills found."}
                     </td>
                   </tr>

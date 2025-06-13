@@ -240,16 +240,16 @@ export default function CarInsuranceForm({ onSubmit }: Props) {
     <>
       <form onSubmit={handleSaveAndSend} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium mb-1 text-white">Policy Number</label>
-          <input name="policyNumber" value={form.policyNumber} onChange={handleChange} className="w-full border rounded px-3 py-2 bg-gray-900 text-white" required />
+          <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">Policy Number</label>
+          <input name="policyNumber" value={form.policyNumber} onChange={handleChange} className="w-full border rounded px-3 py-2 bg-white text-gray-900 border-gray-300 dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700" required />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1 text-white">Car</label>
+          <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">Car</label>
           <select
             name="carId"
             value={form.carId}
             onChange={handleChange}
-            className="w-full border rounded px-3 py-2 bg-gray-900 text-white"
+            className="w-full border rounded px-3 py-2 bg-white text-gray-900 border-gray-300 dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700"
             required
           >
             <option value="">Select a car</option>
@@ -271,30 +271,30 @@ export default function CarInsuranceForm({ onSubmit }: Props) {
           )}
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1 text-white">Client Name</label>
-          <input name="clientName" value={form.clientName} onChange={handleChange} className="w-full border rounded px-3 py-2 bg-gray-900 text-white" required />
+          <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">Client Name</label>
+          <input name="clientName" value={form.clientName} onChange={handleChange} className="w-full border rounded px-3 py-2 bg-white text-gray-900 border-gray-300 dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700" required />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1 text-white">Client Email</label>
-          <input name="clientEmail" type="email" value={form.clientEmail} onChange={handleChange} className="w-full border rounded px-3 py-2 bg-gray-900 text-white" required />
+          <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">Client Email</label>
+          <input name="clientEmail" type="email" value={form.clientEmail} onChange={handleChange} className="w-full border rounded px-3 py-2 bg-white text-gray-900 border-gray-300 dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700" required />
         </div>
         <div className="flex gap-4">
           <div className="flex-1">
-            <label className="block text-sm font-medium mb-1 text-white">Start Date</label>
-            <input name="startDate" type="date" value={form.startDate} onChange={handleChange} className="w-full border rounded px-3 py-2 bg-gray-900 text-white" required />
+            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">Start Date</label>
+            <input name="startDate" type="date" value={form.startDate} onChange={handleChange} className="w-full border rounded px-3 py-2 bg-white text-gray-900 border-gray-300 dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700" required />
           </div>
           <div className="flex-1">
-            <label className="block text-sm font-medium mb-1 text-white">End Date</label>
-            <input name="endDate" type="date" value={form.endDate} onChange={handleChange} className="w-full border rounded px-3 py-2 bg-gray-900 text-white" required />
+            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">End Date</label>
+            <input name="endDate" type="date" value={form.endDate} onChange={handleChange} className="w-full border rounded px-3 py-2 bg-white text-gray-900 border-gray-300 dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700" required />
           </div>
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1 text-white">Coverage Details</label>
-          <textarea name="coverageDetails" value={form.coverageDetails} onChange={handleChange} className="w-full border rounded px-3 py-2 bg-gray-900 text-white" required />
+          <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">Coverage Details</label>
+          <textarea name="coverageDetails" value={form.coverageDetails} onChange={handleChange} className="w-full border rounded px-3 py-2 bg-white text-gray-900 border-gray-300 dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700" required />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1 text-white">Price</label>
-          <input name="price" type="number" step="0.01" min="0" value={form.price} onChange={handleChange} className="w-full border rounded px-3 py-2 bg-gray-900 text-white" required />
+          <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">Price</label>
+          <input name="price" type="number" step="0.01" min="0" value={form.price} onChange={handleChange} className="w-full border rounded px-3 py-2 bg-white text-gray-900 border-gray-300 dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700" required />
         </div>
         <div className="flex gap-4">
           <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">

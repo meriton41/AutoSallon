@@ -197,7 +197,7 @@ export default function BillForm({ onBillCreated }: BillFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-200 mb-1">Client Name</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Client Name</label>
         <input
           type="text"
           name="clientName"
@@ -205,11 +205,11 @@ export default function BillForm({ onBillCreated }: BillFormProps) {
           onChange={handleChange}
           required
           disabled={isSubmitting}
-          className="w-full rounded-md bg-gray-900 border border-gray-700 text-gray-100 focus:border-blue-500 focus:ring-blue-500 text-sm py-2 px-3"
+          className="w-full rounded-md bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus:border-blue-500 focus:ring-blue-500 text-sm py-2 px-3"
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-200 mb-1">Client Email</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Client Email</label>
         <input
           type="email"
           name="clientEmail"
@@ -217,18 +217,18 @@ export default function BillForm({ onBillCreated }: BillFormProps) {
           onChange={handleChange}
           required
           disabled={isSubmitting}
-          className="w-full rounded-md bg-gray-900 border border-gray-700 text-gray-100 focus:border-blue-500 focus:ring-blue-500 text-sm py-2 px-3"
+          className="w-full rounded-md bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus:border-blue-500 focus:ring-blue-500 text-sm py-2 px-3"
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-200 mb-1">Car</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Car</label>
         <select
           name="vehicleId"
           value={form.vehicleId}
           onChange={handleChange}
           required
           disabled={isSubmitting || isLoading}
-          className="w-full rounded-md bg-gray-900 border border-gray-700 text-gray-100 focus:border-blue-500 focus:ring-blue-500 text-sm py-2 px-3"
+          className="w-full rounded-md bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus:border-blue-500 focus:ring-blue-500 text-sm py-2 px-3"
         >
           <option value="">Select a car</option>
           {vehicles.map((vehicle) => (
@@ -243,16 +243,16 @@ export default function BillForm({ onBillCreated }: BillFormProps) {
         </select>
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-200 mb-1">Base Amount</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Base Amount</label>
         <input
           type="number"
           value={vehicles.find(v => v.id.toString() === form.vehicleId)?.price || 0}
           disabled={true}
-          className="w-full rounded-md bg-gray-900 border border-gray-700 text-gray-100 focus:border-blue-500 focus:ring-blue-500 text-sm py-2 px-3"
+          className="w-full rounded-md bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus:border-blue-500 focus:ring-blue-500 text-sm py-2 px-3"
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-200 mb-1">Final Amount</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Final Amount</label>
         <input
           type="number"
           name="amount"
@@ -262,11 +262,11 @@ export default function BillForm({ onBillCreated }: BillFormProps) {
           step="0.01"
           required
           disabled={isSubmitting}
-          className="w-full rounded-md bg-gray-900 border border-gray-700 text-gray-100 focus:border-blue-500 focus:ring-blue-500 text-sm py-2 px-3"
+          className="w-full rounded-md bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus:border-blue-500 focus:ring-blue-500 text-sm py-2 px-3"
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-200 mb-1">Description</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Description</label>
         <textarea
           name="description"
           value={form.description}
@@ -274,11 +274,11 @@ export default function BillForm({ onBillCreated }: BillFormProps) {
           required
           disabled={isSubmitting}
           rows={3}
-          className="w-full rounded-md bg-gray-900 border border-gray-700 text-gray-100 focus:border-blue-500 focus:ring-blue-500 text-sm py-2 px-3"
+          className="w-full rounded-md bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus:border-blue-500 focus:ring-blue-500 text-sm py-2 px-3"
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-200 mb-1">Date</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Date</label>
         <input
           type="date"
           name="date"
@@ -286,7 +286,7 @@ export default function BillForm({ onBillCreated }: BillFormProps) {
           onChange={handleChange}
           required
           disabled={isSubmitting}
-          className="w-full rounded-md bg-gray-900 border border-gray-700 text-gray-100 focus:border-blue-500 focus:ring-blue-500 text-sm py-2 px-3"
+          className="w-full rounded-md bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus:border-blue-500 focus:ring-blue-500 text-sm py-2 px-3"
         />
       </div>
       {error && (

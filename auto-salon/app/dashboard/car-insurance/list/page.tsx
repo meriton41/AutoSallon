@@ -285,36 +285,36 @@ export default function InsuranceListPage() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 py-8">
-      <div className="w-full max-w-5xl mx-auto bg-gray-900 rounded-2xl shadow-lg p-8 border border-gray-800">
-        <h1 className="text-3xl font-bold mb-8 text-blue-500 text-left">View Insurances</h1>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-8">
+      <div className="w-full max-w-5xl mx-auto bg-white dark:bg-gray-900 rounded-2xl shadow-lg p-8 border border-gray-200 dark:border-gray-800">
+        <h1 className="text-3xl font-bold mb-8 text-blue-600 dark:text-blue-500 text-left">View Insurances</h1>
         {loading ? (
-          <p className="text-white">Loading...</p>
+          <p className="text-gray-900">Loading...</p>
         ) : (
           <div className="overflow-x-auto">
             <div className="max-h-[500px] overflow-y-auto">
-              <table className="min-w-full bg-gray-900 rounded-2xl shadow divide-y divide-gray-800">
+              <table className="min-w-full bg-white dark:bg-gray-900 rounded-2xl shadow divide-y divide-gray-200 dark:divide-gray-800">
                 <thead>
                   <tr>
-                    <th className="px-6 py-4 text-left text-base font-bold text-gray-200 uppercase tracking-wider">Policy #</th>
-                    <th className="px-6 py-4 text-left text-base font-bold text-gray-200 uppercase tracking-wider">Client</th>
-                    <th className="px-6 py-4 text-left text-base font-bold text-gray-200 uppercase tracking-wider">Car ID</th>
-                    <th className="px-6 py-4 text-left text-base font-bold text-gray-200 uppercase tracking-wider">Start</th>
-                    <th className="px-6 py-4 text-left text-base font-bold text-gray-200 uppercase tracking-wider">End</th>
-                    <th className="px-6 py-4 text-left text-base font-bold text-gray-200 uppercase tracking-wider">Price</th>
-                    <th className="px-6 py-4 text-left text-base font-bold text-gray-200 uppercase tracking-wider">Actions</th>
+                    <th className="px-6 py-4 text-left text-base font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">Policy #</th>
+                    <th className="px-6 py-4 text-left text-base font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">Client</th>
+                    <th className="px-6 py-4 text-left text-base font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">Car ID</th>
+                    <th className="px-6 py-4 text-left text-base font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">Start</th>
+                    <th className="px-6 py-4 text-left text-base font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">End</th>
+                    <th className="px-6 py-4 text-left text-base font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">Price</th>
+                    <th className="px-6 py-4 text-left text-base font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-800">
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
                   {insurances.length > 0 ? (
                     insurances.map((insurance) => (
-                      <tr key={insurance.id} className="hover:bg-gray-800/70 transition rounded-xl">
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-100">{insurance.policyNumber}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-100">{insurance.clientName}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-100">{insurance.vehicleId || insurance.carId}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-100">{insurance.startDate?.slice(0, 10)}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-100">{insurance.endDate?.slice(0, 10)}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-100">€{insurance.price}</td>
+                      <tr key={insurance.id} className="hover:bg-gray-100 dark:hover:bg-gray-800/70 transition rounded-xl">
+                        <td className="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">{insurance.policyNumber}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">{insurance.clientName}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">{insurance.vehicleId || insurance.carId}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">{insurance.startDate?.slice(0, 10)}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">{insurance.endDate?.slice(0, 10)}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">€{insurance.price}</td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex gap-2">
                             <button
@@ -344,7 +344,7 @@ export default function InsuranceListPage() {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={7} className="text-center py-12 text-gray-400 bg-gray-800/60 rounded-xl">
+                      <td colSpan={7} className="text-center py-12 text-gray-400 bg-gray-100 dark:bg-gray-800/60 rounded-xl">
                         No insurances found.
                       </td>
                     </tr>
