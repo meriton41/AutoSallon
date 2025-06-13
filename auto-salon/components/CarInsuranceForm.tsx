@@ -34,10 +34,46 @@ export default function CarInsuranceForm({ onSubmit }: Props) {
     // Fetch all insurances to get assigned car IDs
     const fetchInsurances = async () => {
       try {
-        const res = await fetch("https://localhost:7234/api/CarInsurance");
+        const userDataString = localStorage.getItem("user");
+        if (!userDataString) {
+          throw new Error("Authentication token not found. Please log in again.");
+        }
+        const userData = JSON.parse(userDataString);
+        const token = userData.token;
+        
+        if (!token) {
+          throw new Error("Authentication token not found. Please log in again.");
+        }
+
+        // Check if user has admin role
+        if (userData.role !== "Admin") {
+          toast.error("You don't have permission to access this page. Admin role required.");
+          setAssignedCarIds([]);
+          return;
+        }
+
+        const res = await fetch("https://localhost:7234/api/CarInsurance", {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (res.status === 401 || res.status === 403) {
+          toast.error("You don't have permission to access this page. Admin role required.");
+          setAssignedCarIds([]);
+          return;
+        }
+
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+
         const data = await res.json();
         setAssignedCarIds(data.map((insurance: CarInsurance) => insurance.carId));
       } catch (error) {
+        console.error("Error fetching insurances:", error);
+        toast.error("Failed to fetch insurances. Please try again later.");
         setAssignedCarIds([]);
       }
     };
@@ -48,10 +84,46 @@ export default function CarInsuranceForm({ onSubmit }: Props) {
     // Fetch all cars
     const fetchCars = async () => {
       try {
-        const res = await fetch("https://localhost:7234/api/Vehicles");
+        const userDataString = localStorage.getItem("user");
+        if (!userDataString) {
+          throw new Error("Authentication token not found. Please log in again.");
+        }
+        const userData = JSON.parse(userDataString);
+        const token = userData.token;
+        
+        if (!token) {
+          throw new Error("Authentication token not found. Please log in again.");
+        }
+
+        // Check if user has admin role
+        if (userData.role !== "Admin") {
+          toast.error("You don't have permission to access this page. Admin role required.");
+          setCars([]);
+          return;
+        }
+
+        const res = await fetch("https://localhost:7234/api/Vehicles", {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (res.status === 401 || res.status === 403) {
+          toast.error("You don't have permission to access this page. Admin role required.");
+          setCars([]);
+          return;
+        }
+
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+
         const data = await res.json();
         setCars(data);
       } catch (error) {
+        console.error("Error fetching cars:", error);
+        toast.error("Failed to fetch cars. Please try again later.");
         setCars([]);
       }
     };
@@ -92,10 +164,25 @@ export default function CarInsuranceForm({ onSubmit }: Props) {
     console.log('Sending insurance data:', insuranceData);
 
     try {
+      // Get authentication token
+      const userDataString = localStorage.getItem("user");
+      if (!userDataString) {
+        throw new Error("Authentication token not found. Please log in again.");
+      }
+      const userData = JSON.parse(userDataString);
+      const token = userData.token;
+      
+      if (!token) {
+        throw new Error("Authentication token not found. Please log in again.");
+      }
+
       // First, save the insurance
       const response = await fetch("https://localhost:7234/api/CarInsurance", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json' 
+        },
         body: JSON.stringify(insuranceData),
       });
       

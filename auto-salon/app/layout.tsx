@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/context/ThemeContext";
 import { AuthProvider } from "../context/auth-context";
 import ClientLayout from "../components/client-layout";
 import Link from "next/link";
+import { Toaster } from 'react-hot-toast';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -26,10 +27,10 @@ export default function RootLayout({
           <AuthProvider>
             <ClientLayout>
               {children}
-              
             </ClientLayout>
           </AuthProvider>
         </ThemeProvider>
+        <Toaster position="top-right" />
       </body>
     </html>
   );

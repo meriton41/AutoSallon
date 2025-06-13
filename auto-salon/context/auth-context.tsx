@@ -145,7 +145,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const data = await response.json();
     if (data.token) {
-      const updatedUser = user ? { ...user, token: data.token } : null;
+      // Decode the new token to get the role
+      const decoded = parseJwt(data.token);
+      const role =
+        decoded?.['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] ||
+        decoded?.role ||
+        null;
+      const userRole = Array.isArray(role) ? role[0] : role;
+      
+      const updatedUser = user ? { 
+        ...user, 
+        token: data.token,
+        role: userRole 
+      } : null;
+      
       if (updatedUser) {
         setUser(updatedUser);
         setToken(data.token);

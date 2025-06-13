@@ -267,7 +267,7 @@ export default function DashboardVehicles() {
               <Input
                 id="title"
                 name="title"
-                value={form.title}
+                value={form.title || ""}
                 onChange={handleChange}
                 placeholder="Title"
                 required
@@ -289,7 +289,7 @@ export default function DashboardVehicles() {
                 id="year"
                 name="year"
                 type="number"
-                value={form.year}
+                value={form.year ?? ""}
                 onChange={handleChange}
                 placeholder="Year"
                 required
@@ -505,62 +505,64 @@ export default function DashboardVehicles() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Image</TableHead>
-                    <TableHead>Title</TableHead>
-                    <TableHead>Brand</TableHead>
-                    <TableHead>Year</TableHead>
-                    <TableHead>Price</TableHead>
-                    <TableHead>Fuel</TableHead>
-                    <TableHead>Transmission</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredVehicles.map((vehicle) => (
-                    <TableRow key={vehicle.id}>
-                      <TableCell>
-                        <img
-                          src={
-                            vehicle.image &&
-                            vehicle.image.split(",")[0] !== "string"
-                              ? vehicle.image.split(",")[0]
-                              : "/placeholder.svg"
-                          }
-                          alt={vehicle.title}
-                          className="w-16 h-10 object-cover rounded"
-                        />
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        {vehicle.title}
-                      </TableCell>
-                      <TableCell>{vehicle.brand}</TableCell>
-                      <TableCell>{vehicle.year}</TableCell>
-                      <TableCell>€{vehicle.price.toFixed(2)}</TableCell>
-                      <TableCell>{vehicle.fuel}</TableCell>
-                      <TableCell>{vehicle.transmission}</TableCell>
-                      <TableCell className="flex gap-2">
-                        <Button
-                          variant="secondary"
-                          size="icon"
-                          onClick={() => handleEdit(vehicle)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          size="icon"
-                          onClick={() => handleDelete(vehicle.id!)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
+              <div className="max-h-[600px] overflow-y-scroll">
+                <Table>
+                  <TableHeader className="sticky top-0 bg-gray-800 z-10">
+                    <TableRow>
+                      <TableHead>Image</TableHead>
+                      <TableHead>Title</TableHead>
+                      <TableHead>Brand</TableHead>
+                      <TableHead>Year</TableHead>
+                      <TableHead>Price</TableHead>
+                      <TableHead>Fuel</TableHead>
+                      <TableHead>Transmission</TableHead>
+                      <TableHead>Actions</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredVehicles.map((vehicle) => (
+                      <TableRow key={vehicle.id}>
+                        <TableCell>
+                          <img
+                            src={
+                              vehicle.image &&
+                              vehicle.image.split(",")[0] !== "string"
+                                ? vehicle.image.split(",")[0]
+                                : "/placeholder.svg"
+                            }
+                            alt={vehicle.title}
+                            className="w-16 h-10 object-cover rounded"
+                          />
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          {vehicle.title}
+                        </TableCell>
+                        <TableCell>{vehicle.brand}</TableCell>
+                        <TableCell>{vehicle.year}</TableCell>
+                        <TableCell>€{vehicle.price.toFixed(2)}</TableCell>
+                        <TableCell>{vehicle.fuel}</TableCell>
+                        <TableCell>{vehicle.transmission}</TableCell>
+                        <TableCell>
+                          <Button
+                            variant="secondary"
+                            size="icon"
+                            onClick={() => handleEdit(vehicle)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="icon"
+                            onClick={() => handleDelete(vehicle.id!)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </div>
           )}
         </div>

@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using AutoSallonSolution.Models;
 using AutoSallonSolution.Data;
 using AutoSallonSolution.DTOs;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +14,7 @@ namespace AutoSallonSolution.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class BillController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -23,6 +26,7 @@ namespace AutoSallonSolution.Controllers
 
         // GET: api/Bill
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<IEnumerable<Bill>>> GetBills()
         {
             return await _context.Bills
@@ -32,6 +36,7 @@ namespace AutoSallonSolution.Controllers
 
         // GET: api/Bill/5
         [HttpGet("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<Bill>> GetBill(Guid id)
         {
             var bill = await _context.Bills
@@ -58,6 +63,7 @@ namespace AutoSallonSolution.Controllers
 
         // POST: api/Bill
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<Bill>> CreateBill([FromBody] CreateBillDTO billDto)
         {
             if (billDto == null)
@@ -93,6 +99,7 @@ namespace AutoSallonSolution.Controllers
 
         // PUT: api/Bill/{id}
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateBill(Guid id, [FromBody] Bill bill)
         {
             if (bill == null || id != bill.Id)
@@ -136,6 +143,7 @@ namespace AutoSallonSolution.Controllers
 
         // DELETE: api/Bill/{id}
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteBill(Guid id)
         {
             var bill = await _context.Bills.FindAsync(id);

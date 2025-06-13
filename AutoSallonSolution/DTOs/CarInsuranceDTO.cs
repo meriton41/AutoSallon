@@ -35,6 +35,9 @@ namespace AutoSallonSolution.DTOs
     public class UpdateCarInsuranceDTO
     {
         [Required]
+        public Guid Id { get; set; }
+
+        [Required]
         public string PolicyNumber { get; set; }
 
         [Required]

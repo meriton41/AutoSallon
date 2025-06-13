@@ -1,8 +1,28 @@
 "use client";
 import { CarInsurance } from "@/types/insurance";
 import CarInsuranceForm from "@/components/CarInsuranceForm";
+import { useAuth } from "@/context/auth-context";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { toast } from "react-toastify";
 
 export default function DashboardCarInsurancePage() {
+  const { isAdmin, isAuthenticated } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push("/login");
+    } else if (!isAdmin) {
+      router.push("/");
+      toast.error("You don't have permission to access this page. Admin role required.");
+    }
+  }, [isAuthenticated, isAdmin, router]);
+
+  if (!isAuthenticated || !isAdmin) {
+    return null;
+  }
+
   const handleSubmit = (insurance: CarInsurance) => {
     alert(`Insurance saved for policy: ${insurance.policyNumber}`);
     // TODO: Add backend integration here
