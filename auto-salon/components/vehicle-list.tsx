@@ -30,50 +30,19 @@ type Vehicle = {
 }
 
 type VehicleListProps = {
-  filters: {
-    searchTerm: string
-    brand: string
-    minYear: number | ""
-    maxYear: number | ""
-    minPrice: number | ""
-    maxPrice: number | ""
-    fuel: string
-    transmission: string
-    color: string
-    isNew: boolean | ""
-  }
+  vehicles: Vehicle[]
 }
 
-export default function VehicleList({ filters }: VehicleListProps) {
-  const [vehicles, setVehicles] = useState<Vehicle[]>([])
+export default function VehicleList({ vehicles }: VehicleListProps) {
   const [loading, setLoading] = useState(true)
   const [favorites, setFavorites] = useState<number[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const { user } = useAuth()
 
-  const buildQueryString = () => {
-    const params = new URLSearchParams()
-    if (filters.searchTerm) params.append("searchTerm", filters.searchTerm)
-    if (filters.brand) params.append("brand", filters.brand)
-    if (filters.minYear !== "") params.append("minYear", filters.minYear.toString())
-    if (filters.maxYear !== "") params.append("maxYear", filters.maxYear.toString())
-    if (filters.minPrice !== "") params.append("minPrice", filters.minPrice.toString())
-    if (filters.maxPrice !== "") params.append("maxPrice", filters.maxPrice.toString())
-    if (filters.fuel) params.append("fuel", filters.fuel)
-    if (filters.transmission) params.append("transmission", filters.transmission)
-    if (filters.color) params.append("color", filters.color)
-    if (filters.isNew !== "") params.append("isNew", filters.isNew.toString())
-    return params.toString()
-  }
-
   useEffect(() => {
     const fetchVehicles = async () => {
       setLoading(true)
       try {
-        const queryString = buildQueryString()
-        const response = await axios.get(`https://localhost:7234/api/Vehicles?${queryString}`)
-        setVehicles(response.data)
-
         if (user?.token) {
           const headers = { Authorization: `Bearer ${user.token}` }
           const favoritesResponse = await axios.get("https://localhost:7234/api/FavoriteVehicles", {
@@ -89,7 +58,7 @@ export default function VehicleList({ filters }: VehicleListProps) {
     }
 
     fetchVehicles()
-  }, [filters, user?.token])
+  }, [user?.token])
 
   // Filter vehicles based on search term
   const filteredVehicles = vehicles.filter(vehicle =>
@@ -162,7 +131,7 @@ export default function VehicleList({ filters }: VehicleListProps) {
                   {vehicle.isNew && (
                     <Badge className="absolute top-2 right-2 bg-green-500 text-white text-xs font-semibold px-2 py-1 rounded">New</Badge>
                   )}
-                  {user && (
+                  {user && user.role === "User" && (
                     <Button
                       variant="ghost"
                       size="icon"

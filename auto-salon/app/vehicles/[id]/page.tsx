@@ -44,6 +44,8 @@ export default function VehicleDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [hasOrdered, setHasOrdered] = useState(false);
   const { token, isAuthenticated } = useAuth();
+  const [currentImage, setCurrentImage] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     if (!vehicleId) return;
@@ -154,41 +156,168 @@ export default function VehicleDetailPage() {
     );
   }
 
-  // Assuming image string is comma-separated URLs
   const images = vehicle.image.split(',').map(img => img.trim()).filter(img => img !== "string" && img !== "");
-  const mainImage = images.length > 0 ? images[0] : "/placeholder.svg";
-  const galleryImages = images.slice(1);
+  const totalImages = images.length;
+  const goToPrev = () => setCurrentImage((prev) => (prev === 0 ? totalImages - 1 : prev - 1));
+  const goToNext = () => setCurrentImage((prev) => (prev === totalImages - 1 ? 0 : prev + 1));
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 py-12">
       <div className="container mx-auto px-4 space-y-12">
+        <div className="flex items-center gap-4">
+          <Button
+            variant="outline"
+            onClick={() => router.push('/vehicles')}
+            className="flex items-center gap-2"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="h-4 w-4"
+            >
+              <path d="m15 18-6-6 6-6" />
+            </svg>
+            Back to Vehicles
+          </Button>
+        </div>
         <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white text-center lg:text-left">{vehicle.title}</h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           {/* Left Column - Main Image / Gallery */}
           <div className="lg:col-span-2 space-y-8">
-             {/* Main Image */}
-            <div className="relative h-80 md:h-96 rounded-xl overflow-hidden shadow-2xl border border-gray-200 dark:border-gray-700">
-              <Image
-                src={mainImage}
-                alt={vehicle.title}
-                fill
-                objectFit="cover"
-              />
+            {/* Image Slider */}
+            <div className="space-y-4">
+              <div className="relative h-80 md:h-96 rounded-xl overflow-hidden shadow-2xl border border-gray-200 dark:border-gray-700 flex items-center justify-center cursor-pointer" onClick={() => setIsModalOpen(true)}>
+                {images.length > 0 ? (
+                  <Image
+                    src={images[currentImage]}
+                    alt={vehicle.title}
+                    fill
+                    className="object-cover"
+                  />
+                ) : (
+                  <Image
+                    src="/placeholder.svg"
+                    alt="No image"
+                    fill
+                    className="object-cover"
+                  />
+                )}
+                {images.length > 1 && (
+                  <>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        goToPrev();
+                      }}
+                      className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black text-white rounded-full p-3 z-20"
+                      aria-label="Previous image"
+                    >
+                      &#8592;
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        goToNext();
+                      }}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black text-white rounded-full p-3 z-20"
+                      aria-label="Next image"
+                    >
+                      &#8594;
+                    </button>
+                  </>
+                )}
+                {images.length > 1 && (
+                  <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/60 text-white text-xs px-3 py-1 rounded-full">
+                    {currentImage + 1} / {totalImages}
+                  </div>
+                )}
+              </div>
+
+              {/* Thumbnail Gallery */}
+              {images.length > 1 && (
+                <div className="flex gap-2 overflow-x-auto pb-2">
+                  {images.map((image, index) => (
+                    <div
+                      key={index}
+                      onClick={() => setCurrentImage(index)}
+                      className={`relative h-20 w-20 flex-shrink-0 rounded-lg overflow-hidden cursor-pointer border-2 ${
+                        currentImage === index
+                          ? 'border-blue-500 dark:border-blue-400'
+                          : 'border-transparent'
+                      }`}
+                    >
+                      <Image
+                        src={image}
+                        alt={`${vehicle.title} - Image ${index + 1}`}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-             {/* Gallery */}
-            {galleryImages.length > 0 && (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {galleryImages.map((img, index) => (
-                  <div key={index} className="relative h-24 md:h-32 rounded-lg overflow-hidden shadow-md border border-gray-200 dark:border-gray-700">
-                     <Image
-                      src={img}
-                      alt={`${vehicle.title} - Gallery Image ${index + 1}`}
+
+            {/* Lightbox Modal */}
+            {isModalOpen && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+                {/* Click outside to close */}
+                <div 
+                  className="fixed inset-0 z-40" 
+                  onClick={() => setIsModalOpen(false)}
+                />
+                <div className="relative w-full max-w-3xl h-[80vh] flex items-center justify-center z-50">
+                  <button
+                    onClick={() => setIsModalOpen(false)}
+                    className="absolute top-4 right-4 bg-black/70 hover:bg-black text-white rounded-full p-2 z-20"
+                    aria-label="Close modal"
+                  >
+                    &#10005;
+                  </button>
+                  {images.length > 1 && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        goToPrev();
+                      }}
+                      className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black text-white rounded-full p-3 z-20"
+                      aria-label="Previous image"
+                    >
+                      &#8592;
+                    </button>
+                  )}
+                  <div className="relative w-full h-full flex items-center justify-center">
+                    <Image
+                      src={images[currentImage]}
+                      alt={vehicle.title}
                       fill
-                      objectFit="cover"
+                      className="object-contain rounded-xl"
                     />
                   </div>
-                ))}
+                  {images.length > 1 && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        goToNext();
+                      }}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black text-white rounded-full p-3 z-20"
+                      aria-label="Next image"
+                    >
+                      &#8594;
+                    </button>
+                  )}
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/60 text-white text-xs px-4 py-2 rounded-full">
+                    {currentImage + 1} / {totalImages}
+                  </div>
+                </div>
               </div>
             )}
           </div>
