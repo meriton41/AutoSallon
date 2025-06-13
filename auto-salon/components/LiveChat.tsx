@@ -169,14 +169,14 @@ export default function LiveChat() {
       {isOpen && (
         <div
           ref={chatWindowRef}
-          className="fixed bottom-20 right-6 z-50 w-80 max-w-full bg-white rounded-xl shadow-2xl border border-gray-300 flex flex-col overflow-hidden ring-2 ring-blue-500"
+          className="fixed bottom-20 right-6 z-50 w-80 max-w-full bg-black rounded-xl shadow-2xl border border-gray-800 flex flex-col overflow-hidden ring-2 ring-blue-500"
         >
-          <div className="p-5 border-b border-blue-500 font-semibold text-xl bg-gradient-to-r from-blue-600 to-indigo-700 text-white flex items-center justify-between">
+          <div className="p-5 border-b border-gray-700 font-semibold text-xl bg-black text-white flex items-center justify-between">
             <span>Live Chat</span>
             <button
               onClick={toggleChat}
               aria-label="Close Live Chat"
-              className="text-white hover:text-gray-300 focus:outline-none"
+              className="text-white hover:text-gray-400 focus:outline-none"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -194,9 +194,9 @@ export default function LiveChat() {
               </svg>
             </button>
           </div>
-          <div className="p-4 flex-1 flex flex-col space-y-4 overflow-y-auto max-h-96 bg-gradient-to-b from-white to-blue-50 relative">
+          <div className="p-4 flex-1 flex flex-col space-y-4 overflow-y-auto max-h-96 bg-black relative">
             {messages.length === 0 && (
-              <p className="text-gray-900 font-semibold mb-3">
+              <p className="text-gray-200 font-semibold mb-3">
                 How can we help you today? Select a question:
               </p>
             )}
