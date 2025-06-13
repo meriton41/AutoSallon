@@ -95,15 +95,18 @@ export default function BillListPage() {
   }, []);
 
   const handleEdit = (bill: Bill) => {
+    console.log('Edit button clicked for bill:', bill);
     setEditingBill(bill);
+    // Format the date to yyyy-MM-dd format for the input
+    const formattedDate = new Date(bill.date).toISOString().split('T')[0];
+    console.log('Formatted date:', formattedDate);
     setEditForm({
-      id: bill.id,
       clientName: bill.clientName,
       clientEmail: bill.clientEmail,
-      vehicleId: bill.vehicleId,
       description: bill.description,
-      date: bill.date
+      date: formattedDate
     });
+    console.log('Setting showModal to true');
     setShowModal(true);
   };
 
@@ -155,6 +158,7 @@ export default function BillListPage() {
 
   const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
+    console.log('Edit form change:', { name, value });
     setEditForm(prev => ({
       ...prev,
       [name]: value
@@ -211,14 +215,22 @@ export default function BillListPage() {
         setError(errorMessage);
         return;
       }
-      const updatedBillResponse = await response.json();
-      console.log('Received updated bill from server:', updatedBillResponse);
-      setBills(bills.map(bill => bill.id === editingBill.id ? updatedBillResponse : bill));
+
+      // Update the bills array with the new data
+      setBills(prevBills => 
+        prevBills.map(bill => 
+          bill.id === editingBill.id 
+            ? { ...bill, ...updatedBill }
+            : bill
+        )
+      );
+      
       setShowModal(false);
       setEditingBill(null);
       setEditForm({});
       toast.success("Bill updated successfully!");
     } catch (error) {
+      console.error("Error updating bill:", error);
       setError("Failed to update bill. Please try again.");
     }
   };
@@ -301,89 +313,92 @@ export default function BillListPage() {
           </div>
         </div>
         {/* Edit Modal */}
-        {showModal && editingBill && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-            <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md">
-              <h2 className="text-xl font-semibold mb-4 text-white">Edit Bill</h2>
-              <form onSubmit={handleUpdate} className="space-y-4">
-                <div>
-                  <label htmlFor="clientName" className="block text-sm font-medium text-gray-300 mb-1">
-                    Client Name
-                  </label>
-                  <input
-                    type="text"
-                    id="clientName"
-                    name="clientName"
-                    value={editForm.clientName}
-                    onChange={handleEditChange}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="clientEmail" className="block text-sm font-medium text-gray-300 mb-1">
-                    Client Email
-                  </label>
-                  <input
-                    type="email"
-                    id="clientEmail"
-                    name="clientEmail"
-                    value={editForm.clientEmail}
-                    onChange={handleEditChange}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="description" className="block text-sm font-medium text-gray-300 mb-1">
-                    Description
-                  </label>
-                  <textarea
-                    id="description"
-                    name="description"
-                    value={editForm.description}
-                    onChange={handleEditChange}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    rows={3}
-                  />
-                </div>
-                <div>
-                  <label htmlFor="date" className="block text-sm font-medium text-gray-300 mb-1">
-                    Date
-                  </label>
-                  <input
-                    type="date"
-                    id="date"
-                    name="date"
-                    value={editForm.date}
-                    onChange={handleEditChange}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required
-                  />
-                </div>
-                <div className="flex justify-end space-x-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowModal(false);
-                      setEditingBill(null);
-                      setEditForm({});
-                    }}
-                    className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    Save Changes
-                  </button>
-                </div>
-              </form>
+        {(() => {
+          console.log('Modal render check:', { showModal, editingBill });
+          return showModal && editingBill && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+              <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md">
+                <h2 className="text-xl font-semibold mb-4 text-white">Edit Bill</h2>
+                <form onSubmit={handleUpdate} className="space-y-4">
+                  <div>
+                    <label htmlFor="clientName" className="block text-sm font-medium text-gray-300 mb-1">
+                      Client Name
+                    </label>
+                    <input
+                      type="text"
+                      id="clientName"
+                      name="clientName"
+                      value={editForm.clientName}
+                      onChange={handleEditChange}
+                      className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="clientEmail" className="block text-sm font-medium text-gray-300 mb-1">
+                      Client Email
+                    </label>
+                    <input
+                      type="email"
+                      id="clientEmail"
+                      name="clientEmail"
+                      value={editForm.clientEmail}
+                      onChange={handleEditChange}
+                      className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="description" className="block text-sm font-medium text-gray-300 mb-1">
+                      Description
+                    </label>
+                    <textarea
+                      id="description"
+                      name="description"
+                      value={editForm.description}
+                      onChange={handleEditChange}
+                      className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      rows={3}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="date" className="block text-sm font-medium text-gray-300 mb-1">
+                      Date
+                    </label>
+                    <input
+                      type="date"
+                      id="date"
+                      name="date"
+                      value={editForm.date}
+                      onChange={handleEditChange}
+                      className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    />
+                  </div>
+                  <div className="flex justify-end space-x-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowModal(false);
+                        setEditingBill(null);
+                        setEditForm({});
+                      }}
+                      className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      Save Changes
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
       </div>
     </div>
   );
