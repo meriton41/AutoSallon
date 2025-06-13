@@ -51,18 +51,7 @@ export default function DashboardLayout({
             >
               Vehicle Management
             </Link>
-            <Link
-              href="/dashboard/car-insurance"
-              className="block py-2 px-4 rounded hover:bg-gray-800 transition-colors"
-            >
-              Car Insurance
-            </Link>
-            <Link
-              href="/dashboard/car-insurance/list"
-              className="block py-2 px-4 rounded hover:bg-gray-800 transition-colors"
-            >
-              View Insurances
-            </Link>
+            
             <Link
               href="/dashboard/bills"
               className="block py-2 px-4 rounded hover:bg-gray-800 transition-colors"
@@ -76,11 +65,30 @@ export default function DashboardLayout({
               View Bills
             </Link>
             <Link
+              href="/dashboard/car-insurance"
+              className="block py-2 px-4 rounded hover:bg-gray-800 transition-colors"
+            >
+              Car Insurance
+            </Link>
+            <Link
+              href="/dashboard/car-insurance/list"
+              className="block py-2 px-4 rounded hover:bg-gray-800 transition-colors"
+            >
+              View Insurances
+            </Link>
+            <Link
               href="/dashboard/orders"
               className="block py-2 px-4 rounded hover:bg-gray-800 transition-colors flex items-center gap-2"
             >
               <ShoppingCart className="h-4 w-4" />
               Orders
+            </Link>
+            <Link
+              href="/dashboard/sold-cars"
+              className="block py-2 px-4 rounded hover:bg-gray-800 transition-colors flex items-center gap-2"
+            >
+              <Car className="h-4 w-4" />
+              Sold Cars
             </Link>
             <Link
               href="/dashboard/test-drive-management"
