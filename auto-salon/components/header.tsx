@@ -64,7 +64,7 @@ export default function Header() {
             )}
           </Button>
 
-          {user && !hasRated && (
+          {user && !hasRated && user.role === "User" && (
             <Button 
               variant="outline" 
               size="sm"
@@ -180,7 +180,7 @@ export default function Header() {
               </Link>
             ))}
 
-            {user && !hasRated && (
+            {user && !hasRated && user.role === "User" && (
               <Button 
                 variant="outline"
                 size="sm"

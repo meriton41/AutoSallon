@@ -5,6 +5,8 @@ import Header from "../components/header";
 import Footer from "../components/footer";
 
 import RealTimeVehicleNotifier from "./RealTimeVehicleNotifier";
+import LiveChat from "./LiveChat";
+import { useAuth } from "../context/auth-context";
 
 export default function ClientLayout({
   children,
@@ -12,6 +14,7 @@ export default function ClientLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const { isAdmin } = useAuth();
 
   const hideLayoutRoutes = ["/verify-email", "/verify-email/notice"];
   const shouldHide = hideLayoutRoutes.includes(pathname);
@@ -22,6 +25,7 @@ export default function ClientLayout({
       <main className="flex-1">{children}</main>
       {!shouldHide && <Footer />}
       <RealTimeVehicleNotifier />
+      {!shouldHide && !isAdmin && <LiveChat />}
     </>
   );
 }
